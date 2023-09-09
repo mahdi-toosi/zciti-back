@@ -71,7 +71,7 @@ func Start(lifecycle fx.Lifecycle, cfg *config.Config, fiber *fiber.App, router 
 				// Information message
 				log.Info().Msg(fiber.Config().AppName + " is running at the moment!")
 
-				// Debug informations
+				// Debug information
 				if !cfg.App.Production {
 					prefork := "Enabled"
 					procs := runtime.GOMAXPROCS(0)
@@ -99,7 +99,7 @@ func Start(lifecycle fx.Lifecycle, cfg *config.Config, fiber *fiber.App, router 
 				}
 
 				go func() {
-					if err := fiber.Listen(cfg.App.Port); err != nil {
+					if err := fiber.Listen(port); err != nil {
 						log.Error().Err(err).Msg("An unknown error occurred when to run server!")
 					}
 				}()
@@ -131,7 +131,7 @@ func Start(lifecycle fx.Lifecycle, cfg *config.Config, fiber *fiber.App, router 
 				log.Info().Msg("1- Shutdown the database")
 				database.ShutdownDatabase()
 				log.Info().Msgf("%s was successful shutdown.", cfg.App.Name)
-				log.Info().Msg("\u001b[96msee you again👋\u001b[0m")
+				log.Info().Msg("\u001b[96m see you again👋 \u001b[0m")
 
 				return nil
 			},

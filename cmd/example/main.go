@@ -1,16 +1,17 @@
 package main
 
 import (
-	"go.uber.org/fx"
+	"github.com/bangadam/go-fiber-starter/app/module/auth"
+	"github.com/bangadam/go-fiber-starter/app/module/user"
 
 	"github.com/bangadam/go-fiber-starter/app/middleware"
-	"github.com/bangadam/go-fiber-starter/app/module/article"
 	"github.com/bangadam/go-fiber-starter/app/router"
 	"github.com/bangadam/go-fiber-starter/internal/bootstrap"
 	"github.com/bangadam/go-fiber-starter/internal/bootstrap/database"
 	"github.com/bangadam/go-fiber-starter/utils/config"
 	fxzerolog "github.com/efectn/fx-zerolog"
 	_ "go.uber.org/automaxprocs"
+	"go.uber.org/fx"
 )
 
 // @title                       Go Fiber Starter API Documentation
@@ -45,9 +46,11 @@ func main() {
 		fx.Provide(router.NewRouter),
 
 		// provide modules
-		article.NewArticleModule,
+		user.Module,
+		auth.Module,
+		// End provide modules
 
-		// start aplication
+		// start application
 		fx.Invoke(bootstrap.Start),
 
 		// define logger

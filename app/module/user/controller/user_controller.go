@@ -3,18 +3,14 @@ package controller
 import (
 	"strconv"
 
-	"github.com/bangadam/go-fiber-starter/app/module/article/request"
-	"github.com/bangadam/go-fiber-starter/app/module/article/service"
+	"github.com/bangadam/go-fiber-starter/app/module/user/request"
+	"github.com/bangadam/go-fiber-starter/app/module/user/service"
 	"github.com/bangadam/go-fiber-starter/utils/paginator"
 	"github.com/bangadam/go-fiber-starter/utils/response"
 	"github.com/gofiber/fiber/v2"
 )
 
-type articleController struct {
-	articleService service.ArticleService
-}
-
-type ArticleController interface {
+type IRestController interface {
 	Index(c *fiber.Ctx) error
 	Show(c *fiber.Ctx) error
 	Store(c *fiber.Ctx) error
@@ -22,15 +18,19 @@ type ArticleController interface {
 	Delete(c *fiber.Ctx) error
 }
 
-func NewArticleController(articleService service.ArticleService) ArticleController {
-	return &articleController{
-		articleService: articleService,
+func RestController(userService service.IService) IRestController {
+	return &controller{
+		userService,
 	}
 }
 
-// get all articles
-// @Summary      Get all articles
-// @Description  API for getting all articles
+type controller struct {
+	userService service.IService
+}
+
+// Index all Users
+// @Summary      Get all users
+// @Description  API for getting all users
 // @Tags         Task
 // @Security     Bearer
 // @Success      200  {object}  response.Response
@@ -38,60 +38,60 @@ func NewArticleController(articleService service.ArticleService) ArticleControll
 // @Failure      404  {object}  response.Response
 // @Failure      422  {object}  response.Response
 // @Failure      500  {object}  response.Response
-// @Router       /articles [get]
-func (_i *articleController) Index(c *fiber.Ctx) error {
+// @Router       /users [get]
+func (_i *controller) Index(c *fiber.Ctx) error {
 	paginate, err := paginator.Paginate(c)
 	if err != nil {
 		return err
 	}
 
-	var req request.ArticlesRequest
+	var req request.UsersRequest
 	req.Pagination = paginate
 
-	articles, paging, err := _i.articleService.All(req)
+	users, paging, err := _i.userService.All(req)
 	if err != nil {
 		return err
 	}
 
 	return response.Resp(c, response.Response{
-		Messages: response.Messages{"Article list successfully retrieved"},
-		Data:     articles,
-		Meta:    paging,
+		Messages: response.Messages{"User list successfully retrieved"},
+		Data:     users,
+		Meta:     paging,
 	})
 }
 
-// get one article
-// @Summary      Get one article
-// @Description  API for getting one article
+// Show one User
+// @Summary      Get one user
+// @Description  API for getting one user
 // @Tags         Task
 // @Security     Bearer
-// @Param        id path int true "Article ID"
+// @Param        id path int true "User ID"
 // @Success      200  {object}  response.Response
 // @Failure      401  {object}  response.Response
 // @Failure      404  {object}  response.Response
 // @Failure      422  {object}  response.Response
 // @Failure      500  {object}  response.Response
-// @Router       /articles/:id [get]
-func (_i *articleController) Show(c *fiber.Ctx) error {
+// @Router       /users/:id [get]
+func (_i *controller) Show(c *fiber.Ctx) error {
 	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
 	if err != nil {
 		return err
 	}
 
-	articles, err := _i.articleService.Show(id)
+	users, err := _i.userService.Show(id)
 	if err != nil {
 		return err
 	}
 
 	return response.Resp(c, response.Response{
-		Messages: response.Messages{"Article successfully retrieved"},
-		Data:     articles,
+		Messages: response.Messages{"User successfully retrieved"},
+		Data:     users,
 	})
 }
 
-// create article
-// @Summary      Create article
-// @Description  API for create article
+// Store user
+// @Summary      Create user
+// @Description  API for create user
 // @Tags         Task
 // @Security     Bearer
 // @Body 	     request.ArticleRequest
@@ -100,81 +100,81 @@ func (_i *articleController) Show(c *fiber.Ctx) error {
 // @Failure      404  {object}  response.Response
 // @Failure      422  {object}  response.Response
 // @Failure      500  {object}  response.Response
-// @Router       /articles [post]
-func (_i *articleController) Store(c *fiber.Ctx) error {
-	req := new(request.ArticleRequest)
+// @Router       /users [post]
+func (_i *controller) Store(c *fiber.Ctx) error {
+	req := new(request.UserRequest)
 	if err := response.ParseAndValidate(c, req); err != nil {
 		return err
 	}
 
-	err := _i.articleService.Store(*req)
+	err := _i.userService.Store(*req)
 	if err != nil {
 		return err
 	}
 
 	return response.Resp(c, response.Response{
-		Messages: response.Messages{"Article successfully created"},
+		Messages: response.Messages{"User successfully created"},
 	})
 }
 
-// update article
-// @Summary      update article
-// @Description  API for update article
+// Update user
+// @Summary      update user
+// @Description  API for update user
 // @Tags         Task
 // @Security     Bearer
 // @Body 	     request.ArticleRequest
-// @Param        id path int true "Article ID"
+// @Param        id path int true "User ID"
 // @Success      200  {object}  response.Response
 // @Failure      401  {object}  response.Response
 // @Failure      404  {object}  response.Response
 // @Failure      422  {object}  response.Response
 // @Failure      500  {object}  response.Response
-// @Router       /articles/:id [put]
-func (_i *articleController) Update(c *fiber.Ctx) error {
+// @Router       /users/:id [put]
+func (_i *controller) Update(c *fiber.Ctx) error {
 	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
 	if err != nil {
 		return err
 	}
 
-	req := new(request.ArticleRequest)
+	req := new(request.UserRequest)
 	if err := response.ParseAndValidate(c, req); err != nil {
 		return err
 	}
 
-	err = _i.articleService.Update(id, *req)
+	err = _i.userService.Update(id, *req)
 	if err != nil {
 		return err
 	}
 
 	return response.Resp(c, response.Response{
-		Messages: response.Messages{"Article successfully updated"},
+		Messages: response.Messages{"User successfully updated"},
 	})
 }
 
-// delete article
-// @Summary      delete article
-// @Description  API for delete article
+// Delete user
+// @Summary      delete user
+// @Description  API for delete user
 // @Tags         Task
 // @Security     Bearer
-// @Param        id path int true "Article ID"
+// @Param        id path int true "User ID"
 // @Success      200  {object}  response.Response
 // @Failure      401  {object}  response.Response
 // @Failure      404  {object}  response.Response
 // @Failure      422  {object}  response.Response
 // @Failure      500  {object}  response.Response
-// @Router       /articles/:id [delete]
-func (_i *articleController) Delete(c *fiber.Ctx) error {
+// @Router       /users/:id [delete]
+func (_i *controller) Delete(c *fiber.Ctx) error {
 	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
 	if err != nil {
 		return err
 	}
 
-	err = _i.articleService.Destroy(id)
+	err = _i.userService.Destroy(id)
 	if err != nil {
 		return err
 	}
 
 	return response.Resp(c, response.Response{
-		Messages: response.Messages{"Article successfully deleted"},
+		Messages: response.Messages{"User successfully deleted"},
 	})
 }

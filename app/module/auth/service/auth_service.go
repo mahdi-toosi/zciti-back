@@ -9,26 +9,22 @@ import (
 	user_repo "github.com/bangadam/go-fiber-starter/app/module/user/repository"
 )
 
-// AuthService
-type articleService struct {
-	userRepo user_repo.UserRepository
-}
-
 //go:generate mockgen -destination=article_service_mock.go -package=service . AuthService
-// define interface of IAuthService
-type AuthService interface {
+type IService interface {
 	Login(req request.LoginRequest) (res response.LoginResponse, err error)
 }
 
-// init AuthService
-func NewAuthService(userRepo user_repo.UserRepository) AuthService {
-	return &articleService{
-		userRepo: userRepo,
+func Service(userRepo user_repo.IRepository) IService {
+	return &service{
+		userRepo,
 	}
 }
 
-// implement interface of AuthService
-func (_i *articleService) Login(req request.LoginRequest) (res response.LoginResponse, err error) {
+type service struct {
+	userRepo user_repo.IRepository
+}
+
+func (_i *service) Login(req request.LoginRequest) (res response.LoginResponse, err error) {
 	// check user by username
 	user, err := _i.userRepo.FindUserByUsername(req.Username)
 	if err != nil {

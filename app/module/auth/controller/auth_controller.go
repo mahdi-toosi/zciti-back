@@ -7,23 +7,23 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type authController struct {
-	authService service.AuthService
-}
-
-type AuthController interface {
+type IRestController interface {
 	Login(c *fiber.Ctx) error
 }
 
-func NewAuthController(authService service.AuthService) AuthController {
-	return &authController{
+func RestController(authService service.IService) IRestController {
+	return &controller{
 		authService: authService,
 	}
 }
 
-// do login
-// @Summary      Do login
-// @Description  API for do login
+type controller struct {
+	authService service.IService
+}
+
+// Login
+// @Summary      Do log in
+// @Description  API for do log in
 // @Tags         Authentication
 // @Security     Bearer
 // @Body 	     request.LoginRequest
@@ -33,7 +33,7 @@ func NewAuthController(authService service.AuthService) AuthController {
 // @Failure      422  {object}  response.Response
 // @Failure      500  {object}  response.Response
 // @Router       /api/v1/login [post]
-func (_i *authController) Login(c *fiber.Ctx) error {
+func (_i *controller) Login(c *fiber.Ctx) error {
 	req := new(request.LoginRequest)
 	if err := response.ParseAndValidate(c, req); err != nil {
 		return err

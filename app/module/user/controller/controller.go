@@ -1,13 +1,13 @@
 package controller
 
-import "github.com/bangadam/go-fiber-starter/app/module/auth/service"
+import "github.com/bangadam/go-fiber-starter/app/module/user/service"
 
 type Controller struct {
-	Auth IRestController
+	User IRestController
 }
 
 func Controllers(s service.IService) *Controller {
 	return &Controller{
-		Auth: RestController(s),
+		User: RestController(s),
 	}
 }

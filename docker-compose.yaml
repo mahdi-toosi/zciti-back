@@ -6,11 +6,11 @@ networks:
 
 services:
   postgres:
-    image: postgres:alpine
+    image: bitnami/postgresql:latest
     environment:
-      POSTGRES_DB: fiber_starter
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRESQL_DATABASE: fiber_starter
+      POSTGRESQL_USERNAME: postgres
+      POSTGRESQL_PASSWORD: postgres
     networks:
       - app
     ports:

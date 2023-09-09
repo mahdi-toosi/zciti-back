@@ -133,5 +133,5 @@ func ParseAddress(raw string) (host, port string) {
 		return raw[:i], raw[i+1:]
 	}
 
-	return raw, ""
+	return "", ":" + raw
 }

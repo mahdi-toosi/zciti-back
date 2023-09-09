@@ -2,6 +2,7 @@ package database
 
 import (
 	"github.com/bangadam/go-fiber-starter/app/database/schema"
+	"github.com/bangadam/go-fiber-starter/app/database/seeds"
 	"github.com/bangadam/go-fiber-starter/utils/config"
 	"github.com/rs/zerolog"
 	"gorm.io/driver/postgres"
@@ -17,7 +18,7 @@ type Database struct {
 
 type Seeder interface {
 	Seed(*gorm.DB) error
-	Count() (int, error)
+	Count(*gorm.DB) (int, error)
 }
 
 func NewDatabase(cfg *config.Config, log zerolog.Logger) *Database {
@@ -35,7 +36,7 @@ func (_db *Database) ConnectDatabase() {
 	if err != nil {
 		_db.Log.Error().Err(err).Msg("An unknown error occurred when to connect the database!")
 	} else {
-		_db.Log.Info().Msg("Connected the database succesfully!")
+		_db.Log.Info().Msg("Connected the database successfully!")
 	}
 
 	_db.DB = conn
@@ -47,9 +48,12 @@ func (_db *Database) ShutdownDatabase() {
 	if err != nil {
 		_db.Log.Error().Err(err).Msg("An unknown error occurred when to shutdown the database!")
 	} else {
-		_db.Log.Info().Msg("Shutdown the database succesfully!")
+		_db.Log.Info().Msg("Shutdown the database successfully!")
 	}
-	sqlDB.Close()
+	_err := sqlDB.Close()
+	if _err != nil {
+		return
+	}
 }
 
 // migrate models
@@ -64,14 +68,18 @@ func (_db *Database) MigrateModels() {
 // list of models for migration
 func Models() []interface{} {
 	return []interface{}{
-		schema.Article{},
+		schema.User{},
 	}
 }
 
 // seed data
-func (_db *Database) SeedModels(seeder ...Seeder) {
-	for _, seed := range seeder {
-		count, err := seed.Count()
+func (_db *Database) SeedModels() {
+	seeders := []Seeder{
+		seeds.UserSeeder{},
+	}
+
+	for _, seed := range seeders {
+		count, err := seed.Count(_db.DB)
 		if err != nil {
 			_db.Log.Error().Err(err).Msg("An unknown error occurred when to seed the database!")
 		}
@@ -81,11 +89,11 @@ func (_db *Database) SeedModels(seeder ...Seeder) {
 				_db.Log.Error().Err(err).Msg("An unknown error occurred when to seed the database!")
 			}
 
-			_db.Log.Info().Msg("Seeded the database succesfully!")
+			_db.Log.Info().Msg("Seeded the database successfully!")
 		} else {
 			_db.Log.Info().Msg("Database is already seeded!")
 		}
 	}
 
-	_db.Log.Info().Msg("Seeded the database succesfully!")
+	_db.Log.Info().Msg("Seeded the database successfully!")
 }
