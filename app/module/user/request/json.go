@@ -20,9 +20,9 @@ type UsersRequest struct {
 func (req *UserRequest) ToDomain() *schema.User {
 	return &schema.User{
 		ID:        *req.ID,
-		FirstName: req.FirstName,
-		LastName:  req.LastName,
+		FirstName: *req.FirstName,
+		LastName:  *req.LastName,
 		Mobile:    req.Mobile,
-		Roles:     req.Roles,
+		Roles:     *req.Roles,
 	}
 }

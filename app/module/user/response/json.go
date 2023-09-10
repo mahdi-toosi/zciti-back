@@ -22,11 +22,11 @@ func FromDomain(user *schema.User) (res *User) {
 	if user != nil {
 		res = &User{
 			ID:              user.ID,
-			FirstName:       *user.FirstName,
-			LastName:        *user.LastName,
+			FirstName:       user.FirstName,
+			LastName:        user.LastName,
 			Mobile:          user.Mobile,
-			MobileConfirmed: *user.MobileConfirmed,
-			Roles:           *user.Roles,
+			MobileConfirmed: user.MobileConfirmed,
+			Roles:           user.Roles,
 
 			CreatedAt: user.CreatedAt,
 			UpdatedAt: user.UpdatedAt,

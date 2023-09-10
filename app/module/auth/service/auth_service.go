@@ -36,12 +36,6 @@ func (_i *service) Login(req request.LoginRequest) (res response.LoginResponse, 
 		return
 	}
 
-	// password not null
-	if user.Password == nil {
-		err = errors.New("user password not found")
-		return
-	}
-
 	// check password
 	if !user.ComparePassword(req.Password) {
 		err = errors.New("password not match")
