@@ -7,12 +7,13 @@ definitions:
       messages:
         items: {}
         type: array
+      meta: {}
     type: object
-host: localhost:8080
+host: localhost:8000
 info:
   contact:
-    email: bangadam.dev@gmail.com
-    name: Developer
+    email: mailmahditoosi@gmail.com
+    name: Mahdi Toosi
   description: This is a sample API documentation.
   license:
     name: Apache 2.0
@@ -21,9 +22,9 @@ info:
   title: Go Fiber Starter API Documentation
   version: "1.0"
 paths:
-  /articles:
-    get:
-      description: API for getting all articles
+  /api/v1/login:
+    post:
+      description: API for do log in
       responses:
         "200":
           description: OK
@@ -47,11 +48,40 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - Bearer: []
-      summary: Get all articles
+      summary: Do log in
+      tags:
+      - Authentication
+  /users:
+    get:
+      description: API for getting all users
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: Get all users
       tags:
       - Task
     post:
-      description: API for create article
+      description: API for create user
       responses:
         "200":
           description: OK
@@ -75,14 +105,14 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - Bearer: []
-      summary: Create article
+      summary: Create user
       tags:
       - Task
-  /articles/:id:
+  /users/:id:
     delete:
-      description: API for delete article
+      description: API for delete user
       parameters:
-      - description: Article ID
+      - description: User ID
         in: path
         name: id
         required: true
@@ -110,13 +140,13 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - Bearer: []
-      summary: delete article
+      summary: delete user
       tags:
       - Task
     get:
-      description: API for getting one article
+      description: API for getting one user
       parameters:
-      - description: Article ID
+      - description: User ID
         in: path
         name: id
         required: true
@@ -144,13 +174,13 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - Bearer: []
-      summary: Get one article
+      summary: Get one user
       tags:
       - Task
     put:
-      description: API for update article
+      description: API for update user
       parameters:
-      - description: Article ID
+      - description: User ID
         in: path
         name: id
         required: true
@@ -178,12 +208,11 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - Bearer: []
-      summary: update article
+      summary: update user
       tags:
       - Task
 schemes:
 - http
-- https
 securityDefinitions:
   Bearer:
     description: '"Type ''Bearer {TOKEN}'' to correctly set the API Key"'

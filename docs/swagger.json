@@ -1,7 +1,6 @@
 {
     "schemes": [
-        "http",
-        "https"
+        "http"
     ],
     "swagger": "2.0",
     "info": {
@@ -9,8 +8,8 @@
         "title": "Go Fiber Starter API Documentation",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
-            "name": "Developer",
-            "email": "bangadam.dev@gmail.com"
+            "name": "Mahdi Toosi",
+            "email": "mailmahditoosi@gmail.com"
         },
         "license": {
             "name": "Apache 2.0",
@@ -18,20 +17,66 @@
         },
         "version": "1.0"
     },
-    "host": "localhost:8080",
+    "host": "localhost:8000",
     "paths": {
-        "/articles": {
+        "/api/v1/login": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "API for do log in",
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Do log in",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/users": {
             "get": {
                 "security": [
                     {
                         "Bearer": []
                     }
                 ],
-                "description": "API for getting all articles",
+                "description": "API for getting all users",
                 "tags": [
                     "Task"
                 ],
-                "summary": "Get all articles",
+                "summary": "Get all users",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -71,11 +116,11 @@
                         "Bearer": []
                     }
                 ],
-                "description": "API for create article",
+                "description": "API for create user",
                 "tags": [
                     "Task"
                 ],
-                "summary": "Create article",
+                "summary": "Create user",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -110,22 +155,22 @@
                 }
             }
         },
-        "/articles/:id": {
+        "/users/:id": {
             "get": {
                 "security": [
                     {
                         "Bearer": []
                     }
                 ],
-                "description": "API for getting one article",
+                "description": "API for getting one user",
                 "tags": [
                     "Task"
                 ],
-                "summary": "Get one article",
+                "summary": "Get one user",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Article ID",
+                        "description": "User ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -170,15 +215,15 @@
                         "Bearer": []
                     }
                 ],
-                "description": "API for update article",
+                "description": "API for update user",
                 "tags": [
                     "Task"
                 ],
-                "summary": "update article",
+                "summary": "update user",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Article ID",
+                        "description": "User ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -223,15 +268,15 @@
                         "Bearer": []
                     }
                 ],
-                "description": "API for delete article",
+                "description": "API for delete user",
                 "tags": [
                     "Task"
                 ],
-                "summary": "delete article",
+                "summary": "delete user",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Article ID",
+                        "description": "User ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -283,7 +328,8 @@
                 "messages": {
                     "type": "array",
                     "items": {}
-                }
+                },
+                "meta": {}
             }
         }
     },

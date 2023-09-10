@@ -9,7 +9,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// setup database with gorm
 type Database struct {
 	DB  *gorm.DB
 	Log zerolog.Logger
@@ -30,7 +29,6 @@ func NewDatabase(cfg *config.Config, log zerolog.Logger) *Database {
 	return db
 }
 
-// connect database
 func (_db *Database) ConnectDatabase() {
 	conn, err := gorm.Open(postgres.Open(_db.Cfg.DB.Postgres.DSN), &gorm.Config{})
 	if err != nil {
@@ -42,7 +40,6 @@ func (_db *Database) ConnectDatabase() {
 	_db.DB = conn
 }
 
-// shutdown database
 func (_db *Database) ShutdownDatabase() {
 	sqlDB, err := _db.DB.DB()
 	if err != nil {
@@ -56,7 +53,6 @@ func (_db *Database) ShutdownDatabase() {
 	}
 }
 
-// migrate models
 func (_db *Database) MigrateModels() {
 	if err := _db.DB.AutoMigrate(
 		Models()...,
@@ -65,14 +61,12 @@ func (_db *Database) MigrateModels() {
 	}
 }
 
-// list of models for migration
 func Models() []interface{} {
-	return []interface{}{
+	return []any{
 		schema.User{},
 	}
 }
 
-// seed data
 func (_db *Database) SeedModels() {
 	seeders := []Seeder{
 		seeds.UserSeeder{},
@@ -94,6 +88,4 @@ func (_db *Database) SeedModels() {
 			_db.Log.Info().Msg("Database is already seeded!")
 		}
 	}
-
-	_db.Log.Info().Msg("Seeded the database successfully!")
 }

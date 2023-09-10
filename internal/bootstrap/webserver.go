@@ -20,7 +20,6 @@ import (
 	futils "github.com/gofiber/fiber/v2/utils"
 )
 
-// initialize the webserver
 func NewFiber(cfg *config.Config) *fiber.App {
 	// setup
 	app := fiber.New(fiber.Config{
@@ -39,7 +38,6 @@ func NewFiber(cfg *config.Config) *fiber.App {
 	return app
 }
 
-// function to start webserver
 func Start(lifecycle fx.Lifecycle, cfg *config.Config, fiber *fiber.App, router *router.Router, middlewares *middleware.Middleware, database *database.Database, log zerolog.Logger) {
 	lifecycle.Append(
 		fx.Hook{
@@ -113,10 +111,16 @@ func Start(lifecycle fx.Lifecycle, cfg *config.Config, fiber *fiber.App, router 
 				// read flag -migrate to migrate the database
 				if *migrate {
 					database.MigrateModels()
+					_ = fiber.Shutdown()
+					database.ShutdownDatabase()
+					os.Exit(0)
 				}
 				// read flag -seed to seed the database
 				if *seeder {
 					database.SeedModels()
+					_ = fiber.Shutdown()
+					database.ShutdownDatabase()
+					os.Exit(0)
 				}
 
 				return nil

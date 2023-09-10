@@ -30,15 +30,11 @@ func NewRouter(
 
 // Register routes
 func (r *Router) Register() {
-	// Test Routes
-	r.App.Get("/ping", func(c *fiber.Ctx) error {
-		return c.SendString("Pong! 👋")
-	})
-
-	// Swagger Documentation
-	r.App.Get("/swagger/*", swagger.HandlerDefault)
 
 	// Register routes of modules
 	r.UserRouter.RegisterRoutes()
 	r.AuthRouter.RegisterRoutes()
+
+	// Swagger Documentation
+	r.App.Get("/swagger/*", swagger.HandlerDefault)
 }
