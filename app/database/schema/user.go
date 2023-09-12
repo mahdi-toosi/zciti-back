@@ -6,13 +6,13 @@ import (
 )
 
 type User struct {
-	ID              uint64         `gorm:"primary_key;column:id" json:"id" faker:"-"`
-	FirstName       string         `gorm:"column:first_name" json:"firstName" faker:"first_name"`
-	LastName        string         `gorm:"column:last_name" json:"lastName" faker:"last_name"`
-	Mobile          string         `gorm:"column:mobile;not null;uniqueIndex" json:"mobile" faker:"e_164_phone_number"`
-	MobileConfirmed bool           `gorm:"column:mobile_confirmed;default:false" json:"mobileConfirmed"`
-	Roles           pq.StringArray `gorm:"column:roles;type:text[]" json:"roles" faker:"slice_len=2"`
-	Password        string         `gorm:"column:password;not null" faker:"password"`
+	ID              uint64         `gorm:"primary_key" faker:"-"`
+	FirstName       string         `faker:"first_name"`
+	LastName        string         `faker:"last_name"`
+	Mobile          string         `gorm:"not null;uniqueIndex" faker:"e_164_phone_number"`
+	MobileConfirmed bool           `gorm:"default:false"`
+	Roles           pq.StringArray `gorm:"type:text[]" faker:"slice_len=2"`
+	Password        string         `gorm:"not null" faker:"password"`
 	Base
 }
 
