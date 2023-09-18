@@ -20,7 +20,7 @@ func NewRouter(fiber *fiber.App, controller *controller.Controller) *Router {
 }
 
 func (_i *Router) RegisterRoutes() {
-	c := _i.Controller.Auth
+	c := _i.Controller.RestController
 
 	_i.App.Route("/api/v1", func(router fiber.Router) {
 		router.Post("/login", c.Login)

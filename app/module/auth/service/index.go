@@ -6,7 +6,7 @@ import (
 	"github.com/bangadam/go-fiber-starter/app/middleware"
 	"github.com/bangadam/go-fiber-starter/app/module/auth/request"
 	"github.com/bangadam/go-fiber-starter/app/module/auth/response"
-	user_repo "github.com/bangadam/go-fiber-starter/app/module/user/repository"
+	"github.com/bangadam/go-fiber-starter/app/module/user/repository"
 )
 
 //go:generate mockgen -destination=article_service_mock.go -package=service . AuthService
@@ -14,19 +14,19 @@ type IService interface {
 	Login(req request.LoginRequest) (res response.LoginResponse, err error)
 }
 
-func Service(userRepo user_repo.IRepository) IService {
+func Service(Repo repository.IRepository) IService {
 	return &service{
-		userRepo,
+		Repo,
 	}
 }
 
 type service struct {
-	userRepo user_repo.IRepository
+	Repo repository.IRepository
 }
 
 func (_i *service) Login(req request.LoginRequest) (res response.LoginResponse, err error) {
 	// check user by username
-	user, err := _i.userRepo.FindUserByUsername(req.Username)
+	user, err := _i.Repo.FindUserByUsername(req.Username)
 	if err != nil {
 		return
 	}

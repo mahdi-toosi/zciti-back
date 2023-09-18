@@ -11,14 +11,12 @@ type IRestController interface {
 	Login(c *fiber.Ctx) error
 }
 
-func RestController(authService service.IService) IRestController {
-	return &controller{
-		authService: authService,
-	}
+func RestController(service service.IService) IRestController {
+	return &controller{service}
 }
 
 type controller struct {
-	authService service.IService
+	service service.IService
 }
 
 // Login
@@ -39,7 +37,7 @@ func (_i *controller) Login(c *fiber.Ctx) error {
 		return err
 	}
 
-	res, err := _i.authService.Login(*req)
+	res, err := _i.service.Login(*req)
 	if err != nil {
 		return err
 	}
