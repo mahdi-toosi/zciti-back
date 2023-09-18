@@ -18,14 +18,12 @@ type IRestController interface {
 	Delete(c *fiber.Ctx) error
 }
 
-func RestController(userService service.IService) IRestController {
-	return &controller{
-		userService,
-	}
+func RestController(s service.IService) IRestController {
+	return &controller{s}
 }
 
 type controller struct {
-	userService service.IService
+	service service.IService
 }
 
 // Index all Users
@@ -48,7 +46,7 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	var req request.UsersRequest
 	req.Pagination = paginate
 
-	users, paging, err := _i.userService.All(req)
+	users, paging, err := _i.service.Index(req)
 	if err != nil {
 		return err
 	}
@@ -78,7 +76,7 @@ func (_i *controller) Show(c *fiber.Ctx) error {
 		return err
 	}
 
-	users, err := _i.userService.Show(id)
+	users, err := _i.service.Show(id)
 	if err != nil {
 		return err
 	}
@@ -107,7 +105,7 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 		return err
 	}
 
-	err := _i.userService.Store(*req)
+	err := _i.service.Store(*req)
 	if err != nil {
 		return err
 	}
@@ -141,7 +139,7 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 		return err
 	}
 
-	err = _i.userService.Update(id, *req)
+	err = _i.service.Update(id, *req)
 	if err != nil {
 		return err
 	}
@@ -169,7 +167,7 @@ func (_i *controller) Delete(c *fiber.Ctx) error {
 		return err
 	}
 
-	err = _i.userService.Destroy(id)
+	err = _i.service.Destroy(id)
 	if err != nil {
 		return err
 	}

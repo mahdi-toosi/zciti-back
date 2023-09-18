@@ -15,7 +15,7 @@ type Router struct {
 
 func (_i *Router) RegisterRoutes() {
 	// define controllers
-	c := _i.Controller.User
+	c := _i.Controller.RestController
 
 	// define routes
 	_i.App.Route("/api/v1", func(router fiber.Router) {

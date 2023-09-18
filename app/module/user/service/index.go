@@ -8,7 +8,7 @@ import (
 )
 
 type IService interface {
-	All(req request.UsersRequest) (articles []*response.User, paging paginator.Pagination, err error)
+	Index(req request.UsersRequest) (articles []*response.User, paging paginator.Pagination, err error)
 	Show(id uint64) (article *response.User, err error)
 	Store(req request.UserRequest) (err error)
 	Update(id uint64, req request.UserRequest) (err error)
@@ -25,21 +25,21 @@ type service struct {
 	Repo repository.IRepository
 }
 
-func (_i *service) All(req request.UsersRequest) (articles []*response.User, paging paginator.Pagination, err error) {
-	results, paging, err := _i.Repo.GetUsers(req)
+func (_i *service) Index(req request.UsersRequest) (users []*response.User, paging paginator.Pagination, err error) {
+	results, paging, err := _i.Repo.GetAll(req)
 	if err != nil {
 		return
 	}
 
 	for _, result := range results {
-		articles = append(articles, response.FromDomain(result))
+		users = append(users, response.FromDomain(result))
 	}
 
 	return
 }
 
 func (_i *service) Show(id uint64) (article *response.User, err error) {
-	result, err := _i.Repo.FindOne(id)
+	result, err := _i.Repo.GetOne(id)
 	if err != nil {
 		return nil, err
 	}

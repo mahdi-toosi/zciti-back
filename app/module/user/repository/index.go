@@ -8,8 +8,8 @@ import (
 )
 
 type IRepository interface {
-	GetUsers(req request.UsersRequest) (users []*schema.User, paging paginator.Pagination, err error)
-	FindOne(id uint64) (user *schema.User, err error)
+	GetAll(req request.UsersRequest) (users []*schema.User, paging paginator.Pagination, err error)
+	GetOne(id uint64) (user *schema.User, err error)
 	Create(user *schema.User) (err error)
 	Update(id uint64, user *schema.User) (err error)
 	Delete(id uint64) (err error)
@@ -26,7 +26,7 @@ type repo struct {
 	DB *database.Database
 }
 
-func (_i *repo) GetUsers(req request.UsersRequest) (users []*schema.User, paging paginator.Pagination, err error) {
+func (_i *repo) GetAll(req request.UsersRequest) (users []*schema.User, paging paginator.Pagination, err error) {
 	var count int64
 
 	query := _i.DB.DB.Model(&schema.User{})
@@ -45,7 +45,7 @@ func (_i *repo) GetUsers(req request.UsersRequest) (users []*schema.User, paging
 	return
 }
 
-func (_i *repo) FindOne(id uint64) (article *schema.User, err error) {
+func (_i *repo) GetOne(id uint64) (article *schema.User, err error) {
 	if err := _i.DB.DB.First(&article, id).Error; err != nil {
 		return nil, err
 	}
