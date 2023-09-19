@@ -1,10 +1,10 @@
 package controller
 
 import (
-	"github.com/bangadam/go-fiber-starter/app/module/auth/request"
-	"github.com/bangadam/go-fiber-starter/app/module/auth/service"
-	"github.com/bangadam/go-fiber-starter/utils/response"
 	"github.com/gofiber/fiber/v2"
+	"go-fiber-starter/app/module/auth/request"
+	"go-fiber-starter/app/module/auth/service"
+	"go-fiber-starter/utils/response"
 )
 
 type IRestController interface {

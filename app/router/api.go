@@ -1,30 +1,38 @@
 package router
 
 import (
-	"github.com/bangadam/go-fiber-starter/app/module/auth"
-	"github.com/bangadam/go-fiber-starter/app/module/user"
-	"github.com/bangadam/go-fiber-starter/utils/config"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
+	"go-fiber-starter/app/module/auth"
+	"go-fiber-starter/app/module/post"
+	"go-fiber-starter/app/module/user"
+	"go-fiber-starter/utils/config"
 )
 
 type Router struct {
-	App        fiber.Router
-	Cfg        *config.Config
+	App fiber.Router
+	Cfg *config.Config
+
 	AuthRouter *auth.Router
 	UserRouter *user.Router
+	PostRouter *post.Router
 }
 
 func NewRouter(
 	fiber *fiber.App,
 	cfg *config.Config,
+
+	authRouter *auth.Router,
 	userRouter *user.Router,
-	authRouter *auth.Router) *Router {
+	postRouter *post.Router,
+) *Router {
 	return &Router{
-		App:        fiber,
-		Cfg:        cfg,
+		App: fiber,
+		Cfg: cfg,
+
 		AuthRouter: authRouter,
 		UserRouter: userRouter,
+		PostRouter: postRouter,
 	}
 }
 
@@ -34,6 +42,7 @@ func (r *Router) Register() {
 	// Register routes of modules
 	r.UserRouter.RegisterRoutes()
 	r.AuthRouter.RegisterRoutes()
+	r.PostRouter.RegisterRoutes()
 
 	// Swagger Documentation
 	r.App.Get("/swagger/*", swagger.HandlerDefault)

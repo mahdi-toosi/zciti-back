@@ -4,10 +4,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/bangadam/go-fiber-starter/utils/config"
 	"github.com/gofiber/fiber/v2"
 	jwtware "github.com/gofiber/jwt/v2"
 	"github.com/golang-jwt/jwt/v4"
+	"go-fiber-starter/utils/config"
 )
 
 func Protected() fiber.Handler {

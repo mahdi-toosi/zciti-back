@@ -1,27 +1,19 @@
-<div align="center" id="top"> 
-  <img src="./.github/app.gif" alt="Go Fiber Starter" />
-
-&#xa0;
-
-  <!-- <a href="https://gofiberstarter.netlify.app">Demo</a> -->
-</div>
-
 <h1 align="center">Go Fiber Starter</h1>
 
 <p align="center">
-  <img alt="Github top language" src="https://img.shields.io/github/languages/top/bangadam/go-fiber-starter?color=56BEB8">
+  <img alt="Github top language" src="https://img.shields.io/github/languages/top/mahdi-toosi/go-fiber-starter?color=56BEB8">
 
-  <img alt="Github language count" src="https://img.shields.io/github/languages/count/bangadam/go-fiber-starter?color=56BEB8">
+  <img alt="Github language count" src="https://img.shields.io/github/languages/count/mahdi-toosi/go-fiber-starter?color=56BEB8">
 
-  <img alt="Repository size" src="https://img.shields.io/github/repo-size/bangadam/go-fiber-starter?color=56BEB8">
+  <img alt="Repository size" src="https://img.shields.io/github/repo-size/mahdi-toosi/go-fiber-starter?color=56BEB8">
 
-  <img alt="License" src="https://img.shields.io/github/license/bangadam/go-fiber-starter?color=56BEB8">
+  <img alt="License" src="https://img.shields.io/github/license/mahdi-toosi/go-fiber-starter?color=56BEB8">
 
-  <img alt="Github issues" src="https://img.shields.io/github/issues/bangadam/go-fiber-starter?color=56BEB8" />
+  <img alt="Github issues" src="https://img.shields.io/github/issues/mahdi-toosi/go-fiber-starter?color=56BEB8" />
 
-  <img alt="Github forks" src="https://img.shields.io/github/forks/bangadam/go-fiber-starter?color=56BEB8" />
+  <img alt="Github forks" src="https://img.shields.io/github/forks/mahdi-toosi/go-fiber-starter?color=56BEB8" />
 
-  <img alt="Github stars" src="https://img.shields.io/github/stars/bangadam/go-fiber-starter?color=56BEB8" />
+  <img alt="Github stars" src="https://img.shields.io/github/stars/mahdi-toosi/go-fiber-starter?color=56BEB8" />
 </p>
 
 <!-- Status -->
@@ -81,7 +73,7 @@ Before starting :checkered_flag:, you need to have [Git](https://git-scm.com), [
 
 ```bash
 # Clone this project
-$ git clone https://github.com/bangadam/go-fiber-starter
+$ git clone https://github.com/mahdi-toosi/go-fiber-starter
 
 # Access
 $ cd go-fiber-starter
@@ -99,7 +91,7 @@ $ go run cmd/example/main.go
 
 This project is under license from MIT. For more details, see the [LICENSE](LICENSE) file.
 
-Made with :heart: by <a href="https://github.com/bangadam" target="_blank">bangadam.dev</a>
+Made with :heart: by <a href="https://github.com/mahdi-toosi" target="_blank">mahdi toosi</a>
 
 &#xa0;
 

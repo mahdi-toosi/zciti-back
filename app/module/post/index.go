@@ -1,10 +1,10 @@
-package user
+package post
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"go-fiber-starter/app/module/user/controller"
-	"go-fiber-starter/app/module/user/repository"
-	"go-fiber-starter/app/module/user/service"
+	"go-fiber-starter/app/module/post/controller"
+	"go-fiber-starter/app/module/post/repository"
+	"go-fiber-starter/app/module/post/service"
 	"go.uber.org/fx"
 )
 

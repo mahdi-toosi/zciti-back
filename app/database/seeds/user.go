@@ -1,15 +1,15 @@
 package seeds
 
 import (
-	"github.com/bangadam/go-fiber-starter/app/database/schema"
 	"github.com/bxcodec/faker/v4"
 	"github.com/rs/zerolog/log"
+	"go-fiber-starter/app/database/schema"
 	"gorm.io/gorm"
 )
 
-type UserSeeder struct{}
+type User struct{}
 
-func (UserSeeder) Seed(conn *gorm.DB) error {
+func (User) Seed(conn *gorm.DB) error {
 	count := 30
 	for i := 0; i <= count; i++ {
 		fakeData := &schema.User{}
@@ -29,7 +29,7 @@ func (UserSeeder) Seed(conn *gorm.DB) error {
 	return nil
 }
 
-func (UserSeeder) Count(conn *gorm.DB) (int, error) {
+func (User) Count(conn *gorm.DB) (int, error) {
 	var count int64
 	if err := conn.Model(schema.User{}).Count(&count).Error; err != nil {
 		return 0, err

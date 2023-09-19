@@ -3,10 +3,10 @@ package bootstrap
 import (
 	"os"
 
-	"github.com/bangadam/go-fiber-starter/utils/config"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"go-fiber-starter/utils/config"
 )
 
 // initialize logger

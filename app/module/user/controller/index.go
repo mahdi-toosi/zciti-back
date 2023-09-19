@@ -1,6 +1,6 @@
 package controller
 
-import "github.com/bangadam/go-fiber-starter/app/module/user/service"
+import "go-fiber-starter/app/module/user/service"
 
 type Controller struct {
 	RestController IRestController

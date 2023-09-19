@@ -6,7 +6,7 @@ import (
 	"go-fiber-starter/app/database/schema"
 )
 
-type User struct {
+type Post struct {
 	ID              uint64   `json:"id"`
 	FirstName       string   `json:"firstName"`
 	LastName        string   `json:"lastName"`
@@ -18,18 +18,17 @@ type User struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func FromDomain(user *schema.User) (res *User) {
-	if user != nil {
-		res = &User{
-			ID:              user.ID,
-			FirstName:       user.FirstName,
-			LastName:        user.LastName,
-			Mobile:          user.Mobile,
-			MobileConfirmed: user.MobileConfirmed,
-			Roles:           user.Roles,
+func FromDomain(post *schema.Post) (res *Post) {
+	if post != nil {
+		res = &Post{
+			ID:              post.ID,
+			FirstName:       post.FirstName,
+			LastName:        post.LastName,
+			Mobile:          post.Mobile,
+			MobileConfirmed: post.MobileConfirmed,
 
-			CreatedAt: user.CreatedAt,
-			UpdatedAt: user.UpdatedAt,
+			CreatedAt: post.CreatedAt,
+			UpdatedAt: post.UpdatedAt,
 		}
 	}
 

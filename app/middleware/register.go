@@ -4,8 +4,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/bangadam/go-fiber-starter/utils"
-	"github.com/bangadam/go-fiber-starter/utils/config"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
@@ -13,6 +11,8 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/monitor"
 	"github.com/gofiber/fiber/v2/middleware/pprof"
 	"github.com/gofiber/fiber/v2/middleware/recover"
+	"go-fiber-starter/utils"
+	"go-fiber-starter/utils/config"
 )
 
 // Middleware is a struct that contains all the middleware functions

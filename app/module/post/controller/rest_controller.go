@@ -4,8 +4,8 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
-	"go-fiber-starter/app/module/user/request"
-	"go-fiber-starter/app/module/user/service"
+	"go-fiber-starter/app/module/post/request"
+	"go-fiber-starter/app/module/post/service"
 	"go-fiber-starter/utils/paginator"
 	"go-fiber-starter/utils/response"
 )
@@ -26,9 +26,9 @@ type controller struct {
 	service service.IService
 }
 
-// Index all Users
-// @Summary      Get all users
-// @Description  API for getting all users
+// Index all Posts
+// @Summary      Get all posts
+// @Description  API for getting all posts
 // @Tags         Task
 // @Security     Bearer
 // @Success      200  {object}  response.Response
@@ -36,60 +36,60 @@ type controller struct {
 // @Failure      404  {object}  response.Response
 // @Failure      422  {object}  response.Response
 // @Failure      500  {object}  response.Response
-// @Router       /users [get]
+// @Router       /posts [get]
 func (_i *controller) Index(c *fiber.Ctx) error {
 	paginate, err := paginator.Paginate(c)
 	if err != nil {
 		return err
 	}
 
-	var req request.UsersRequest
+	var req request.PostsRequest
 	req.Pagination = paginate
 
-	users, paging, err := _i.service.Index(req)
+	posts, paging, err := _i.service.Index(req)
 	if err != nil {
 		return err
 	}
 
 	return response.Resp(c, response.Response{
-		Messages: response.Messages{"User list successfully retrieved"},
-		Data:     users,
+		Messages: response.Messages{"Post list successfully retrieved"},
+		Data:     posts,
 		Meta:     paging,
 	})
 }
 
-// Show one User
-// @Summary      Get one user
-// @Description  API for getting one user
+// Show one Post
+// @Summary      Get one post
+// @Description  API for getting one post
 // @Tags         Task
 // @Security     Bearer
-// @Param        id path int true "User ID"
+// @Param        id path int true "Post ID"
 // @Success      200  {object}  response.Response
 // @Failure      401  {object}  response.Response
 // @Failure      404  {object}  response.Response
 // @Failure      422  {object}  response.Response
 // @Failure      500  {object}  response.Response
-// @Router       /users/:id [get]
+// @Router       /posts/:id [get]
 func (_i *controller) Show(c *fiber.Ctx) error {
 	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
 	if err != nil {
 		return err
 	}
 
-	users, err := _i.service.Show(id)
+	posts, err := _i.service.Show(id)
 	if err != nil {
 		return err
 	}
 
 	return response.Resp(c, response.Response{
-		Messages: response.Messages{"User successfully retrieved"},
-		Data:     users,
+		Messages: response.Messages{"Post successfully retrieved"},
+		Data:     posts,
 	})
 }
 
-// Store user
-// @Summary      Create user
-// @Description  API for create user
+// Store post
+// @Summary      Create post
+// @Description  API for create post
 // @Tags         Task
 // @Security     Bearer
 // @Body 	     request.ArticleRequest
@@ -98,9 +98,9 @@ func (_i *controller) Show(c *fiber.Ctx) error {
 // @Failure      404  {object}  response.Response
 // @Failure      422  {object}  response.Response
 // @Failure      500  {object}  response.Response
-// @Router       /users [post]
+// @Router       /posts [post]
 func (_i *controller) Store(c *fiber.Ctx) error {
-	req := new(request.UserRequest)
+	req := new(request.PostRequest)
 	if err := response.ParseAndValidate(c, req); err != nil {
 		return err
 	}
@@ -111,30 +111,30 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 	}
 
 	return response.Resp(c, response.Response{
-		Messages: response.Messages{"User successfully created"},
+		Messages: response.Messages{"Post successfully created"},
 	})
 }
 
-// Update user
-// @Summary      update user
-// @Description  API for update user
+// Update post
+// @Summary      update post
+// @Description  API for update post
 // @Tags         Task
 // @Security     Bearer
 // @Body 	     request.ArticleRequest
-// @Param        id path int true "User ID"
+// @Param        id path int true "Post ID"
 // @Success      200  {object}  response.Response
 // @Failure      401  {object}  response.Response
 // @Failure      404  {object}  response.Response
 // @Failure      422  {object}  response.Response
 // @Failure      500  {object}  response.Response
-// @Router       /users/:id [put]
+// @Router       /posts/:id [put]
 func (_i *controller) Update(c *fiber.Ctx) error {
 	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
 	if err != nil {
 		return err
 	}
 
-	req := new(request.UserRequest)
+	req := new(request.PostRequest)
 	if err := response.ParseAndValidate(c, req); err != nil {
 		return err
 	}
@@ -145,34 +145,34 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 	}
 
 	return response.Resp(c, response.Response{
-		Messages: response.Messages{"User successfully updated"},
+		Messages: response.Messages{"Post successfully updated"},
 	})
 }
 
-// Delete user
-// @Summary      delete user
-// @Description  API for delete user
+// Delete post
+// @Summary      delete post
+// @Description  API for delete post
 // @Tags         Task
 // @Security     Bearer
-// @Param        id path int true "User ID"
+// @Param        id path int true "Post ID"
 // @Success      200  {object}  response.Response
 // @Failure      401  {object}  response.Response
 // @Failure      404  {object}  response.Response
 // @Failure      422  {object}  response.Response
 // @Failure      500  {object}  response.Response
-// @Router       /users/:id [delete]
+// @Router       /posts/:id [delete]
 func (_i *controller) Delete(c *fiber.Ctx) error {
 	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
 	if err != nil {
 		return err
 	}
 
-	err = _i.service.Destroy(id)
+	err = _i.service.Delete(id)
 	if err != nil {
 		return err
 	}
 
 	return response.Resp(c, response.Response{
-		Messages: response.Messages{"User successfully deleted"},
+		Messages: response.Messages{"Post successfully deleted"},
 	})
 }

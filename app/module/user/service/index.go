@@ -1,10 +1,10 @@
 package service
 
 import (
-	"github.com/bangadam/go-fiber-starter/app/module/user/repository"
-	"github.com/bangadam/go-fiber-starter/app/module/user/request"
-	"github.com/bangadam/go-fiber-starter/app/module/user/response"
-	"github.com/bangadam/go-fiber-starter/utils/paginator"
+	"go-fiber-starter/app/module/user/repository"
+	"go-fiber-starter/app/module/user/request"
+	"go-fiber-starter/app/module/user/response"
+	"go-fiber-starter/utils/paginator"
 )
 
 type IService interface {

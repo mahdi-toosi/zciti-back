@@ -8,13 +8,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bangadam/go-fiber-starter/app/middleware"
-	"github.com/bangadam/go-fiber-starter/app/router"
-	"github.com/bangadam/go-fiber-starter/internal/bootstrap/database"
-	"github.com/bangadam/go-fiber-starter/utils/config"
-	"github.com/bangadam/go-fiber-starter/utils/response"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog"
+	"go-fiber-starter/app/middleware"
+	"go-fiber-starter/app/router"
+	"go-fiber-starter/internal/bootstrap/database"
+	"go-fiber-starter/utils/config"
+	"go-fiber-starter/utils/response"
 	"go.uber.org/fx"
 
 	futils "github.com/gofiber/fiber/v2/utils"

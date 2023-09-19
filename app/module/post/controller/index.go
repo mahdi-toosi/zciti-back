@@ -1,6 +1,6 @@
 package controller
 
-import "go-fiber-starter/app/module/auth/service"
+import "go-fiber-starter/app/module/post/service"
 
 type Controller struct {
 	RestController IRestController

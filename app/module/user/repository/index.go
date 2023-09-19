@@ -1,10 +1,10 @@
 package repository
 
 import (
-	"github.com/bangadam/go-fiber-starter/app/database/schema"
-	"github.com/bangadam/go-fiber-starter/app/module/user/request"
-	"github.com/bangadam/go-fiber-starter/internal/bootstrap/database"
-	"github.com/bangadam/go-fiber-starter/utils/paginator"
+	"go-fiber-starter/app/database/schema"
+	"go-fiber-starter/app/module/user/request"
+	"go-fiber-starter/internal/bootstrap/database"
+	"go-fiber-starter/utils/paginator"
 )
 
 type IRepository interface {

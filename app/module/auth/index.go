@@ -1,9 +1,9 @@
 package auth
 
 import (
-	"github.com/bangadam/go-fiber-starter/app/module/auth/controller"
-	"github.com/bangadam/go-fiber-starter/app/module/auth/service"
 	"github.com/gofiber/fiber/v2"
+	"go-fiber-starter/app/module/auth/controller"
+	"go-fiber-starter/app/module/auth/service"
 	"go.uber.org/fx"
 )
 

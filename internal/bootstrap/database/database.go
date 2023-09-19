@@ -1,10 +1,10 @@
 package database
 
 import (
-	"github.com/bangadam/go-fiber-starter/app/database/schema"
-	"github.com/bangadam/go-fiber-starter/app/database/seeds"
-	"github.com/bangadam/go-fiber-starter/utils/config"
 	"github.com/rs/zerolog"
+	"go-fiber-starter/app/database/schema"
+	"go-fiber-starter/app/database/seeds"
+	"go-fiber-starter/utils/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -13,11 +13,6 @@ type Database struct {
 	DB  *gorm.DB
 	Log zerolog.Logger
 	Cfg *config.Config
-}
-
-type Seeder interface {
-	Seed(*gorm.DB) error
-	Count(*gorm.DB) (int, error)
 }
 
 func NewDatabase(cfg *config.Config, log zerolog.Logger) *Database {
@@ -55,22 +50,14 @@ func (_db *Database) ShutdownDatabase() {
 
 func (_db *Database) MigrateModels() {
 	if err := _db.DB.AutoMigrate(
-		Models()...,
+		schema.Models()...,
 	); err != nil {
 		_db.Log.Error().Err(err).Msg("An unknown error occurred when to migrate the database!")
 	}
 }
 
-func Models() []interface{} {
-	return []any{
-		schema.User{},
-	}
-}
-
 func (_db *Database) SeedModels() {
-	seeders := []Seeder{
-		seeds.UserSeeder{},
-	}
+	seeders := seeds.Seeders()
 
 	for _, seed := range seeders {
 		count, err := seed.Count(_db.DB)

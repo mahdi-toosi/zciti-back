@@ -3,10 +3,10 @@ package service
 import (
 	"errors"
 
-	"github.com/bangadam/go-fiber-starter/app/middleware"
-	"github.com/bangadam/go-fiber-starter/app/module/auth/request"
-	"github.com/bangadam/go-fiber-starter/app/module/auth/response"
-	"github.com/bangadam/go-fiber-starter/app/module/user/repository"
+	"go-fiber-starter/app/middleware"
+	"go-fiber-starter/app/module/auth/request"
+	"go-fiber-starter/app/module/auth/response"
+	"go-fiber-starter/app/module/user/repository"
 )
 
 //go:generate mockgen -destination=article_service_mock.go -package=service . AuthService
