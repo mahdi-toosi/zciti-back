@@ -106,18 +106,23 @@ func Start(lifecycle fx.Lifecycle, cfg *config.Config, fiber *fiber.App, router 
 
 				migrate := flag.Bool("migrate", false, "migrate the database")
 				seeder := flag.Bool("seed", false, "seed the database")
+				drop := flag.Bool("drop-all-tables", false, "drop all tables in the database")
 				flag.Parse()
 
-				// read flag -migrate to migrate the database
-				if *migrate {
-					database.MigrateModels()
-					_ = fiber.Shutdown()
-					database.ShutdownDatabase()
-					os.Exit(0)
-				}
-				// read flag -seed to seed the database
-				if *seeder {
-					database.SeedModels()
+				if *migrate || *seeder || *drop {
+					// read flag -migrate to migrate the database
+					if *migrate {
+						database.MigrateModels()
+					}
+					// read flag -seed to seed the database
+					if *seeder {
+						database.SeedModels()
+					}
+					// read flag -drop-all-tables to drop all tables in the database
+					if *drop {
+						database.DropTables()
+					}
+
 					_ = fiber.Shutdown()
 					database.ShutdownDatabase()
 					os.Exit(0)

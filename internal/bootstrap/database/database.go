@@ -49,17 +49,13 @@ func (_db *Database) ShutdownDatabase() {
 }
 
 func (_db *Database) MigrateModels() {
-	if err := _db.DB.AutoMigrate(
-		schema.Models()...,
-	); err != nil {
+	if err := _db.DB.AutoMigrate(schema.Models()...); err != nil {
 		_db.Log.Error().Err(err).Msg("An unknown error occurred when to migrate the database!")
 	}
 }
 
 func (_db *Database) SeedModels() {
-	seeders := seeds.Seeders()
-
-	for _, seed := range seeders {
+	for _, seed := range seeds.Seeders() {
 		count, err := seed.Count(_db.DB)
 		if err != nil {
 			_db.Log.Error().Err(err).Msg("An unknown error occurred when to seed the database!")
@@ -73,6 +69,14 @@ func (_db *Database) SeedModels() {
 			_db.Log.Info().Msg("Seeded the database successfully!")
 		} else {
 			_db.Log.Info().Msg("Database is already seeded!")
+		}
+	}
+}
+
+func (_db *Database) DropTables() {
+	for _, model := range schema.Models() {
+		if err := _db.DB.Migrator().DropTable(model); err != nil {
+			_db.Log.Error().Err(err).Msg("An unknown error occurred when to drop table in the database!")
 		}
 	}
 }

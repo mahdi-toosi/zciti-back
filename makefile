@@ -1,6 +1,10 @@
-ms:
+dms:
+	make drop
 	make migrate
 	make seed
+
+drop:
+	go run cmd/example/main.go --drop-all-tables
 
 migrate:
 	go run cmd/example/main.go --migrate
