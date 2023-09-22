@@ -37,9 +37,7 @@ func NewRouter(
 }
 
 // Register routes
-func (r *Router) Register() {
-
-	// Register routes of modules
+func (r *Router) Register() { // Register routes of modules
 	r.UserRouter.RegisterRoutes()
 	r.AuthRouter.RegisterRoutes()
 	r.PostRouter.RegisterRoutes()

@@ -7,11 +7,11 @@ import (
 
 type PostRequest struct {
 	ID       uint64 `json:"id"`
-	AuthorID uint64 `json:"author_id"`
-	Title    string `json:"title" validate:"min=2,max=255"`
-	Content  string `json:"content" validate:"min=2,max=255"`
-	Status   string `json:"status"`
-	Type     string `json:"type"`
+	AuthorID uint64 `json:"author_id" example:"1"`
+	Title    string `json:"title" example:"title" validate:"min=2,max=255"`
+	Content  string `json:"content" example:"content content content" validate:"min=2,max=255"`
+	Status   string `json:"status" example:"draft"`
+	Type     string `json:"type" example:"page"`
 }
 
 type PostsRequest struct {

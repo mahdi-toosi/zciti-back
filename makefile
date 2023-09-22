@@ -13,4 +13,4 @@ seed:
 	go run cmd/example/main.go --seed
 
 swag:
-	swag init -g ./cmd/example/main.go
+	swag init -g ./cmd/example/main.go --outputTypes "json"
