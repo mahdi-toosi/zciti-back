@@ -1,6 +1,6 @@
 package request
 
 type LoginRequest struct {
-	Username string `json:"username" example:"admin1" validate:"required,min=3,max=255"`
-	Password string `json:"password" example:"12345678" validate:"required,min=8,max=255"`
+	Mobile   uint64 `json:"mobile" example:"09180338595" validate:"regex:09(1\[0-9\]|3\[1-9\]|2\[1-9\]\)-?\[0-9\]{3}-?\[0-9\]{4}"` //nolint:govet
+	Password string `json:"password" example:"123456" validate:"required,min=6,max=255"`
 }

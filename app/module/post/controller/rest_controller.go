@@ -28,14 +28,8 @@ type controller struct {
 
 // Index all Posts
 // @Summary      Get all posts
-// @Description  API for getting all posts
 // @Tags         Task
 // @Security     Bearer
-// @Success      200  {object}  response.Response
-// @Failure      401  {object}  response.Response
-// @Failure      404  {object}  response.Response
-// @Failure      422  {object}  response.Response
-// @Failure      500  {object}  response.Response
 // @Router       /posts [get]
 func (_i *controller) Index(c *fiber.Ctx) error {
 	paginate, err := paginator.Paginate(c)
@@ -60,15 +54,9 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 
 // Show one Post
 // @Summary      Get one post
-// @Description  API for getting one post
 // @Tags         Task
 // @Security     Bearer
 // @Param        id path int true "Post ID"
-// @Success      200  {object}  response.Response
-// @Failure      401  {object}  response.Response
-// @Failure      404  {object}  response.Response
-// @Failure      422  {object}  response.Response
-// @Failure      500  {object}  response.Response
 // @Router       /posts/:id [get]
 func (_i *controller) Show(c *fiber.Ctx) error {
 	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
@@ -89,15 +77,9 @@ func (_i *controller) Show(c *fiber.Ctx) error {
 
 // Store post
 // @Summary      Create post
-// @Description  API for create post
 // @Tags         Task
+// @Param 		 post body request.PostRequest true "Post details"
 // @Security     Bearer
-// @Body 	     request.ArticleRequest
-// @Success      200  {object}  response.Response
-// @Failure      401  {object}  response.Response
-// @Failure      404  {object}  response.Response
-// @Failure      422  {object}  response.Response
-// @Failure      500  {object}  response.Response
 // @Router       /posts [post]
 func (_i *controller) Store(c *fiber.Ctx) error {
 	req := new(request.PostRequest)
@@ -117,16 +99,10 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 
 // Update post
 // @Summary      update post
-// @Description  API for update post
 // @Tags         Task
+// @Param 		 post body request.PostRequest true "Post details"
 // @Security     Bearer
-// @Body 	     request.ArticleRequest
 // @Param        id path int true "Post ID"
-// @Success      200  {object}  response.Response
-// @Failure      401  {object}  response.Response
-// @Failure      404  {object}  response.Response
-// @Failure      422  {object}  response.Response
-// @Failure      500  {object}  response.Response
 // @Router       /posts/:id [put]
 func (_i *controller) Update(c *fiber.Ctx) error {
 	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
@@ -151,15 +127,9 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 
 // Delete post
 // @Summary      delete post
-// @Description  API for delete post
 // @Tags         Task
 // @Security     Bearer
 // @Param        id path int true "Post ID"
-// @Success      200  {object}  response.Response
-// @Failure      401  {object}  response.Response
-// @Failure      404  {object}  response.Response
-// @Failure      422  {object}  response.Response
-// @Failure      500  {object}  response.Response
 // @Router       /posts/:id [delete]
 func (_i *controller) Delete(c *fiber.Ctx) error {
 	id, err := strconv.ParseUint(c.Params("id"), 10, 64)

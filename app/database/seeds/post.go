@@ -7,9 +7,10 @@ import (
 	"gorm.io/gorm"
 )
 
-type Article struct{}
+type Post struct{}
 
-func (Article) Seed(conn *gorm.DB) error {
+func (Post) Seed(db *gorm.DB) error {
+	log.Info().Msg("mahdi yahooooo")
 	count := 30
 	for i := 0; i <= count; i++ {
 		fakeData := &schema.Post{}
@@ -19,7 +20,7 @@ func (Article) Seed(conn *gorm.DB) error {
 			return err
 		}
 
-		if err := conn.Create(fakeData).Error; err != nil {
+		if err := db.Create(fakeData).Error; err != nil {
 			log.Error().Err(err)
 		}
 	}
@@ -29,9 +30,9 @@ func (Article) Seed(conn *gorm.DB) error {
 	return nil
 }
 
-func (Article) Count(conn *gorm.DB) (int, error) {
+func (Post) Count(db *gorm.DB) (int, error) {
 	var count int64
-	if err := conn.Model(schema.User{}).Count(&count).Error; err != nil {
+	if err := db.Model(schema.Post{}).Count(&count).Error; err != nil {
 		return 0, err
 	}
 

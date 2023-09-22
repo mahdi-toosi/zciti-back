@@ -13,7 +13,7 @@ type IRepository interface {
 	Create(user *schema.User) (err error)
 	Update(id uint64, user *schema.User) (err error)
 	Delete(id uint64) (err error)
-	FindUserByUsername(username string) (user *schema.User, err error)
+	FindUserByUsername(mobile uint64) (user *schema.User, err error)
 }
 
 func Repository(DB *database.Database) IRepository {
@@ -67,8 +67,8 @@ func (_i *repo) Delete(id uint64) error {
 	return _i.DB.DB.Delete(&schema.User{}, id).Error
 }
 
-func (_i *repo) FindUserByUsername(username string) (user *schema.User, err error) {
-	if err := _i.DB.DB.Where("user_name = ?", username).First(&user).Error; err != nil {
+func (_i *repo) FindUserByUsername(mobile uint64) (user *schema.User, err error) {
+	if err := _i.DB.DB.Where("mobile = ?", mobile).First(&user).Error; err != nil {
 		return nil, err
 	}
 

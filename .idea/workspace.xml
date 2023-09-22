@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="ALL" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="b4b21b75-b17b-4473-8a10-b7a98480a777" name="Changes" comment="chore: add drop command to make file">
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/go-fiber-starter.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/go-fiber-starter.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/database/schema/post.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/schema/post.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/database/schema/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/schema/user.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/database/seeds/index.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/seeds/index.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/database/seeds/post.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/seeds/post.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/database/seeds/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/seeds/user.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/module/auth/controller/rest_controller.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/module/auth/controller/rest_controller.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/module/auth/request/json.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/module/auth/request/json.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/module/auth/response/json.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/module/auth/response/json.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/module/auth/service/index.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/module/auth/service/index.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/module/post/controller/rest_controller.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/module/post/controller/rest_controller.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/module/post/request/json.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/module/post/request/json.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/module/post/response/json.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/module/post/response/json.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/module/post/service/index.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/module/post/service/index.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/module/user/controller/rest_controller.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/module/user/controller/rest_controller.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/module/user/repository/index.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/module/user/repository/index.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/module/user/request/json.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/module/user/request/json.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/module/user/response/json.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/module/user/response/json.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/router/api.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/router/api.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/docs.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/swagger.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/swagger.yaml" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ChangesViewManager">
+    <option name="groupingKeys">
+      <option value="directory" />
+    </option>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Go File" />
+      </list>
+    </option>
+  </component>
+  <component name="FormatOnSaveOptions">
+    <option name="mySelectedFileTypes">
+      <set>
+        <option value="Go" />
+        <option value="Go Template" />
+        <option value="HTML" />
+        <option value="TOML" />
+      </set>
+    </option>
+  </component>
+  <component name="GOROOT" url="file:///opt/homebrew/opt/go/libexec" />
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;mahdi-toosi&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">
+    <option name="selectedUrlAndAccountId">
+      <UrlAndAccount>
+        <option name="accountId" value="8a9f4530-1d61-4198-a417-b61ea3652193" />
+        <option name="url" value="https://github.com/mahdi-toosi/zciti-back.git" />
+      </UrlAndAccount>
+    </option>
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/utils/config/config.go" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
+  <component name="ProjectId" id="2Tgs7xkO3QiCFEQPYnBIC6GXzf9" />
+  <component name="ProjectViewState">
+    <option name="autoscrollFromSource" value="true" />
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "DefaultGoTemplateProperty": "Go File",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.go.formatter.settings.were.checked": "true",
+    "RunOnceActivity.go.migrated.go.modules.settings": "true",
+    "RunOnceActivity.go.modules.automatic.dependencies.download": "true",
+    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "dev",
+    "go.import.settings.migrated": "true",
+    "go.sdk.automatically.set": "true",
+    "last_opened_file_path": "/Users/mahditoosi/codes/go-projects/go-fiber-starter/app/database/seeds",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.pluginManager"
+  }
+}]]></component>
+  <component name="Push.Settings">
+    <force-push-targets>
+      <force-push-target remote-path="origin" branch="dev" />
+    </force-push-targets>
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/app/database/seeds" />
+      <recent name="$PROJECT_DIR$/app/database/schema" />
+      <recent name="$PROJECT_DIR$/app/module" />
+      <recent name="$PROJECT_DIR$/app/module/user" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/internal/bootstrap/database" />
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/cmd/example" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Docker.docker-compose.yaml.postgres: Compose Deployment">
+    <configuration default="true" type="docker-deploy" factoryName="docker-compose.yml" temporary="true">
+      <deployment type="docker-compose.yml">
+        <settings />
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <configuration name="docker-compose.yaml: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
+      <deployment type="docker-compose.yml">
+        <settings>
+          <option name="envFilePath" value="" />
+          <option name="sourceFilePath" value="docker-compose.yaml" />
+        </settings>
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <configuration name="docker-compose.yaml.example: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
+      <deployment type="docker-compose.yml">
+        <settings>
+          <option name="services">
+            <list>
+              <option value="example" />
+            </list>
+          </option>
+          <option name="sourceFilePath" value="docker-compose.yaml" />
+        </settings>
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <configuration name="docker-compose.yaml.postgres: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
+      <deployment type="docker-compose.yml">
+        <settings>
+          <option name="services">
+            <list>
+              <option value="postgres" />
+            </list>
+          </option>
+          <option name="sourceFilePath" value="docker-compose.yaml" />
+        </settings>
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Docker.docker-compose.yaml.example: Compose Deployment" />
+      <item itemvalue="Docker.docker-compose.yaml.postgres: Compose Deployment" />
+      <item itemvalue="Docker.docker-compose.yaml: Compose Deployment" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Docker.docker-compose.yaml.postgres: Compose Deployment" />
+        <item itemvalue="Docker.docker-compose.yaml.example: Compose Deployment" />
+        <item itemvalue="Docker.docker-compose.yaml: Compose Deployment" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="dev" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="refactor: remove articles and add users" />
+    <MESSAGE value="chore: add make file for migration seed and swagger generation" />
+    <MESSAGE value="feat: add user seeder" />
+    <MESSAGE value="chore: update .idea folder" />
+    <MESSAGE value="refactor: remove unnecessary tags from user struct model for gorm" />
+    <MESSAGE value="refactor: user module file names" />
+    <MESSAGE value="refactor(user): user module file names" />
+    <MESSAGE value="refactor(auth): auth module file names" />
+    <MESSAGE value="refactor: change root module name" />
+    <MESSAGE value="refactor: change root module name&#10;add basic post module &#10;improve database structure" />
+    <MESSAGE value="chore: add drop command to make file" />
+    <option name="LAST_COMMIT_MESSAGE" value="chore: add drop command to make file" />
+  </component>
+  <component name="VgoProject">
+    <settings-migrated>true</settings-migrated>
+  </component>
+</project>

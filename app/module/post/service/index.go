@@ -15,9 +15,9 @@ type IService interface {
 	Delete(id uint64) error
 }
 
-func Service(Repo repository.IRepository) IService {
+func Service(repo repository.IRepository) IService {
 	return &service{
-		Repo,
+		repo,
 	}
 }
 

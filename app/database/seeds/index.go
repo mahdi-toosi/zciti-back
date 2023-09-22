@@ -8,8 +8,9 @@ type Seeder interface {
 }
 
 func Seeders() []Seeder {
+	// order matters
 	return []Seeder{
 		User{},
-		Article{},
+		Post{},
 	}
 }

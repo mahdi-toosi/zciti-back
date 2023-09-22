@@ -10,7 +10,7 @@ type User struct {
 	ID              uint64   `json:"id"`
 	FirstName       string   `json:"firstName"`
 	LastName        string   `json:"lastName"`
-	Mobile          string   `json:"mobile"`
+	Mobile          uint64   `json:"mobile"`
 	MobileConfirmed bool     `json:"mobileConfirmed"`
 	Roles           []string `json:"roles"`
 

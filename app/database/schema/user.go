@@ -7,12 +7,12 @@ import (
 
 type User struct {
 	ID              uint64         `gorm:"primary_key" faker:"-"`
-	FirstName       string         `faker:"first_name"`
-	LastName        string         `faker:"last_name"`
-	Mobile          string         `gorm:"not null;uniqueIndex" faker:"e_164_phone_number"`
+	FirstName       string         `gorm:"varchar(250);" faker:"first_name"`
+	LastName        string         `gorm:"varchar(250);" faker:"last_name"`
+	Mobile          uint64         `gorm:"not null;uniqueIndex"`
 	MobileConfirmed bool           `gorm:"default:false"`
-	Roles           pq.StringArray `gorm:"type:text[]" faker:"slice_len=2"`
-	Password        string         `gorm:"not null" faker:"password"`
+	Roles           pq.StringArray `gorm:"type:text[]"`
+	Password        string         `gorm:"varchar(250);not null"`
 	Base
 }
 

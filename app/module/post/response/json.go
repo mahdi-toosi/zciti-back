@@ -7,12 +7,11 @@ import (
 )
 
 type Post struct {
-	ID              uint64   `json:"id"`
-	FirstName       string   `json:"firstName"`
-	LastName        string   `json:"lastName"`
-	Mobile          string   `json:"mobile"`
-	MobileConfirmed bool     `json:"mobileConfirmed"`
-	Roles           []string `json:"roles"`
+	ID       uint64 `json:"id"`
+	Title    string `json:"title"`
+	AuthorID uint64 `json:"author_id"`
+	Content  string `json:"content"`
+	Type     string `json:"type"`
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
@@ -21,11 +20,11 @@ type Post struct {
 func FromDomain(post *schema.Post) (res *Post) {
 	if post != nil {
 		res = &Post{
-			ID:              post.ID,
-			FirstName:       post.FirstName,
-			LastName:        post.LastName,
-			Mobile:          post.Mobile,
-			MobileConfirmed: post.MobileConfirmed,
+			ID:       post.ID,
+			Title:    post.Title,
+			AuthorID: post.AuthorID,
+			Content:  post.Content,
+			Type:     post.Type,
 
 			CreatedAt: post.CreatedAt,
 			UpdatedAt: post.UpdatedAt,

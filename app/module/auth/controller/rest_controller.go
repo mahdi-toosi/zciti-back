@@ -23,13 +23,7 @@ type controller struct {
 // @Summary      Do log in
 // @Description  API for do log in
 // @Tags         Authentication
-// @Security     Bearer
-// @Body 	     request.LoginRequest
-// @Success      200  {object}  response.Response
-// @Failure      401  {object}  response.Response
-// @Failure      404  {object}  response.Response
-// @Failure      422  {object}  response.Response
-// @Failure      500  {object}  response.Response
+// @Param 		 user body request.LoginRequest true "User details"
 // @Router       /api/v1/login [post]
 func (_i *controller) Login(c *fiber.Ctx) error {
 	req := new(request.LoginRequest)

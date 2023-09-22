@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	userResponse "go-fiber-starter/app/module/user/response"
 
 	"go-fiber-starter/app/middleware"
 	"go-fiber-starter/app/module/auth/request"
@@ -26,7 +27,7 @@ type service struct {
 
 func (_i *service) Login(req request.LoginRequest) (res response.LoginResponse, err error) {
 	// check user by username
-	user, err := _i.Repo.FindUserByUsername(req.Username)
+	user, err := _i.Repo.FindUserByUsername(req.Mobile)
 	if err != nil {
 		return
 	}
@@ -48,6 +49,7 @@ func (_i *service) Login(req request.LoginRequest) (res response.LoginResponse, 
 		return
 	}
 
+	res.User = *userResponse.FromDomain(user)
 	res.Token = claims.Token
 	res.Type = claims.Type
 	res.ExpiresAt = claims.ExpiresAt

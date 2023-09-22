@@ -28,14 +28,8 @@ type controller struct {
 
 // Index all Users
 // @Summary      Get all users
-// @Description  API for getting all users
 // @Tags         Task
 // @Security     Bearer
-// @Success      200  {object}  response.Response
-// @Failure      401  {object}  response.Response
-// @Failure      404  {object}  response.Response
-// @Failure      422  {object}  response.Response
-// @Failure      500  {object}  response.Response
 // @Router       /users [get]
 func (_i *controller) Index(c *fiber.Ctx) error {
 	paginate, err := paginator.Paginate(c)
@@ -60,15 +54,9 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 
 // Show one User
 // @Summary      Get one user
-// @Description  API for getting one user
 // @Tags         Task
 // @Security     Bearer
 // @Param        id path int true "User ID"
-// @Success      200  {object}  response.Response
-// @Failure      401  {object}  response.Response
-// @Failure      404  {object}  response.Response
-// @Failure      422  {object}  response.Response
-// @Failure      500  {object}  response.Response
 // @Router       /users/:id [get]
 func (_i *controller) Show(c *fiber.Ctx) error {
 	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
@@ -89,15 +77,8 @@ func (_i *controller) Show(c *fiber.Ctx) error {
 
 // Store user
 // @Summary      Create user
-// @Description  API for create user
 // @Tags         Task
-// @Security     Bearer
-// @Body 	     request.ArticleRequest
-// @Success      200  {object}  response.Response
-// @Failure      401  {object}  response.Response
-// @Failure      404  {object}  response.Response
-// @Failure      422  {object}  response.Response
-// @Failure      500  {object}  response.Response
+// @Param 		 user body request.UserRequest true "User details"
 // @Router       /users [post]
 func (_i *controller) Store(c *fiber.Ctx) error {
 	req := new(request.UserRequest)
@@ -117,16 +98,10 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 
 // Update user
 // @Summary      update user
-// @Description  API for update user
-// @Tags         Task
 // @Security     Bearer
-// @Body 	     request.ArticleRequest
+// @Tags         Task
+// @Param 		 user body request.UserRequest true "User details"
 // @Param        id path int true "User ID"
-// @Success      200  {object}  response.Response
-// @Failure      401  {object}  response.Response
-// @Failure      404  {object}  response.Response
-// @Failure      422  {object}  response.Response
-// @Failure      500  {object}  response.Response
 // @Router       /users/:id [put]
 func (_i *controller) Update(c *fiber.Ctx) error {
 	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
@@ -151,15 +126,9 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 
 // Delete user
 // @Summary      delete user
-// @Description  API for delete user
 // @Tags         Task
 // @Security     Bearer
 // @Param        id path int true "User ID"
-// @Success      200  {object}  response.Response
-// @Failure      401  {object}  response.Response
-// @Failure      404  {object}  response.Response
-// @Failure      422  {object}  response.Response
-// @Failure      500  {object}  response.Response
 // @Router       /users/:id [delete]
 func (_i *controller) Delete(c *fiber.Ctx) error {
 	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
