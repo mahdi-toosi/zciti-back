@@ -20,11 +20,11 @@ func (_i *Router) RegisterRoutes() {
 
 	// define routes
 	_i.App.Route("/api/v1/posts", func(router fiber.Router) {
-		router.Get("/", middleware.Protected(), c.Index)
-		router.Get("/:id", c.Show)
-		router.Post("/", c.Store)
-		router.Put("/:id", c.Update)
-		router.Delete("/:id", c.Delete)
+		router.Get("/", middleware.Protected(), middleware.Permission(middleware.DPost, middleware.PReadAll), c.Index)
+		router.Get("/:id", middleware.Protected(), middleware.Permission(middleware.DPost, middleware.PReadSingle), c.Show)
+		router.Post("/", middleware.Protected(), middleware.Permission(middleware.DPost, middleware.PCreate), c.Store)
+		router.Put("/:id", middleware.Protected(), middleware.Permission(middleware.DPost, middleware.PUpdate), c.Update)
+		router.Delete("/:id", middleware.Protected(), middleware.Permission(middleware.DPost, middleware.PDelete), c.Delete)
 	})
 }
 

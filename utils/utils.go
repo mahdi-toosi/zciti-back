@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"github.com/gofiber/fiber/v2"
 	"go-fiber-starter/app/module/user/response"
 )
@@ -20,6 +21,10 @@ func InlineCondition(condition bool, ifResult any, elseResult any) any {
 	return elseResult
 }
 
-func GiveAuthUser(c *fiber.Ctx) response.User {
-	return c.Locals("user").(response.User)
+func GiveAuthUser(c *fiber.Ctx) (response.User, error) {
+	user, ok := c.Locals("user").(response.User)
+	if ok {
+		return user, nil
+	}
+	return response.User{}, errors.New("user doesn't exist")
 }
