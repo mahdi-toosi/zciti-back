@@ -2,6 +2,7 @@ package post
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"go-fiber-starter/app/middleware"
 	"go-fiber-starter/app/module/post/controller"
 	"go-fiber-starter/app/module/post/repository"
 	"go-fiber-starter/app/module/post/service"
@@ -18,8 +19,8 @@ func (_i *Router) RegisterRoutes() {
 	c := _i.Controller.RestController
 
 	// define routes
-	_i.App.Route("/api/v1", func(router fiber.Router) {
-		router.Get("/", c.Index)
+	_i.App.Route("/api/v1/posts", func(router fiber.Router) {
+		router.Get("/", middleware.Protected(), c.Index)
 		router.Get("/:id", c.Show)
 		router.Post("/", c.Store)
 		router.Put("/:id", c.Update)

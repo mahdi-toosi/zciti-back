@@ -44,15 +44,13 @@ func (_i *service) Login(req request.LoginRequest) (res response.LoginResponse, 
 	}
 
 	// do create token
-	claims, err := middleware.GenerateTokenAccess(user.ID)
+	token, err := middleware.GenerateTokenAccess(*userResponse.FromDomain(user))
 	if err != nil {
 		return
 	}
 
 	res.User = *userResponse.FromDomain(user)
-	res.Token = claims.Token
-	res.Type = claims.Type
-	res.ExpiresAt = claims.ExpiresAt
+	res.Token = token
 
 	return
 }

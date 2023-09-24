@@ -4,11 +4,19 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b4b21b75-b17b-4473-8a10-b7a98480a777" name="Changes" comment="Untracked files issue resolved to fix .gitignore">
+    <list default="true" id="b4b21b75-b17b-4473-8a10-b7a98480a777" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/module/post/request/json.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/module/post/request/json.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/module/user/request/json.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/module/user/request/json.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/makefile" beforeDir="false" afterPath="$PROJECT_DIR$/makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/middleware/auth.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/middleware/auth.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/module/auth/controller/rest_controller.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/module/auth/controller/rest_controller.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/module/auth/response/json.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/module/auth/response/json.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/module/auth/service/index.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/module/auth/service/index.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/module/post/controller/rest_controller.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/module/post/controller/rest_controller.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/module/post/index.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/module/post/index.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/module/user/controller/rest_controller.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/module/user/controller/rest_controller.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/module/user/index.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/module/user/index.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/example/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/example/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/example.toml" beforeDir="false" afterPath="$PROJECT_DIR$/config/example.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/utils.go" beforeDir="false" afterPath="$PROJECT_DIR$/utils/utils.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -75,27 +83,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "DefaultGoTemplateProperty": "Go File",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.go.formatter.settings.were.checked": "true",
-    "RunOnceActivity.go.migrated.go.modules.settings": "true",
-    "RunOnceActivity.go.modules.automatic.dependencies.download": "true",
-    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "main",
-    "go.import.settings.migrated": "true",
-    "go.sdk.automatically.set": "true",
-    "last_opened_file_path": "/Users/mahditoosi/codes/go-projects/go-fiber-starter/app/database/seeds",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.pluginManager"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;DefaultGoTemplateProperty&quot;: &quot;Go File&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.modules.automatic.dependencies.download&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
+    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/mahditoosi/codes/go-projects/go-fiber-starter/app/database/seeds&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
   }
-}]]></component>
+}</component>
   <component name="Push.Settings">
     <force-push-targets>
       <force-push-target remote-path="origin" branch="dev" />
@@ -114,7 +122,16 @@
       <recent name="$PROJECT_DIR$/cmd/example" />
     </key>
   </component>
-  <component name="RunManager" selected="Docker.docker-compose.yaml.postgres: Compose Deployment">
+  <component name="RunManager" selected="Go Build.project">
+    <configuration name="project" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="go-fiber-starter" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="FILE" />
+      <package value="go-fiber-starter" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$/cmd/example/main.go" />
+      <method v="2" />
+    </configuration>
     <configuration default="true" type="docker-deploy" factoryName="docker-compose.yml" temporary="true">
       <deployment type="docker-compose.yml">
         <settings />
@@ -160,6 +177,7 @@
       <item itemvalue="Docker.docker-compose.yaml.example: Compose Deployment" />
       <item itemvalue="Docker.docker-compose.yaml.postgres: Compose Deployment" />
       <item itemvalue="Docker.docker-compose.yaml: Compose Deployment" />
+      <item itemvalue="Go Build.project" />
     </list>
     <recent_temporary>
       <list>
@@ -184,7 +202,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="dev" />
+                        <option value="main" />
                       </list>
                     </value>
                   </entry>
@@ -209,9 +227,18 @@
     <MESSAGE value="refactor: change root module name&#10;add basic post module &#10;improve database structure" />
     <MESSAGE value="chore: add drop command to make file" />
     <MESSAGE value="Untracked files issue resolved to fix .gitignore" />
-    <option name="LAST_COMMIT_MESSAGE" value="Untracked files issue resolved to fix .gitignore" />
+    <MESSAGE value="chore: get json doc from swagger and add example for user and post requests" />
+    <MESSAGE value="feat: bu" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: bu" />
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <default-breakpoints>
+        <breakpoint type="DlvErrorBreakpoint" />
+      </default-breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
