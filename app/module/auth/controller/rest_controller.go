@@ -24,7 +24,7 @@ type controller struct {
 // @Description  API for do log in
 // @Tags         Authentication
 // @Param 		 user body request.LoginRequest true "User details"
-// @Router       /api/v1/login [post]
+// @Router       /login [post]
 func (_i *controller) Login(c *fiber.Ctx) error {
 	req := new(request.LoginRequest)
 	if err := response.ParseAndValidate(c, req); err != nil {

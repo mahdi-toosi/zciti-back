@@ -23,7 +23,7 @@ import (
 // @contact.email               mailmahditoosi@gmail.com
 // @license.name                Apache 2.0
 // @license.url                 http://www.apache.org/licenses/LICENSE-2.0.html
-// @host                        localhost:8000
+// @host                        localhost:8000/api/v1
 // @schemes                     http
 // @securityDefinitions.apikey  Bearer
 // @in                          header

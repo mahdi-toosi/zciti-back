@@ -28,7 +28,7 @@ type controller struct {
 
 // Index all Users
 // @Summary      Get all users
-// @Tags         Task
+// @Tags         Users
 // @Security     Bearer
 // @Router       /users [get]
 func (_i *controller) Index(c *fiber.Ctx) error {
@@ -54,7 +54,7 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 
 // Show one User
 // @Summary      Get one user
-// @Tags         Task
+// @Tags         Users
 // @Security     Bearer
 // @Param        id path int true "User ID"
 // @Router       /users/:id [get]
@@ -77,7 +77,7 @@ func (_i *controller) Show(c *fiber.Ctx) error {
 
 // Store user
 // @Summary      Create user
-// @Tags         Task
+// @Tags         Users
 // @Param 		 user body request.UserRequest true "User details"
 // @Router       /users [post]
 func (_i *controller) Store(c *fiber.Ctx) error {
@@ -99,7 +99,7 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 // Update user
 // @Summary      update user
 // @Security     Bearer
-// @Tags         Task
+// @Tags         Users
 // @Param 		 user body request.UserRequest true "User details"
 // @Param        id path int true "User ID"
 // @Router       /users/:id [put]
@@ -126,7 +126,7 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 
 // Delete user
 // @Summary      delete user
-// @Tags         Task
+// @Tags         Users
 // @Security     Bearer
 // @Param        id path int true "User ID"
 // @Router       /users/:id [delete]
