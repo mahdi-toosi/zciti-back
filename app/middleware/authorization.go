@@ -56,8 +56,8 @@ var Permissions = map[string]map[DomainType]map[PermissionType]bool{
 // define Roles
 
 const (
-	RAdmin string = "admin"
-	RUser  string = "user"
+	RAdmin = "admin"
+	RUser  = "user"
 )
 
 // end define Roles
