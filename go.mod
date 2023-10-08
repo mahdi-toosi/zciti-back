@@ -14,9 +14,8 @@ require (
 	github.com/gofiber/swagger v0.1.1
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/lib/pq v1.10.9
-	github.com/pelletier/go-toml/v2 v2.0.9
+	github.com/pelletier/go-toml/v2 v2.1.0
 	github.com/rs/zerolog v1.28.0
-	github.com/swaggo/swag v1.8.5
 	go.uber.org/automaxprocs v1.5.3
 	go.uber.org/fx v1.18.1
 	gorm.io/driver/postgres v1.4.6
@@ -48,6 +47,7 @@ require (
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	github.com/swaggo/files v0.0.0-20210815190702-a29dd2bc99b2 // indirect
+	github.com/swaggo/swag v1.8.5 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.41.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
