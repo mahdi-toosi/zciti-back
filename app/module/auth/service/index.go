@@ -2,7 +2,8 @@ package service
 
 import (
 	"errors"
-	"github.com/rs/zerolog/log"
+	"fmt"
+	MessageWay "github.com/MessageWay/MessageWayGolang"
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/middleware"
 	"go-fiber-starter/app/module/auth/request"
@@ -16,16 +17,20 @@ import (
 type IService interface {
 	Login(req request.Login) (res response.Login, err error)
 	Register(req *request.Register) (res response.Register, err error)
+	SendOtp(req *request.SendOtp) error
+	ResetPass(req *request.ResetPass) error
 }
 
-func Service(Repo usersRepo.IRepository) IService {
+func Service(Repo usersRepo.IRepository, MessageWay *MessageWay.App) IService {
 	return &service{
 		Repo,
+		MessageWay,
 	}
 }
 
 type service struct {
-	Repo usersRepo.IRepository
+	Repo       usersRepo.IRepository
+	MessageWay *MessageWay.App
 }
 
 func (_i *service) Login(req request.Login) (res response.Login, err error) {
@@ -73,8 +78,6 @@ func (_i *service) Register(req *request.Register) (res response.Register, err e
 		return response.Register{}, err
 	}
 
-	log.Debug().Msgf("%+v", user)
-
 	// do create token
 	token, err := middleware.GenerateTokenAccess(*userResponse.FromDomain(user))
 	if err != nil {
@@ -85,4 +88,45 @@ func (_i *service) Register(req *request.Register) (res response.Register, err e
 	res.Token = token
 
 	return
+}
+
+func (_i *service) SendOtp(req *request.SendOtp) error {
+	user, err := _i.Repo.FindUserByMobile(req.Mobile)
+	if err != nil {
+		return err
+	}
+
+	_, err = _i.MessageWay.Send(MessageWay.Message{
+		TemplateID: 3,
+		Method:     "sms",
+		Mobile:     fmt.Sprint("0", user.Mobile),
+	})
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (_i *service) ResetPass(req *request.ResetPass) error {
+	user, err := _i.Repo.FindUserByMobile(req.Mobile)
+	if err != nil {
+		return err
+	}
+
+	_, err = _i.MessageWay.Verify(MessageWay.OTPVerifyRequest{
+		OTP:    req.Otp,
+		Mobile: fmt.Sprint("0", user.Mobile),
+	})
+
+	if err != nil {
+		return err
+	}
+
+	err = _i.Repo.Update(user.ID, &schema.User{Password: helpers.Hash([]byte(req.Password))})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

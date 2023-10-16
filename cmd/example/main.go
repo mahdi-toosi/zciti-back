@@ -4,6 +4,7 @@ import (
 	"go-fiber-starter/app/module/auth"
 	"go-fiber-starter/app/module/post"
 	"go-fiber-starter/app/module/user"
+	"go-fiber-starter/internal"
 
 	fxzerolog "github.com/efectn/fx-zerolog"
 	"go-fiber-starter/app/middleware"
@@ -45,6 +46,8 @@ func main() {
 		fx.Provide(middleware.NewMiddleware),
 		// router
 		fx.Provide(router.NewRouter),
+		// messageWay service
+		fx.Provide(internal.NewMessageWay),
 
 		// provide modules
 		post.Module,

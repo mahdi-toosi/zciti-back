@@ -13,6 +13,8 @@ import (
 type IRestController interface {
 	Login(c *fiber.Ctx) error
 	Register(c *fiber.Ctx) error
+	SendOtp(c *fiber.Ctx) error
+	ResetPass(c *fiber.Ctx) error
 }
 
 func RestController(service service.IService, usersRepo usersRepo.IRepository) IRestController {
@@ -48,7 +50,7 @@ func (_i *controller) Login(c *fiber.Ctx) error {
 // @Summary      register
 // @Description  API for register
 // @Tags         Authentication
-// @Param 		 user body userReq.UserRequest true "User details"
+// @Param 		 user body request.Register true "User details"
 // @Router       /auth/register [post]
 func (_i *controller) Register(c *fiber.Ctx) error {
 	req := new(request.Register)
@@ -66,4 +68,52 @@ func (_i *controller) Register(c *fiber.Ctx) error {
 	}
 
 	return response.Resp(c, response.Response{Data: res})
+}
+
+// SendOtp
+// @Summary      register
+// @Description  API for register
+// @Tags         Authentication
+// @Param 		 user body request.SendOtp true "User details"
+// @Router       /auth/send-otp [post]
+func (_i *controller) SendOtp(c *fiber.Ctx) error {
+	req := new(request.SendOtp)
+	if err := response.ParseAndValidate(c, req); err != nil {
+		return err
+	}
+
+	if err := utils.ValidateMobileNumber(strconv.FormatUint(req.Mobile, 10)); err != nil {
+		return err
+	}
+
+	err := _i.service.SendOtp(req)
+	if err != nil {
+		return err
+	}
+
+	return response.Resp(c, response.Response{Messages: response.Messages{"success"}})
+}
+
+// ResetPass
+// @Summary      register
+// @Description  API for register
+// @Tags         Authentication
+// @Param 		 user body userReq.UserRequest true "User details"
+// @Router       /auth/reset-pass [post]
+func (_i *controller) ResetPass(c *fiber.Ctx) error {
+	req := new(request.ResetPass)
+	if err := response.ParseAndValidate(c, req); err != nil {
+		return err
+	}
+
+	if err := utils.ValidateMobileNumber(strconv.FormatUint(req.Mobile, 10)); err != nil {
+		return err
+	}
+
+	err := _i.service.ResetPass(req)
+	if err != nil {
+		return err
+	}
+
+	return response.Resp(c, response.Response{Messages: response.Messages{"success"}})
 }
