@@ -1,13 +1,16 @@
 package controller
 
-import "go-fiber-starter/app/module/auth/service"
+import (
+	"go-fiber-starter/app/module/auth/service"
+	usersRepo "go-fiber-starter/app/module/user/repository"
+)
 
 type Controller struct {
 	RestController IRestController
 }
 
-func Controllers(s service.IService) *Controller {
+func Controllers(s service.IService, u usersRepo.IRepository) *Controller {
 	return &Controller{
-		RestController(s),
+		RestController(s, u),
 	}
 }

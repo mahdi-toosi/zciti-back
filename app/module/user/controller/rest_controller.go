@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"go-fiber-starter/utils"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -83,6 +84,10 @@ func (_i *controller) Show(c *fiber.Ctx) error {
 func (_i *controller) Store(c *fiber.Ctx) error {
 	req := new(request.UserRequest)
 	if err := response.ParseAndValidate(c, req); err != nil {
+		return err
+	}
+
+	if err := utils.ValidateMobileNumber(strconv.FormatUint(req.Mobile, 10)); err != nil {
 		return err
 	}
 

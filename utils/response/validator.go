@@ -8,7 +8,7 @@ import (
 	"github.com/go-playground/locales/en"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
-	ent "github.com/go-playground/validator/v10/translations/en"
+	fat "github.com/go-playground/validator/v10/translations/fa"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -22,9 +22,9 @@ func init() {
 	validate = validator.New()
 
 	uni = ut.New(en.New())
-	trans, _ = uni.GetTranslator("en")
+	trans, _ = uni.GetTranslator("fa")
 
-	if err := ent.RegisterDefaultTranslations(validate, trans); err != nil && !fiber.IsChild() {
+	if err := fat.RegisterDefaultTranslations(validate, trans); err != nil && !fiber.IsChild() {
 		log.Panic().Err(err).Msg("")
 	}
 }

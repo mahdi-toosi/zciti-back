@@ -24,13 +24,12 @@ func (e *Error) Error() string {
 
 // A struct to return normal response
 type Response struct {
-	Code     int      `json:"code"`
-	Messages Messages `json:"messages"`
-	Data     any      `json:"data,omitempty"`
-	Meta	 any      `json:"meta,omitempty"`
+	Code     int
+	Messages Messages
+	Data     any `json:"Data,omitempty"`
+	Meta     any `json:"Meta,omitempty"`
 }
 
-// nothiing to describe this fucking variable
 var IsProduction bool
 
 // Default error handler
@@ -38,6 +37,9 @@ var ErrorHandler = func(c *fiber.Ctx, err error) error {
 	resp := Response{
 		Code: fiber.StatusInternalServerError,
 	}
+
+	//_, ok := err.(validator.ValidationErrors)
+	//log.Debug().Msgf("%+v", ok)
 
 	// handle errors
 	if c, ok := err.(validator.ValidationErrors); ok {
@@ -76,7 +78,7 @@ func Resp(c *fiber.Ctx, resp Response) error {
 	return c.JSON(resp)
 }
 
-// remove unecessary fields from validator message
+// remove unnecessary fields from validator message
 func removeTopStruct(fields map[string]string) map[string]string {
 	res := map[string]string{}
 
