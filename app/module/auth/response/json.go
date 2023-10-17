@@ -4,7 +4,12 @@ import (
 	"go-fiber-starter/app/module/user/response"
 )
 
-type LoginResponse struct {
-	User  response.User `json:"user"`
-	Token string        `json:"token"`
+type Login struct {
+	User  response.User
+	Token string
+}
+
+type Register struct {
+	User  response.User
+	Token string
 }

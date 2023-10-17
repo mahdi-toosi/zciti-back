@@ -7,15 +7,15 @@ import (
 )
 
 type User struct {
-	ID              uint64   `json:"id"`
-	FirstName       string   `json:"firstName"`
-	LastName        string   `json:"lastName"`
-	Mobile          uint64   `json:"mobile"`
-	MobileConfirmed bool     `json:"mobileConfirmed"`
-	Roles           []string `json:"roles"`
+	ID              uint64
+	FirstName       string
+	LastName        string
+	Mobile          uint64
+	MobileConfirmed bool
+	Roles           []string
 
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 func FromDomain(user *schema.User) (res *User) {

@@ -23,7 +23,11 @@ func (_i *Router) RegisterRoutes() {
 	c := _i.Controller.RestController
 
 	_i.App.Route("/api/v1", func(router fiber.Router) {
-		router.Post("/login", c.Login)
+		router.Post("/auth/login", c.Login)
+		router.Post("/auth/register", c.Register)
+		router.Post("/auth/send-otp", c.SendOtp)
+		router.Post("/auth/reset-pass", c.ResetPass)
+		//router.Post("/auth/forgot-pass", c.Login)
 	})
 }
 

@@ -6,11 +6,11 @@ import (
 )
 
 type UserRequest struct {
-	ID        uint64   `json:"id"`
-	FirstName string   `json:"firstName" example:"mahdi" validate:"min=2,max=255"`
-	LastName  string   `json:"lastName" example:"lastname" validate:"min=2,max=255"`
-	Mobile    uint64   `json:"mobile" example:"09150338494" validate:"regex:09(1[0-9]|3[1-9]|2[1-9])-?[0-9]{3}-?[0-9]{4}"`
-	Roles     []string `json:"roles" example:"user"`
+	ID        uint64
+	FirstName string   `example:"mahdi" validate:"min=2,max=255"`
+	LastName  string   `example:"lastname" validate:"min=2,max=255"`
+	Mobile    uint64   `example:"9150338494" validate:"number"`
+	Roles     []string `example:"user"`
 }
 
 type UsersRequest struct {

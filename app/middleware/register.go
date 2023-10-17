@@ -31,6 +31,20 @@ func NewMiddleware(app *fiber.App, cfg *config.Config) *Middleware {
 // Register registers all the middleware functions
 func (m *Middleware) Register() {
 	// Add Extra Middlewares
+
+	m.App.Use(func(c *fiber.Ctx) error {
+		c.Response().Header.Set("Access-Control-Allow-Origin", "*")
+		c.Response().Header.Set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE")
+		c.Response().Header.Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		c.Response().Header.Set("Access-Control-Allow-Credentials", "true")
+		// Handle preflight requests
+		if c.Method() == "OPTIONS" {
+			return c.SendStatus(fiber.StatusOK)
+		}
+		// Continue to next middleware or handler
+		return c.Next()
+	})
+
 	m.App.Use(limiter.New(limiter.Config{
 		Next:       utils.IsEnabled(m.Cfg.Middleware.Limiter.Enable),
 		Max:        m.Cfg.Middleware.Limiter.Max,

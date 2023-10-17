@@ -43,6 +43,12 @@ type logger = struct {
 	Prettier   bool          `toml:"prettier"`
 }
 
+type services = struct {
+	MessageWay struct {
+		ApiKey string `toml:"apiKey"`
+	}
+}
+
 // middleware
 type middleware = struct {
 	Compress struct {
@@ -88,6 +94,7 @@ type Config struct {
 	DB         db
 	Logger     logger
 	Middleware middleware
+	Services   services
 }
 
 // func to parse config
