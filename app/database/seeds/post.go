@@ -4,15 +4,16 @@ import (
 	"github.com/bxcodec/faker/v4"
 	"github.com/rs/zerolog/log"
 	"go-fiber-starter/app/database/schema"
+	"go-fiber-starter/utils"
 	"gorm.io/gorm"
 )
 
 type Post struct{}
 
+const PostSeedCount = 30
+
 func (Post) Seed(db *gorm.DB) error {
-	log.Info().Msg("mahdi yahooooo")
-	count := 30
-	for i := 0; i <= count; i++ {
+	for i := 0; i <= PostSeedCount; i++ {
 		fakeData := &schema.Post{}
 		err := faker.FakeData(&fakeData)
 		if err != nil {
@@ -20,12 +21,14 @@ func (Post) Seed(db *gorm.DB) error {
 			return err
 		}
 
+		fakeData.AuthorID = utils.Random(1, UserSeedCount)
+
 		if err := db.Create(fakeData).Error; err != nil {
 			log.Error().Err(err)
 		}
 	}
 
-	log.Info().Msgf("%d users created", count)
+	log.Info().Msgf("%d users created", PostSeedCount)
 
 	return nil
 }

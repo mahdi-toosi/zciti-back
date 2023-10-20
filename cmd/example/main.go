@@ -2,13 +2,15 @@ package main
 
 import (
 	"go-fiber-starter/app/module/auth"
+	"go-fiber-starter/app/module/notification"
+	"go-fiber-starter/app/module/notificationTemplate"
 	"go-fiber-starter/app/module/post"
 	"go-fiber-starter/app/module/user"
-	"go-fiber-starter/internal"
 
-	fxzerolog "github.com/efectn/fx-zerolog"
+	"github.com/efectn/fx-zerolog"
 	"go-fiber-starter/app/middleware"
 	"go-fiber-starter/app/router"
+	"go-fiber-starter/internal"
 	"go-fiber-starter/internal/bootstrap"
 	"go-fiber-starter/internal/bootstrap/database"
 	"go-fiber-starter/utils/config"
@@ -53,6 +55,8 @@ func main() {
 		post.Module,
 		user.Module,
 		auth.Module,
+		notification.Module,
+		notificationtemplate.Module,
 		// End provide modules
 
 		// start application

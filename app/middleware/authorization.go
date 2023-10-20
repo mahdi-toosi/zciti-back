@@ -45,8 +45,10 @@ func Permission(
 
 var Permissions = map[string]map[DomainType]map[PermissionType]bool{
 	RAdmin: {
-		DUser: {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
-		DPost: {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
+		DUser:                 {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
+		DPost:                 {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
+		DNotification:         {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
+		DNotificationTemplate: {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 	},
 	RUser: {},
 }
@@ -69,6 +71,8 @@ type DomainType int
 const (
 	DPost DomainType = iota
 	DUser
+	DNotification
+	DNotificationTemplate
 )
 
 // end define Domains
