@@ -55,14 +55,14 @@ func (_db *Database) MigrateModels() {
 }
 
 func (_db *Database) SeedModels() {
-	for _, seed := range seeds.Seeders() {
-		count, err := seed.Count(_db.DB)
+	for _, model := range seeds.Seeders() {
+		count, err := model.Count(_db.DB)
 		if err != nil {
 			_db.Log.Error().Err(err).Msg("An unknown error occurred when to seed the database!")
 		}
 
 		if count == 0 {
-			if err := seed.Seed(_db.DB); err != nil {
+			if err := model.Seed(_db.DB); err != nil {
 				_db.Log.Error().Err(err).Msg("An unknown error occurred when to seed the database!")
 			}
 

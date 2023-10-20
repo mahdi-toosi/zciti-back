@@ -3,7 +3,8 @@ package utils
 import (
 	"errors"
 	"github.com/gofiber/fiber/v2"
-	"go-fiber-starter/app/module/user/response"
+	"go-fiber-starter/app/database/schema"
+	"math/rand"
 	"regexp"
 )
 
@@ -22,12 +23,12 @@ func InlineCondition(condition bool, ifResult any, elseResult any) any {
 	return elseResult
 }
 
-func GiveAuthUser(c *fiber.Ctx) (response.User, error) {
-	user, ok := c.Locals("user").(response.User)
+func GiveAuthUser(c *fiber.Ctx) (schema.User, error) {
+	user, ok := c.Locals("user").(schema.User)
 	if ok {
 		return user, nil
 	}
-	return response.User{}, errors.New("user doesn't exist")
+	return schema.User{}, errors.New("user doesn't exist")
 }
 
 func ValidateMobileNumber(number string) error {
@@ -44,4 +45,8 @@ func ValidateMobileNumber(number string) error {
 	}
 
 	return nil
+}
+
+func Random(min int, max int) uint64 {
+	return uint64(rand.Intn(max-min) + min) //nolint:gosec
 }

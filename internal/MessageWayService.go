@@ -5,10 +5,8 @@ import (
 	"go-fiber-starter/utils/config"
 )
 
-// initialize logger
 func NewMessageWay(cfg *config.Config) *MessageWay.App {
 	return MessageWay.New(MessageWay.Config{
 		ApiKey: cfg.Services.MessageWay.ApiKey,
 	})
-
 }
