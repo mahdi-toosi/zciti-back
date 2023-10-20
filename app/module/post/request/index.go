@@ -5,7 +5,7 @@ import (
 	"go-fiber-starter/utils/paginator"
 )
 
-type PostRequest struct {
+type Post struct {
 	ID       uint64 `json:"id"`
 	AuthorID uint64 `json:"author_id" example:"1"`
 	Title    string `json:"title" example:"title" validate:"min=2,max=255"`
@@ -15,10 +15,10 @@ type PostRequest struct {
 }
 
 type PostsRequest struct {
-	Pagination *paginator.Pagination `json:"pagination"`
+	Pagination *paginator.Pagination
 }
 
-func (req *PostRequest) ToDomain() *schema.Post {
+func (req *Post) ToDomain() *schema.Post {
 	return &schema.Post{
 		ID:       req.ID,
 		Title:    req.Title,

@@ -1,8 +1,6 @@
 package response
 
 import (
-	"time"
-
 	"go-fiber-starter/app/database/schema"
 )
 
@@ -13,9 +11,6 @@ type User struct {
 	Mobile          uint64
 	MobileConfirmed bool
 	Roles           []string
-
-	CreatedAt time.Time
-	UpdatedAt time.Time
 }
 
 func FromDomain(user *schema.User) (res *User) {
@@ -27,9 +22,6 @@ func FromDomain(user *schema.User) (res *User) {
 			Mobile:          user.Mobile,
 			MobileConfirmed: user.MobileConfirmed,
 			Roles:           user.Roles,
-
-			CreatedAt: user.CreatedAt,
-			UpdatedAt: user.UpdatedAt,
 		}
 	}
 

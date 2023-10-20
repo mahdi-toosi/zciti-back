@@ -8,7 +8,7 @@ import (
 )
 
 type IRepository interface {
-	GetAll(req request.UsersRequest) (users []*schema.User, paging paginator.Pagination, err error)
+	GetAll(req request.Users) (users []*schema.User, paging paginator.Pagination, err error)
 	GetOne(id uint64) (user *schema.User, err error)
 	Create(user *schema.User) (err error)
 	Update(id uint64, user *schema.User) (err error)
@@ -26,14 +26,13 @@ type repo struct {
 	DB *database.Database
 }
 
-func (_i *repo) GetAll(req request.UsersRequest) (users []*schema.User, paging paginator.Pagination, err error) {
-	var count int64
+func (_i *repo) GetAll(req request.Users) (users []*schema.User, paging paginator.Pagination, err error) {
+	var total int64
 
 	query := _i.DB.DB.Model(&schema.User{})
-	query.Count(&count)
+	query.Count(&total)
 
-	req.Pagination.Count = count
-	req.Pagination = paginator.Paging(req.Pagination)
+	req.Pagination.Total = total
 
 	err = query.Offset(req.Pagination.Offset).Limit(req.Pagination.Limit).Find(&users).Error
 	if err != nil {

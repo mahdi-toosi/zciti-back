@@ -5,7 +5,7 @@ import (
 	"go-fiber-starter/utils/paginator"
 )
 
-type UserRequest struct {
+type User struct {
 	ID        uint64
 	FirstName string   `example:"mahdi" validate:"min=2,max=255"`
 	LastName  string   `example:"lastname" validate:"min=2,max=255"`
@@ -13,11 +13,11 @@ type UserRequest struct {
 	Roles     []string `example:"user"`
 }
 
-type UsersRequest struct {
-	Pagination *paginator.Pagination `json:"pagination"`
+type Users struct {
+	Pagination *paginator.Pagination
 }
 
-func (req *UserRequest) ToDomain() *schema.User {
+func (req *User) ToDomain() *schema.User {
 	return &schema.User{
 		ID:        req.ID,
 		FirstName: req.FirstName,

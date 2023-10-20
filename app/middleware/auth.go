@@ -2,16 +2,16 @@ package middleware
 
 import (
 	"fmt"
-	"go-fiber-starter/app/module/user/response"
-	"go-fiber-starter/utils"
-	"strconv"
-	"strings"
-	"time"
-
 	"github.com/gofiber/fiber/v2"
 	jwtware "github.com/gofiber/jwt/v2"
 	"github.com/golang-jwt/jwt/v4"
+	"go-fiber-starter/app/database/schema"
+	"go-fiber-starter/app/module/user/response"
+	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/config"
+	"strconv"
+	"strings"
+	"time"
 )
 
 func Protected() fiber.Handler {
@@ -44,7 +44,7 @@ func jwtSuccess(c *fiber.Ctx) error {
 	ID, _ := strconv.ParseUint(userJSON["ID"].(string), 10, 64)
 	Mobile, _ := strconv.ParseUint(userJSON["Mobile"].(string), 10, 64)
 
-	c.Locals("user", response.User{
+	c.Locals("user", schema.User{
 		ID:              ID,
 		FirstName:       userJSON["FirstName"].(string),
 		LastName:        userJSON["LastName"].(string),

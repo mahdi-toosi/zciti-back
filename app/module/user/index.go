@@ -2,7 +2,7 @@ package user
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"go-fiber-starter/app/middleware"
+	mdl "go-fiber-starter/app/middleware"
 	"go-fiber-starter/app/module/user/controller"
 	"go-fiber-starter/app/module/user/repository"
 	"go-fiber-starter/app/module/user/service"
@@ -20,11 +20,11 @@ func (_i *Router) RegisterRoutes() {
 
 	// define routes
 	_i.App.Route("/api/v1/users", func(router fiber.Router) {
-		router.Get("/", middleware.Protected(), middleware.Permission(middleware.DUser, middleware.PReadAll), c.Index)
-		router.Get("/:id", middleware.Protected(), middleware.Permission(middleware.DUser, middleware.PReadSingle), c.Show)
-		router.Post("/", middleware.Protected(), middleware.Permission(middleware.DUser, middleware.PCreate), c.Store)
-		router.Put("/:id", middleware.Protected(), middleware.Permission(middleware.DUser, middleware.PUpdate), c.Update)
-		router.Delete("/:id", middleware.Protected(), middleware.Permission(middleware.DUser, middleware.PDelete), c.Delete)
+		router.Get("/", mdl.Protected(), mdl.Permission(mdl.DUser, mdl.PReadAll), c.Index)
+		router.Get("/:id", mdl.Protected(), mdl.Permission(mdl.DUser, mdl.PReadSingle), c.Show)
+		router.Post("/", mdl.Protected(), mdl.Permission(mdl.DUser, mdl.PCreate), c.Store)
+		router.Put("/:id", mdl.Protected(), mdl.Permission(mdl.DUser, mdl.PUpdate), c.Update)
+		router.Delete("/:id", mdl.Protected(), mdl.Permission(mdl.DUser, mdl.PDelete), c.Delete)
 	})
 }
 

@@ -1,14 +1,13 @@
 package controller
 
 import (
-	"go-fiber-starter/utils"
-	"strconv"
-
 	"github.com/gofiber/fiber/v2"
 	"go-fiber-starter/app/module/user/request"
 	"go-fiber-starter/app/module/user/service"
+	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
 	"go-fiber-starter/utils/response"
+	"strconv"
 )
 
 type IRestController interface {
@@ -27,7 +26,7 @@ type controller struct {
 	service service.IService
 }
 
-// Index all Users
+// Index
 // @Summary      Get all users
 // @Tags         Users
 // @Security     Bearer
@@ -38,7 +37,7 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 		return err
 	}
 
-	var req request.UsersRequest
+	var req request.Users
 	req.Pagination = paginate
 
 	users, paging, err := _i.service.Index(req)
@@ -47,13 +46,12 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	}
 
 	return response.Resp(c, response.Response{
-		Messages: response.Messages{"User list successfully retrieved"},
-		Data:     users,
-		Meta:     paging,
+		Data: users,
+		Meta: paging,
 	})
 }
 
-// Show one User
+// Show
 // @Summary      Get one user
 // @Tags         Users
 // @Security     Bearer
@@ -65,24 +63,21 @@ func (_i *controller) Show(c *fiber.Ctx) error {
 		return err
 	}
 
-	users, err := _i.service.Show(id)
+	user, err := _i.service.Show(id)
 	if err != nil {
 		return err
 	}
 
-	return response.Resp(c, response.Response{
-		Messages: response.Messages{"User successfully retrieved"},
-		Data:     users,
-	})
+	return c.JSON(user)
 }
 
-// Store user
+// Store
 // @Summary      Create user
 // @Tags         Users
-// @Param 		 user body request.UserRequest true "User details"
+// @Param 		 user body request.User true "User details"
 // @Router       /users [post]
 func (_i *controller) Store(c *fiber.Ctx) error {
-	req := new(request.UserRequest)
+	req := new(request.User)
 	if err := response.ParseAndValidate(c, req); err != nil {
 		return err
 	}
@@ -96,16 +91,14 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 		return err
 	}
 
-	return response.Resp(c, response.Response{
-		Messages: response.Messages{"User successfully created"},
-	})
+	return c.JSON("success")
 }
 
-// Update user
+// Update
 // @Summary      update user
 // @Security     Bearer
 // @Tags         Users
-// @Param 		 user body request.UserRequest true "User details"
+// @Param 		 user body request.User true "User details"
 // @Param        id path int true "User ID"
 // @Router       /users/:id [put]
 func (_i *controller) Update(c *fiber.Ctx) error {
@@ -114,7 +107,7 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 		return err
 	}
 
-	req := new(request.UserRequest)
+	req := new(request.User)
 	if err := response.ParseAndValidate(c, req); err != nil {
 		return err
 	}
@@ -124,12 +117,10 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 		return err
 	}
 
-	return response.Resp(c, response.Response{
-		Messages: response.Messages{"User successfully updated"},
-	})
+	return c.JSON("success")
 }
 
-// Delete user
+// Delete
 // @Summary      delete user
 // @Tags         Users
 // @Security     Bearer
@@ -146,7 +137,5 @@ func (_i *controller) Delete(c *fiber.Ctx) error {
 		return err
 	}
 
-	return response.Resp(c, response.Response{
-		Messages: response.Messages{"User successfully deleted"},
-	})
+	return c.JSON("success")
 }

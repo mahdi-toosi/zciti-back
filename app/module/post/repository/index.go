@@ -26,13 +26,12 @@ type repo struct {
 }
 
 func (_i *repo) GetAll(req request.PostsRequest) (posts []*schema.Post, paging paginator.Pagination, err error) {
-	var count int64
+	var total int64
 
 	query := _i.DB.DB.Model(&schema.Post{})
-	query.Count(&count)
+	query.Count(&total)
 
-	req.Pagination.Count = count
-	req.Pagination = paginator.Paging(req.Pagination)
+	req.Pagination.Total = total
 
 	err = query.Offset(req.Pagination.Offset).Limit(req.Pagination.Limit).Find(&posts).Error
 	if err != nil {

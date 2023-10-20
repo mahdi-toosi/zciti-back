@@ -27,7 +27,6 @@ func (_i *Router) RegisterRoutes() {
 		router.Post("/auth/register", c.Register)
 		router.Post("/auth/send-otp", c.SendOtp)
 		router.Post("/auth/reset-pass", c.ResetPass)
-		//router.Post("/auth/forgot-pass", c.Login)
 	})
 }
 

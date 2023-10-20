@@ -26,7 +26,7 @@ type controller struct {
 	service service.IService
 }
 
-// Index all Posts
+// Index
 // @Summary      Get all posts
 // @Tags         Post
 // @Security     Bearer
@@ -46,13 +46,12 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	}
 
 	return response.Resp(c, response.Response{
-		Messages: response.Messages{"Post list successfully retrieved"},
-		Data:     posts,
-		Meta:     paging,
+		Data: posts,
+		Meta: paging,
 	})
 }
 
-// Show one Post
+// Show
 // @Summary      Get one post
 // @Tags         Post
 // @Security     Bearer
@@ -64,25 +63,22 @@ func (_i *controller) Show(c *fiber.Ctx) error {
 		return err
 	}
 
-	posts, err := _i.service.Show(id)
+	post, err := _i.service.Show(id)
 	if err != nil {
 		return err
 	}
 
-	return response.Resp(c, response.Response{
-		Messages: response.Messages{"Post successfully retrieved"},
-		Data:     posts,
-	})
+	return c.JSON(post)
 }
 
-// Store post
+// Store
 // @Summary      Create post
 // @Tags         Post
-// @Param 		 post body request.PostRequest true "Post details"
+// @Param 		 post body request.Post true "Post details"
 // @Security     Bearer
 // @Router       /posts [post]
 func (_i *controller) Store(c *fiber.Ctx) error {
-	req := new(request.PostRequest)
+	req := new(request.Post)
 	if err := response.ParseAndValidate(c, req); err != nil {
 		return err
 	}
@@ -92,15 +88,13 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 		return err
 	}
 
-	return response.Resp(c, response.Response{
-		Messages: response.Messages{"Post successfully created"},
-	})
+	return c.JSON("success")
 }
 
-// Update post
+// Update
 // @Summary      update post
 // @Tags         Post
-// @Param 		 post body request.PostRequest true "Post details"
+// @Param 		 post body request.Post true "Post details"
 // @Security     Bearer
 // @Param        id path int true "Post ID"
 // @Router       /posts/:id [put]
@@ -110,7 +104,7 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 		return err
 	}
 
-	req := new(request.PostRequest)
+	req := new(request.Post)
 	if err := response.ParseAndValidate(c, req); err != nil {
 		return err
 	}
@@ -120,12 +114,10 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 		return err
 	}
 
-	return response.Resp(c, response.Response{
-		Messages: response.Messages{"Post successfully updated"},
-	})
+	return c.JSON("success")
 }
 
-// Delete post
+// Delete
 // @Summary      delete post
 // @Tags         Post
 // @Security     Bearer
@@ -142,7 +134,5 @@ func (_i *controller) Delete(c *fiber.Ctx) error {
 		return err
 	}
 
-	return response.Resp(c, response.Response{
-		Messages: response.Messages{"Post successfully deleted"},
-	})
+	return c.JSON("success")
 }

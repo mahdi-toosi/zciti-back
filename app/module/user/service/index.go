@@ -8,10 +8,10 @@ import (
 )
 
 type IService interface {
-	Index(req request.UsersRequest) (articles []*response.User, paging paginator.Pagination, err error)
-	Show(id uint64) (article *response.User, err error)
-	Store(req request.UserRequest) (err error)
-	Update(id uint64, req request.UserRequest) (err error)
+	Index(req request.Users) (users []*response.User, paging paginator.Pagination, err error)
+	Show(id uint64) (user *response.User, err error)
+	Store(req request.User) (err error)
+	Update(id uint64, req request.User) (err error)
 	Destroy(id uint64) error
 }
 
@@ -25,7 +25,7 @@ type service struct {
 	Repo repository.IRepository
 }
 
-func (_i *service) Index(req request.UsersRequest) (users []*response.User, paging paginator.Pagination, err error) {
+func (_i *service) Index(req request.Users) (users []*response.User, paging paginator.Pagination, err error) {
 	results, paging, err := _i.Repo.GetAll(req)
 	if err != nil {
 		return
@@ -38,7 +38,7 @@ func (_i *service) Index(req request.UsersRequest) (users []*response.User, pagi
 	return
 }
 
-func (_i *service) Show(id uint64) (article *response.User, err error) {
+func (_i *service) Show(id uint64) (user *response.User, err error) {
 	result, err := _i.Repo.GetOne(id)
 	if err != nil {
 		return nil, err
@@ -47,11 +47,11 @@ func (_i *service) Show(id uint64) (article *response.User, err error) {
 	return response.FromDomain(result), nil
 }
 
-func (_i *service) Store(req request.UserRequest) (err error) {
+func (_i *service) Store(req request.User) (err error) {
 	return _i.Repo.Create(req.ToDomain())
 }
 
-func (_i *service) Update(id uint64, req request.UserRequest) (err error) {
+func (_i *service) Update(id uint64, req request.User) (err error) {
 	return _i.Repo.Update(id, req.ToDomain())
 }
 

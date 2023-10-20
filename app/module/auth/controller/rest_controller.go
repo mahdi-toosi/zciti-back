@@ -43,7 +43,7 @@ func (_i *controller) Login(c *fiber.Ctx) error {
 		return err
 	}
 
-	return response.Resp(c, response.Response{Data: res})
+	return c.JSON(res)
 }
 
 // Register
@@ -67,7 +67,7 @@ func (_i *controller) Register(c *fiber.Ctx) error {
 		return err
 	}
 
-	return response.Resp(c, response.Response{Data: res})
+	return c.JSON(res)
 }
 
 // SendOtp
@@ -91,14 +91,14 @@ func (_i *controller) SendOtp(c *fiber.Ctx) error {
 		return err
 	}
 
-	return response.Resp(c, response.Response{Messages: response.Messages{"success"}})
+	return c.JSON("success")
 }
 
 // ResetPass
 // @Summary      register
 // @Description  API for register
 // @Tags         Authentication
-// @Param 		 user body userReq.UserRequest true "User details"
+// @Param 		 user body request.ResetPass true "User details"
 // @Router       /auth/reset-pass [post]
 func (_i *controller) ResetPass(c *fiber.Ctx) error {
 	req := new(request.ResetPass)
@@ -115,5 +115,5 @@ func (_i *controller) ResetPass(c *fiber.Ctx) error {
 		return err
 	}
 
-	return response.Resp(c, response.Response{Messages: response.Messages{"success"}})
+	return c.JSON("success")
 }

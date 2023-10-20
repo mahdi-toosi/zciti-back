@@ -1,20 +1,16 @@
 package response
 
 import (
-	"time"
-
 	"go-fiber-starter/app/database/schema"
 )
 
 type Post struct {
-	ID       uint64 `json:"id"`
-	Title    string `json:"title"`
-	AuthorID uint64 `json:"author_id"`
-	Content  string `json:"content"`
-	Type     string `json:"type"`
-
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	ID       uint64
+	Title    string
+	AuthorID uint64
+	Content  string
+	Status   string
+	Type     string
 }
 
 func FromDomain(post *schema.Post) (res *Post) {
@@ -25,9 +21,6 @@ func FromDomain(post *schema.Post) (res *Post) {
 			AuthorID: post.AuthorID,
 			Content:  post.Content,
 			Type:     post.Type,
-
-			CreatedAt: post.CreatedAt,
-			UpdatedAt: post.UpdatedAt,
 		}
 	}
 
