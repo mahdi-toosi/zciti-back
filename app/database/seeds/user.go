@@ -28,7 +28,6 @@ func (User) Seed(db *gorm.DB) error {
 			log.Error().Err(err)
 		}
 	}
-	faker.ResetUnique()
 
 	// create admin
 	admin := &schema.User{}

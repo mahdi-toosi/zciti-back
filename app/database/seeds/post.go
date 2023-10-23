@@ -28,7 +28,7 @@ func (Post) Seed(db *gorm.DB) error {
 		}
 	}
 
-	log.Info().Msgf("%d users created", PostSeedCount)
+	log.Info().Msgf("%d posts created", PostSeedCount)
 
 	return nil
 }

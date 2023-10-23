@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"github.com/rs/zerolog/log"
 	"go-fiber-starter/app/database/schema"
 	ntrequest "go-fiber-starter/app/module/notificationTemplate/request"
 	"go-fiber-starter/internal/bootstrap/database"
@@ -38,6 +39,9 @@ func (_i *repo) GetAll(req ntrequest.Index) (notificationTemplates []*schema.Not
 		return
 	}
 
+	b, _ := notificationTemplates[0].Meta.Value()
+	log.Debug().Msgf("%+v", b)
+
 	paging = *req.Pagination
 
 	return
@@ -63,12 +67,4 @@ func (_i *repo) Update(id uint64, notificationTemplate *schema.NotificationTempl
 
 func (_i *repo) Delete(id uint64) error {
 	return _i.DB.DB.Delete(&schema.NotificationTemplate{}, id).Error
-}
-
-func (_i *repo) FindUserByMobile(mobile uint64) (notificationTemplate *schema.NotificationTemplate, err error) {
-	if err := _i.DB.DB.Where("mobile = ?", mobile).First(&notificationTemplate).Error; err != nil {
-		return nil, err
-	}
-
-	return notificationTemplate, nil
 }

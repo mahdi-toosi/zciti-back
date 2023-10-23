@@ -1,6 +1,7 @@
 package seeds
 
 import (
+	"encoding/json"
 	"github.com/bxcodec/faker/v4"
 	"github.com/rs/zerolog/log"
 	"go-fiber-starter/app/database/schema"
@@ -20,12 +21,15 @@ func (NotificationTemplate) Seed(db *gorm.DB) error {
 			return err
 		}
 
+		meta, _ := json.Marshal(map[string]any{"mahdi": "toosi"})
+		fakeData.Meta = meta
 		if err := db.Create(fakeData).Error; err != nil {
 			log.Error().Err(err)
 		}
 	}
+	faker.ResetUnique()
 
-	log.Info().Msgf("%d notifications created", NotificationTemplateSeedCount)
+	log.Info().Msgf("%d notification templates created", NotificationTemplateSeedCount)
 
 	return nil
 }

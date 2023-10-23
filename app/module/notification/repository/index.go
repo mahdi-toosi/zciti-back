@@ -13,7 +13,6 @@ type IRepository interface {
 	Create(notification *schema.Notification) (err error)
 	Update(id uint64, notification *schema.Notification) (err error)
 	Delete(id uint64) (err error)
-	FindUserByMobile(mobile uint64) (notification *schema.Notification, err error)
 }
 
 func Repository(DB *database.Database) IRepository {
@@ -64,12 +63,4 @@ func (_i *repo) Update(id uint64, notification *schema.Notification) (err error)
 
 func (_i *repo) Delete(id uint64) error {
 	return _i.DB.DB.Delete(&schema.Notification{}, id).Error
-}
-
-func (_i *repo) FindUserByMobile(mobile uint64) (notification *schema.Notification, err error) {
-	if err := _i.DB.DB.Where("mobile = ?", mobile).First(&notification).Error; err != nil {
-		return nil, err
-	}
-
-	return notification, nil
 }

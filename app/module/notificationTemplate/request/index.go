@@ -7,10 +7,10 @@ import (
 
 type NotificationTemplate struct {
 	ID      uint64
-	Title   string   `example:"title" validate:"min=2,max=255"`
-	Content string   `example:"some content some content some content" validate:"min=2"`
-	Meta    string   `example:"{}" validate:"min=2"`
-	Tag     []string `example:"['tag']" validate:"min=2"`
+	Title   string      `example:"title" validate:"min=2,max=255"`
+	Content string      `example:"some content some content some content" validate:"min=2"`
+	Meta    schema.JSON `example:"{}" validate:"min=2"`
+	Tag     []string    `example:"['tag']" validate:"min=2"`
 }
 
 type Index struct {
