@@ -9,7 +9,6 @@ import (
 
 type IService interface {
 	Index(req request.Index) (notificationTemplates []*response.NotificationTemplate, paging paginator.Pagination, err error)
-	Show(id uint64) (notificationTemplate *response.NotificationTemplate, err error)
 	Store(req request.NotificationTemplate) (err error)
 	Update(id uint64, req request.NotificationTemplate) (err error)
 	Destroy(id uint64) error

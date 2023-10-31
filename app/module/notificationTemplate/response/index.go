@@ -8,7 +8,6 @@ type NotificationTemplate struct {
 	ID      uint64
 	Title   string
 	Content string
-	Meta    schema.JSON
 	Tag     []string
 }
 
@@ -18,7 +17,6 @@ func FromDomain(nt *schema.NotificationTemplate) (res *NotificationTemplate) {
 			ID:      nt.ID,
 			Title:   nt.Title,
 			Content: nt.Content,
-			Meta:    nt.Meta,
 			Tag:     nt.Tag,
 		}
 	}

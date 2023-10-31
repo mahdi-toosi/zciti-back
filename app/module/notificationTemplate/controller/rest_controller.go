@@ -11,7 +11,7 @@ import (
 
 type IRestController interface {
 	Index(c *fiber.Ctx) error
-	Show(c *fiber.Ctx) error
+	Keywords(c *fiber.Ctx) error
 	Store(c *fiber.Ctx) error
 	Update(c *fiber.Ctx) error
 	Delete(c *fiber.Ctx) error
@@ -25,7 +25,7 @@ type controller struct {
 	service service.IService
 }
 
-// Index all NotificationTemplates
+// Index
 // @Summary      Get all notificationTemplates
 // @Tags         NotificationTemplates
 // @Security     Bearer
@@ -50,27 +50,24 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	})
 }
 
-// Show one NotificationTemplate
-// @Summary      Get one NotificationTemplate
+// Keywords
+// @Summary      Get NotificationTemplate keywords
 // @Tags         NotificationTemplates
 // @Security     Bearer
-// @Param        id path int true "NotificationTemplate ID"
-// @Router       /notificationTemplates/:id [get]
-func (_i *controller) Show(c *fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
-	if err != nil {
-		return err
+// @Router       /notificationTemplates/keywords [get]
+func (_i *controller) Keywords(c *fiber.Ctx) error {
+	var keywords = map[string]string{
+		"FirstName":     "نام کاربر",
+		"LastName":      "نام خانوادگی کاربر",
+		"FullName":      "نام و نام خانوادگی کاربر",
+		"BusinessName":  "نام کسب و کار",
+		"BusinessPhone": "تلفن کسب و کار",
 	}
 
-	notificationTemplate, err := _i.service.Show(id)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(notificationTemplate)
+	return c.JSON(keywords)
 }
 
-// Store NotificationTemplate
+// Store
 // @Summary      Create NotificationTemplate
 // @Tags         NotificationTemplates
 // @Param 		 NotificationTemplate body request.NotificationTemplate true "NotificationTemplate details"
@@ -89,7 +86,7 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 	return c.JSON("success")
 }
 
-// Update NotificationTemplate
+// Update
 // @Summary      update NotificationTemplate
 // @Security     Bearer
 // @Tags         NotificationTemplates
@@ -115,7 +112,7 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 	return c.JSON("success")
 }
 
-// Delete NotificationTemplate
+// Delete
 // @Summary      delete NotificationTemplate
 // @Tags         NotificationTemplates
 // @Security     Bearer

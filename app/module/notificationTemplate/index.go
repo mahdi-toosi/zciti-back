@@ -21,9 +21,9 @@ func (_i *Router) RegisterRoutes() {
 	// define routes
 	_i.App.Route("/api/v1/notificationTemplates", func(router fiber.Router) {
 		router.Get("/", mdl.Protected(), mdl.Permission(mdl.DNotificationTemplate, mdl.PReadAll), c.Index)
-		router.Get("/:id", mdl.Protected(), mdl.Permission(mdl.DNotificationTemplate, mdl.PReadSingle), c.Show)
+		router.Get("/keywords", mdl.Protected(), mdl.Permission(mdl.DNotificationTemplate, mdl.PReadSingle), c.Keywords)
 		router.Post("/", mdl.Protected(), mdl.Permission(mdl.DNotificationTemplate, mdl.PCreate), c.Store)
-		router.Put("/:id", mdl.Protected(), mdl.Permission(mdl.DNotificationTemplate, mdl.PUpdate), c.Update)
+		router.Patch("/:id", mdl.Protected(), mdl.Permission(mdl.DNotificationTemplate, mdl.PUpdate), c.Update)
 		router.Delete("/:id", mdl.Protected(), mdl.Permission(mdl.DNotificationTemplate, mdl.PDelete), c.Delete)
 	})
 }
