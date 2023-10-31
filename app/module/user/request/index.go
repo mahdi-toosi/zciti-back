@@ -15,6 +15,7 @@ type User struct {
 
 type Users struct {
 	Pagination *paginator.Pagination
+	Keyword    string
 }
 
 func (req *User) ToDomain() *schema.User {
