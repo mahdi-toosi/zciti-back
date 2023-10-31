@@ -24,16 +24,16 @@ func Paginate(c *fiber.Ctx) (*Pagination, error) {
 	}
 	page, err := strconv.Atoi(c.Query("page"))
 	if err != nil {
-		page = 1
+		page = 0
+		limit = 0
 	}
 	p := &Pagination{
 		Limit: limit,
 		Page:  page,
 	}
-	if p.Page == 0 {
-		p.Page = 1
+	if p.Page > 0 {
+		p.Offset = (p.Page - 1) * p.Limit
 	}
 
-	p.Offset = (p.Page - 1) * p.Limit
 	return p, nil
 }

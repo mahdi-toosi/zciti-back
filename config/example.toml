@@ -44,7 +44,7 @@ expiration_seconds = 60
 
 [middleware.jwt]
 secret = "apom$dpaom%dpaosmdpoamu2n4i2@$02"
-expiration_seconds = 3600
+expiration_seconds = 86400
 
 [middleware.filesystem]
 enable = false

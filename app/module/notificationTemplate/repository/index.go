@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"github.com/rs/zerolog/log"
 	"go-fiber-starter/app/database/schema"
 	ntrequest "go-fiber-starter/app/module/notificationTemplate/request"
 	"go-fiber-starter/internal/bootstrap/database"
@@ -27,20 +26,21 @@ type repo struct {
 }
 
 func (_i *repo) GetAll(req ntrequest.Index) (notificationTemplates []*schema.NotificationTemplate, paging paginator.Pagination, err error) {
-	var total int64
-
 	query := _i.DB.DB.Model(&schema.NotificationTemplate{})
-	query.Count(&total)
 
-	req.Pagination.Total = total
+	if req.Pagination.Page > 0 {
+		var total int64
+		query.Count(&total)
+		req.Pagination.Total = total
 
-	err = query.Offset(req.Pagination.Offset).Limit(req.Pagination.Limit).Find(&notificationTemplates).Error
+		query.Offset(req.Pagination.Offset)
+		query.Limit(req.Pagination.Limit)
+	}
+
+	err = query.Order("created_at asc").Find(&notificationTemplates).Error
 	if err != nil {
 		return
 	}
-
-	b, _ := notificationTemplates[0].Meta.Value()
-	log.Debug().Msgf("%+v", b)
 
 	paging = *req.Pagination
 

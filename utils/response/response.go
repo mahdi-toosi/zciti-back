@@ -25,9 +25,9 @@ func (e *Error) Error() string {
 // A struct to return normal response
 type Response struct {
 	Code     int
-	Messages Messages
-	Data     any `json:"Data,omitempty"`
-	Meta     any `json:"Meta,omitempty"`
+	Messages Messages `json:",omitempty"`
+	Data     any      `json:",omitempty"`
+	Meta     any      `json:",omitempty"`
 }
 
 var IsProduction bool

@@ -26,14 +26,18 @@ type repo struct {
 }
 
 func (_i *repo) GetAll(req request.Notifications) (notifications []*schema.Notification, paging paginator.Pagination, err error) {
-	var total int64
-
 	query := _i.DB.DB.Model(&schema.Notification{})
-	query.Count(&total)
 
-	req.Pagination.Total = total
+	if req.Pagination.Page > 0 {
+		var total int64
+		query.Count(&total)
+		req.Pagination.Total = total
 
-	err = query.Offset(req.Pagination.Offset).Limit(req.Pagination.Limit).Find(&notifications).Error
+		query.Offset(req.Pagination.Offset)
+		query.Limit(req.Pagination.Limit)
+	}
+
+	err = query.Order("created_at asc").Find(&notifications).Error
 	if err != nil {
 		return
 	}
