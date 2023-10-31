@@ -12,6 +12,7 @@ func Seeders() []Seeder {
 	return []Seeder{
 		User{},
 		Post{},
+		Business{},
 		NotificationTemplate{},
 		Notification{},
 	}

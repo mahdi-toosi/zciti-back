@@ -10,7 +10,7 @@ import (
 
 type Notification struct{}
 
-const NotificationSeedCount = 500
+const NotificationSeedCount = 40
 
 func (Notification) Seed(db *gorm.DB) error {
 	for i := 0; i <= NotificationSeedCount; i++ {

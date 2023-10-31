@@ -47,6 +47,7 @@ var Permissions = map[string]map[DomainType]map[PermissionType]bool{
 	RAdmin: {
 		DUser:                 {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DPost:                 {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
+		DBusiness:             {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DNotification:         {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DNotificationTemplate: {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 	},
@@ -73,6 +74,7 @@ const (
 	DUser
 	DNotification
 	DNotificationTemplate
+	DBusiness
 )
 
 // end define Domains

@@ -10,9 +10,9 @@ import (
 )
 
 type Base struct {
-	CreatedAt time.Time `gorm:"autoCreateTime"`
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt
+	CreatedAt time.Time      `gorm:"autoCreateTime" json:",omitempty"`
+	UpdatedAt time.Time      `json:",omitempty"`
+	DeletedAt gorm.DeletedAt `json:",omitempty"`
 }
 
 type JSON json.RawMessage

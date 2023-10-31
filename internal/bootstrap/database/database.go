@@ -51,6 +51,7 @@ func (_db *Database) ShutdownDatabase() {
 func (_db *Database) MigrateModels() {
 	if err := _db.DB.AutoMigrate(schema.Models()...); err != nil {
 		_db.Log.Error().Err(err).Msg("An unknown error occurred when to migrate the database!")
+		panic("An unknown error occurred when to migrate the database!")
 	}
 }
 
