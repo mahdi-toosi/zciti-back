@@ -1,5 +1,7 @@
 package schema
 
+import "gorm.io/gorm"
+
 func Models() []any {
 	// order matters
 	return []any{
@@ -8,6 +10,9 @@ func Models() []any {
 		Business{},
 		NotificationTemplate{},
 		Notification{},
-		Business{},
 	}
+}
+
+func DropExtraCommands(db *gorm.DB) {
+	db.Exec("DROP TABLE business_users")
 }

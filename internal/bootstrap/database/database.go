@@ -80,4 +80,6 @@ func (_db *Database) DropTables() {
 			_db.Log.Error().Err(err).Msg("An unknown error occurred when to drop table in the database!")
 		}
 	}
+
+	schema.DropExtraCommands(_db.DB)
 }
