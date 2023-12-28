@@ -5,7 +5,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/go-playground/locales/en"
+	"github.com/go-playground/locales/fa_IR"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	fat "github.com/go-playground/validator/v10/translations/fa"
@@ -21,7 +21,7 @@ var (
 func init() {
 	validate = validator.New()
 
-	uni = ut.New(en.New())
+	uni = ut.New(fa_IR.New())
 	trans, _ = uni.GetTranslator("fa")
 
 	if err := fat.RegisterDefaultTranslations(validate, trans); err != nil && !fiber.IsChild() {
