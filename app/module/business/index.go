@@ -24,6 +24,7 @@ func (_i *Router) RegisterRoutes() {
 		router.Get("/types", mdl.Protected(), mdl.Permission(mdl.DBusiness, mdl.PReadSingle), c.Types)
 		router.Get("/:id", mdl.Protected(), mdl.Permission(mdl.DBusiness, mdl.PReadSingle), c.Show)
 		router.Get("/:id/users", mdl.Protected(), mdl.Permission(mdl.DBusiness, mdl.PReadSingle), c.Users)
+		router.Delete("/:businessID/users/:userID", mdl.Protected(), mdl.Permission(mdl.DBusiness, mdl.PDelete), c.DeleteUser)
 		router.Post("/", mdl.Protected(), mdl.Permission(mdl.DBusiness, mdl.PCreate), c.Store)
 		router.Put("/:id", mdl.Protected(), mdl.Permission(mdl.DBusiness, mdl.PUpdate), c.Update)
 		router.Delete("/:id", mdl.Protected(), mdl.Permission(mdl.DBusiness, mdl.PDelete), c.Delete)

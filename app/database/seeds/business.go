@@ -1,6 +1,7 @@
 package seeds
 
 import (
+	"fmt"
 	"github.com/bxcodec/faker/v4"
 	"github.com/rs/zerolog/log"
 	"go-fiber-starter/app/database/schema"
@@ -25,6 +26,11 @@ func (Business) Seed(db *gorm.DB) error {
 
 		if err := db.Create(fakeData).Error; err != nil {
 			log.Error().Err(err)
+		}
+
+		query := "INSERT INTO business_users (business_id, user_id) VALUES  (%d, %d)"
+		for userID := 1; userID < UserSeedCount; userID++ {
+			db.Exec(fmt.Sprintf(query, i+1, userID))
 		}
 	}
 

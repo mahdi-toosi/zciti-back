@@ -20,7 +20,7 @@ type Businesses struct {
 
 type Users struct {
 	Pagination *paginator.Pagination
-	BusinessID string
+	BusinessID uint64
 	Keyword    string
 }
 

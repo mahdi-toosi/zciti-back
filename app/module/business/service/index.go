@@ -12,6 +12,7 @@ type IService interface {
 	Index(req request.Businesses) (businesses []*response.Business, paging paginator.Pagination, err error)
 	Show(id uint64) (business *response.Business, err error)
 	Users(req request.Users) (users []*usersRes.User, paging paginator.Pagination, err error)
+	DeleteUser(businessID uint64, userID uint64) (err error)
 	Store(req request.Business) (err error)
 	Update(id uint64, req request.Business) (err error)
 	Destroy(id uint64) error
@@ -60,6 +61,15 @@ func (_i *service) Users(req request.Users) (users []*usersRes.User, paging pagi
 	}
 
 	return
+}
+
+func (_i *service) DeleteUser(businessID uint64, userID uint64) (err error) {
+	err = _i.Repo.DeleteUser(businessID, userID)
+	if err != nil {
+		return
+	}
+
+	return nil
 }
 
 func (_i *service) Store(req request.Business) (err error) {
