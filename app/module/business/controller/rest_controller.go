@@ -6,9 +6,9 @@ import (
 	"go-fiber-starter/app/module/business/request"
 	res "go-fiber-starter/app/module/business/response"
 	"go-fiber-starter/app/module/business/service"
+	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
 	"go-fiber-starter/utils/response"
-	"strconv"
 )
 
 type IRestController interface {
@@ -16,6 +16,8 @@ type IRestController interface {
 	Types(c *fiber.Ctx) error
 	Show(c *fiber.Ctx) error
 	Users(c *fiber.Ctx) error
+	InsertUser(c *fiber.Ctx) error
+	DeleteUser(c *fiber.Ctx) error
 	Store(c *fiber.Ctx) error
 	Update(c *fiber.Ctx) error
 	Delete(c *fiber.Ctx) error
@@ -79,7 +81,7 @@ func (_i *controller) Types(c *fiber.Ctx) error {
 // @Param        id path int true "Business ID"
 // @Router       /businesses/:id [get]
 func (_i *controller) Show(c *fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+	id, err := utils.GetIntInParams(c, "id")
 	if err != nil {
 		return err
 	}
@@ -105,17 +107,93 @@ func (_i *controller) Users(c *fiber.Ctx) error {
 	}
 
 	var req request.Users
+	req.BusinessID, err = utils.GetIntInParams(c, "id")
+	if err != nil {
+		return fiber.ErrBadRequest
+	}
 	req.Pagination = paginate
 	req.Keyword = c.Query("Keyword")
 
-	businesses, paging, err := _i.service.Users(req)
+	users, paging, err := _i.service.Users(req)
 	if err != nil {
 		return err
 	}
 
 	return response.Resp(c, response.Response{
-		Data: businesses,
+		Data: users,
 		Meta: paging,
+	})
+}
+
+// InsertUser
+// @Summary      Insert one business user
+// @Tags         Businesses
+// @Security     Bearer
+// @Param        businessId path int true "Business ID" ,userId path int true "User ID"
+// @Router       /businesses/:businessID/users/:userID [post]
+func (_i *controller) InsertUser(c *fiber.Ctx) error {
+	businessID, err := utils.GetIntInParams(c, "businessID")
+	if err != nil {
+		return fiber.ErrBadRequest
+	}
+
+	userID, err := utils.GetIntInParams(c, "userID")
+	if err != nil {
+		return fiber.ErrBadRequest
+	}
+
+	user, err := utils.GetAuthenticatedUser(c)
+	if err != nil {
+		return fiber.ErrBadRequest
+	}
+
+	if !user.IsAdmin() && user.ID != userID {
+		return fiber.ErrForbidden
+	}
+
+	err = _i.service.InsertUser(businessID, userID)
+	if err != nil {
+		return err
+	}
+
+	return response.Resp(c, response.Response{
+		Messages: response.Messages{"success"},
+	})
+}
+
+// DeleteUser
+// @Summary      Delete one business user
+// @Tags         Businesses
+// @Security     Bearer
+// @Param        businessId path int true "Business ID" ,userId path int true "User ID"
+// @Router       /businesses/:businessID/users/:userID [delete]
+func (_i *controller) DeleteUser(c *fiber.Ctx) error {
+	businessID, err := utils.GetIntInParams(c, "businessID")
+	if err != nil {
+		return fiber.ErrBadRequest
+	}
+
+	userID, err := utils.GetIntInParams(c, "userID")
+	if err != nil {
+		return fiber.ErrBadRequest
+	}
+
+	user, err := utils.GetAuthenticatedUser(c)
+	if err != nil {
+		return fiber.ErrBadRequest
+	}
+
+	if !user.IsAdmin() && user.ID != userID {
+		return fiber.ErrForbidden
+	}
+
+	err = _i.service.DeleteUser(businessID, userID)
+	if err != nil {
+		return err
+	}
+
+	return response.Resp(c, response.Response{
+		Messages: response.Messages{"success"},
 	})
 }
 
@@ -146,7 +224,7 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 // @Param        id path int true "Business ID"
 // @Router       /businesses/:id [put]
 func (_i *controller) Update(c *fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+	id, err := utils.GetIntInParams(c, "id")
 	if err != nil {
 		return err
 	}
@@ -171,7 +249,7 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 // @Param        id path int true "Business ID"
 // @Router       /businesses/:id [delete]
 func (_i *controller) Delete(c *fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+	id, err := utils.GetIntInParams(c, "id")
 	if err != nil {
 		return err
 	}

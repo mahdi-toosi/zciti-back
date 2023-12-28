@@ -11,6 +11,7 @@ import (
 type IRepository interface {
 	GetAll(req request.Businesses) (businesses []*schema.Business, paging paginator.Pagination, err error)
 	GetUsers(req request.Users) (users []*schema.User, paging paginator.Pagination, err error)
+	InsertUser(businessID uint64, userID uint64) (err error)
 	DeleteUser(businessID uint64, userID uint64) (err error)
 	GetOne(id uint64) (business *schema.Business, err error)
 	Create(business *schema.Business) (err error)
@@ -82,6 +83,20 @@ func (_i *repo) GetUsers(req request.Users) (users []*schema.User, paging pagina
 	paging = *req.Pagination
 
 	return
+}
+
+func (_i *repo) InsertUser(businessID uint64, userID uint64) (err error) {
+	err = _i.DB.DB.
+		Exec(`INSERT INTO business_users 
+    		(user_id, business_id) VALUES (?, ?)`,
+			userID, businessID).
+		Error
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (_i *repo) DeleteUser(businessID uint64, userID uint64) (err error) {
