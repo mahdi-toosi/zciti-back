@@ -6,7 +6,7 @@ import (
 )
 
 type Notification struct {
-	ID         uint64         `gorm:"primary_key" faker:"-"`
+	ID         uint64         `gorm:"primaryKey" faker:"-"`
 	ReceiverID uint64         `gorm:"not null" faker:"-"`
 	Receiver   User           `gorm:"foreignKey:ReceiverID" faker:"-"`
 	Type       pq.StringArray `gorm:"type:text[];not null" faker:"-"`

@@ -1,7 +1,7 @@
 package schema
 
 type Post struct {
-	ID       uint64 `gorm:"primary_key" faker:"-"`
+	ID       uint64 `gorm:"primaryKey" faker:"-"`
 	Title    string `gorm:"varchar(600);" faker:"sentence"`
 	Content  string `gorm:"not null" faker:"paragraph"`
 	Status   string `gorm:"varchar(100); default:published" faker:"oneof: draft, published, private"`

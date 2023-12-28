@@ -12,7 +12,7 @@ import (
 type Base struct {
 	CreatedAt time.Time      `gorm:"autoCreateTime" json:",omitempty"`
 	UpdatedAt time.Time      `json:",omitempty"`
-	DeletedAt gorm.DeletedAt `json:",omitempty"`
+	DeletedAt gorm.DeletedAt `json:",omitempty" faker:"-"`
 }
 
 type JSON json.RawMessage
