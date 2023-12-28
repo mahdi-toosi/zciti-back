@@ -6,6 +6,7 @@ import (
 	"go-fiber-starter/app/database/schema"
 	"math/rand"
 	"regexp"
+	"strconv"
 )
 
 func IsEnabled(key bool) func(c *fiber.Ctx) bool {
@@ -23,7 +24,11 @@ func InlineCondition(condition bool, ifResult any, elseResult any) any {
 	return elseResult
 }
 
-func GiveAuthUser(c *fiber.Ctx) (schema.User, error) {
+func GetIntInParams(c *fiber.Ctx, key string) (uint64, error) {
+	return strconv.ParseUint(c.Params(key), 10, 64)
+}
+
+func GetAuthenticatedUser(c *fiber.Ctx) (schema.User, error) {
 	user, ok := c.Locals("user").(schema.User)
 	if ok {
 		return user, nil

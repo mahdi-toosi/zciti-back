@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/utils"
 )
 
@@ -10,7 +11,7 @@ func Permission(
 	permission PermissionType,
 ) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		user, err := utils.GiveAuthUser(c)
+		user, err := utils.GetAuthenticatedUser(c)
 		if err != nil {
 			return err
 		}
@@ -44,24 +45,19 @@ func Permission(
 // define Permissions
 
 var Permissions = map[string]map[DomainType]map[PermissionType]bool{
-	RAdmin: {
+	schema.RAdmin: {
 		DUser:                 {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DPost:                 {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DBusiness:             {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DNotification:         {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DNotificationTemplate: {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 	},
-	RUser: {},
+	schema.RUser: {},
 }
 
 // end define Permissions
 
 // define Roles
-
-const (
-	RAdmin = "admin"
-	RUser  = "user"
-)
 
 // end define Roles
 
