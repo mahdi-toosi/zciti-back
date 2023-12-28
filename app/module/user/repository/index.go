@@ -33,13 +33,13 @@ func (_i *repo) GetAll(req request.Users) (users []*schema.User, paging paginato
 	if req.Keyword != "" {
 		query.Where("first_name Like ?", fmt.Sprint("%", req.Keyword, "%"))
 		query.Or("last_name Like ?", fmt.Sprint("%", req.Keyword, "%"))
+		query.Or("mobile", req.Keyword)
 	}
 
 	if req.Pagination.Page > 0 {
 		var total int64
 		query.Count(&total)
 		req.Pagination.Total = total
-		query.Count(&total)
 
 		req.Pagination.Total = total
 
