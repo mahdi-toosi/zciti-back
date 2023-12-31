@@ -26,7 +26,7 @@ type repo struct {
 }
 
 func (_i *repo) GetAll(req request.PostsRequest) (posts []*schema.Post, paging paginator.Pagination, err error) {
-	query := _i.DB.DB.Model(&schema.Post{})
+	query := _i.DB.Main.Model(&schema.Post{})
 
 	if req.Pagination.Page > 0 {
 		var total int64
@@ -48,7 +48,7 @@ func (_i *repo) GetAll(req request.PostsRequest) (posts []*schema.Post, paging p
 }
 
 func (_i *repo) GetOne(id uint64) (post *schema.Post, err error) {
-	if err := _i.DB.DB.First(&post, id).Error; err != nil {
+	if err := _i.DB.Main.First(&post, id).Error; err != nil {
 		return nil, err
 	}
 
@@ -56,15 +56,15 @@ func (_i *repo) GetOne(id uint64) (post *schema.Post, err error) {
 }
 
 func (_i *repo) Create(post *schema.Post) (err error) {
-	return _i.DB.DB.Create(post).Error
+	return _i.DB.Main.Create(post).Error
 }
 
 func (_i *repo) Update(id uint64, post *schema.Post) (err error) {
-	return _i.DB.DB.Model(&schema.Post{}).
+	return _i.DB.Main.Model(&schema.Post{}).
 		Where(&schema.Post{ID: id}).
 		Updates(post).Error
 }
 
 func (_i *repo) Delete(id uint64) error {
-	return _i.DB.DB.Delete(&schema.Post{}, id).Error
+	return _i.DB.Main.Delete(&schema.Post{}, id).Error
 }

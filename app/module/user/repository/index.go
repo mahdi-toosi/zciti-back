@@ -28,7 +28,7 @@ type repo struct {
 }
 
 func (_i *repo) GetAll(req request.Users) (users []*schema.User, paging paginator.Pagination, err error) {
-	query := _i.DB.DB.Model(&schema.User{})
+	query := _i.DB.Main.Model(&schema.User{})
 
 	if req.Keyword != "" {
 		query.Where("first_name Like ?", fmt.Sprint("%", req.Keyword, "%"))
@@ -59,7 +59,7 @@ func (_i *repo) GetAll(req request.Users) (users []*schema.User, paging paginato
 }
 
 func (_i *repo) GetOne(id uint64) (user *schema.User, err error) {
-	if err := _i.DB.DB.First(&user, id).Error; err != nil {
+	if err := _i.DB.Main.First(&user, id).Error; err != nil {
 		return nil, err
 	}
 
@@ -67,21 +67,21 @@ func (_i *repo) GetOne(id uint64) (user *schema.User, err error) {
 }
 
 func (_i *repo) Create(user *schema.User) (err error) {
-	return _i.DB.DB.Create(user).Error
+	return _i.DB.Main.Create(user).Error
 }
 
 func (_i *repo) Update(id uint64, user *schema.User) (err error) {
-	return _i.DB.DB.Model(&schema.User{}).
+	return _i.DB.Main.Model(&schema.User{}).
 		Where(&schema.User{ID: id}).
 		Updates(user).Error
 }
 
 func (_i *repo) Delete(id uint64) error {
-	return _i.DB.DB.Delete(&schema.User{}, id).Error
+	return _i.DB.Main.Delete(&schema.User{}, id).Error
 }
 
 func (_i *repo) FindUserByMobile(mobile uint64) (user *schema.User, err error) {
-	if err := _i.DB.DB.Where("mobile = ?", mobile).First(&user).Error; err != nil {
+	if err := _i.DB.Main.Where("mobile = ?", mobile).First(&user).Error; err != nil {
 		return nil, err
 	}
 

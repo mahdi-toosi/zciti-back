@@ -5,27 +5,37 @@ networks:
     driver: bridge
 
 services:
-  postgres:
+  mainDb:
     image: bitnami/postgresql:latest
     environment:
-      POSTGRESQL_DATABASE: fiber_starter
+      POSTGRESQL_DATABASE: zciti_main_dev
       POSTGRESQL_USERNAME: postgres
       POSTGRESQL_PASSWORD: postgres
     networks:
       - app
     ports:
       - "5432:5432"
-  example:
-    build:
-      context: .
-      dockerfile: build/Dockerfile${CUSTOM}
-    depends_on:
-      - postgres
-    links:
-      - postgres
-    volumes:
-      - .:/app
+  chatDb:
+    image: bitnami/postgresql:latest
+    environment:
+      POSTGRESQL_DATABASE: zciti_chat_dev
+      POSTGRESQL_USERNAME: postgres
+      POSTGRESQL_PASSWORD: postgres
     networks:
       - app
     ports:
-      - "8080:8080"
+      - "5433:5432"
+#  example:
+#    build:
+#      context: .
+#      dockerfile: build/Dockerfile${CUSTOM}
+#    depends_on:
+#      - postgres
+#    links:
+#      - postgres
+#    volumes:
+#      - .:/app
+#    networks:
+#      - app
+#    ports:
+#      - "8080:8080"

@@ -13,13 +13,13 @@ cert-file = "./storage/selfsigned.crt"
 key-file = "./storage/selfsigned.key"
 
 [db.main]
-url = "" # <driver>://<username>:<password>@<host>:<port>/<database>
+url = "postgresql://postgres:postgres@localhost:5432/zciti_main_dev" # <driver>://<username>:<password>@<host>:<port>/<database>
 
 [db.chat]
-url = ""  # <driver>://<username>:<password>@<host>:<port>/<database>
+url = "postgresql://postgres:postgres@localhost:5433/zciti_chat_dev"  # <driver>://<username>:<password>@<host>:<port>/<database>
 
 [services.messageWay]
-apiKey = ""
+apiKey = "26510b7869bc5d2f0fe16bf0f94d38eb"
 
 [logger]
 time-format = "" # https://pkg.go.dev/time#pkg-constants, https://github.com/rs/zerolog/blob/master/api.go#L10 
@@ -46,7 +46,7 @@ max = 20
 expiration_seconds = 60
 
 [middleware.jwt]
-secret = ""
+secret = "apom$dpaom%dpaosmdpoamu2n4i2@$02"
 expiration_seconds = 86400
 
 [middleware.filesystem]

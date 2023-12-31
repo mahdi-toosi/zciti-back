@@ -2,7 +2,7 @@ package schema
 
 import "gorm.io/gorm"
 
-func Models() []any {
+func MainDBModels() []any {
 	// order matters
 	return []any{
 		User{},
@@ -13,6 +13,14 @@ func Models() []any {
 	}
 }
 
-func DropExtraCommands(db *gorm.DB) {
+func ChatDBModels() []any {
+	// order matters
+	return []any{}
+}
+
+func MainDBDropExtraCommands(db *gorm.DB) {
 	db.Exec("DROP TABLE business_users")
+}
+
+func ChatDBDropExtraCommands(db *gorm.DB) {
 }

@@ -1,4 +1,4 @@
-package database
+package database //nolint:typecheck
 
 import (
 	"github.com/rs/zerolog"
@@ -10,9 +10,10 @@ import (
 )
 
 type Database struct {
-	DB  *gorm.DB
-	Log zerolog.Logger
-	Cfg *config.Config
+	Main *gorm.DB
+	Chat *gorm.DB
+	Log  zerolog.Logger
+	Cfg  *config.Config
 }
 
 func NewDatabase(cfg *config.Config, log zerolog.Logger) *Database {
@@ -25,61 +26,111 @@ func NewDatabase(cfg *config.Config, log zerolog.Logger) *Database {
 }
 
 func (_db *Database) ConnectDatabase() {
-	conn, err := gorm.Open(postgres.Open(_db.Cfg.DB.Postgres.DSN), &gorm.Config{})
+	mainDB, err := gorm.Open(postgres.Open(_db.Cfg.DB.Main.Url), &gorm.Config{})
 	if err != nil {
-		_db.Log.Error().Err(err).Msg("An unknown error occurred when to connect the database!")
+		_db.Log.Error().Err(err).Msg("An unknown error occurred when to connect the *Main* database!")
 	} else {
-		_db.Log.Info().Msg("Connected the database successfully!")
+		_db.Log.Info().Msg("Connected the *Main* database successfully!")
 	}
 
-	_db.DB = conn
+	_db.Main = mainDB
+
+	chatDB, err := gorm.Open(postgres.Open(_db.Cfg.DB.Chat.Url), &gorm.Config{})
+	if err != nil {
+		_db.Log.Error().Err(err).Msg("An unknown error occurred when to connect the *Chat* database!")
+	} else {
+		_db.Log.Info().Msg("Connected the *Chat* database successfully!")
+	}
+
+	_db.Chat = chatDB
 }
 
 func (_db *Database) ShutdownDatabase() {
-	sqlDB, err := _db.DB.DB()
+	mainDB, err := _db.Main.DB()
 	if err != nil {
-		_db.Log.Error().Err(err).Msg("An unknown error occurred when to shutdown the database!")
+		_db.Log.Error().Err(err).Msg("An unknown error occurred when to shutdown the *Main* database!")
 	} else {
-		_db.Log.Info().Msg("Shutdown the database successfully!")
+		_db.Log.Info().Msg("Shutdown the *Main* database successfully!")
 	}
-	_err := sqlDB.Close()
+	_err := mainDB.Close()
+	if _err != nil {
+		return
+	}
+
+	chatDB, err := _db.Chat.DB()
+	if err != nil {
+		_db.Log.Error().Err(err).Msg("An unknown error occurred when to shutdown the *Chat* database!")
+	} else {
+		_db.Log.Info().Msg("Shutdown the *Chat* database successfully!")
+	}
+	_err = chatDB.Close()
 	if _err != nil {
 		return
 	}
 }
 
 func (_db *Database) MigrateModels() {
-	if err := _db.DB.AutoMigrate(schema.Models()...); err != nil {
-		_db.Log.Error().Err(err).Msg("An unknown error occurred when to migrate the database!")
-		panic("An unknown error occurred when to migrate the database!")
+	if err := _db.Main.AutoMigrate(schema.MainDBModels()...); err != nil {
+		_db.Log.Error().Err(err).Msg("An unknown error occurred when to migrate the *Main* database!")
+		panic("An unknown error occurred when to migrate the *Main* database!")
+	}
+
+	if err := _db.Chat.AutoMigrate(schema.ChatDBModels()...); err != nil {
+		_db.Log.Error().Err(err).Msg("An unknown error occurred when to migrate the *Chat* database!")
+		panic("An unknown error occurred when to migrate the *Chat* database!")
 	}
 }
 
 func (_db *Database) SeedModels() {
-	for _, model := range seeds.Seeders() {
-		count, err := model.Count(_db.DB)
+	for _, model := range seeds.MainDBSeeders() {
+		count, err := model.Count(_db.Main)
 		if err != nil {
-			_db.Log.Error().Err(err).Msg("An unknown error occurred when to seed the database!")
+			_db.Log.Error().Err(err).Msg("An unknown error occurred when to seed the *Main* database!")
 		}
 
 		if count == 0 {
-			if err := model.Seed(_db.DB); err != nil {
-				_db.Log.Error().Err(err).Msg("An unknown error occurred when to seed the database!")
+			if err := model.Seed(_db.Main); err != nil {
+				_db.Log.Error().Err(err).Msg("An unknown error occurred when to seed the *Main* database!")
 			}
 
-			_db.Log.Info().Msg("Seeded the database successfully!")
+			_db.Log.Info().Msg("*Main* Seeded the database successfully!")
 		} else {
-			_db.Log.Info().Msg("Database is already seeded!")
+			_db.Log.Info().Msg("*Main* Database is already seeded!")
+		}
+	}
+
+	for _, model := range seeds.ChatDBSeeders() {
+		count, err := model.Count(_db.Chat)
+		if err != nil {
+			_db.Log.Error().Err(err).Msg("An unknown error occurred when to seed the *Chat* database!")
+		}
+
+		if count == 0 {
+			if err := model.Seed(_db.Chat); err != nil {
+				_db.Log.Error().Err(err).Msg("An unknown error occurred when to seed the *Chat* database!")
+			}
+
+			_db.Log.Info().Msg("*Chat* Seeded the database successfully!")
+		} else {
+			_db.Log.Info().Msg("*Chat* Database is already seeded!")
 		}
 	}
 }
 
 func (_db *Database) DropTables() {
-	for _, model := range schema.Models() {
-		if err := _db.DB.Migrator().DropTable(model); err != nil {
-			_db.Log.Error().Err(err).Msg("An unknown error occurred when to drop table in the database!")
+	for _, model := range schema.MainDBModels() {
+		if err := _db.Main.Migrator().DropTable(model); err != nil {
+			_db.Log.Error().Err(err).Msg("An unknown error occurred when to drop table in the *Main* database!")
 		}
 	}
 
-	schema.DropExtraCommands(_db.DB)
+	schema.MainDBDropExtraCommands(_db.Main)
+
+	for _, model := range schema.ChatDBModels() {
+		if err := _db.Chat.Migrator().DropTable(model); err != nil {
+			_db.Log.Error().Err(err).Msg("An unknown error occurred when to drop table in the *Chat* database!")
+		}
+	}
+
+	schema.ChatDBDropExtraCommands(_db.Chat)
 }

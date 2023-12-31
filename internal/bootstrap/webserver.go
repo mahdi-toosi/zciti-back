@@ -104,9 +104,9 @@ func Start(lifecycle fx.Lifecycle, cfg *config.Config, fiber *fiber.App, router 
 
 				database.ConnectDatabase()
 
-				migrate := flag.Bool("migrate", false, "migrate the database")
-				seeder := flag.Bool("seed", false, "seed the database")
-				drop := flag.Bool("drop-all-tables", false, "drop all tables in the database")
+				migrate := flag.Bool("migrate", false, "migrate the databases")
+				seeder := flag.Bool("seed", false, "seed the databases")
+				drop := flag.Bool("drop-all-tables", false, "drop all tables in the databases")
 				flag.Parse()
 
 				if *migrate || *seeder || *drop {

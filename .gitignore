@@ -22,3 +22,7 @@ docs/
 
 # goland
 .idea
+
+# configs
+config/
+!config/example.toml

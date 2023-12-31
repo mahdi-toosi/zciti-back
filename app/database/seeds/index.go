@@ -7,7 +7,7 @@ type Seeder interface {
 	Count(*gorm.DB) (int, error)
 }
 
-func Seeders() []Seeder {
+func MainDBSeeders() []Seeder {
 	// order matters
 	return []Seeder{
 		User{},
@@ -16,4 +16,9 @@ func Seeders() []Seeder {
 		NotificationTemplate{},
 		Notification{},
 	}
+}
+
+func ChatDBSeeders() []Seeder {
+	// order matters
+	return []Seeder{}
 }

@@ -31,8 +31,11 @@ type app = struct {
 
 // db struct config
 type db = struct {
-	Postgres struct {
-		DSN string `toml:"dsn"`
+	Main struct {
+		Url string `toml:"url"`
+	}
+	Chat struct {
+		Url string `toml:"url"`
 	}
 }
 
@@ -125,7 +128,7 @@ func ParseConfig(name string, debug ...bool) (*Config, error) {
 
 // initialize config
 func NewConfig() *Config {
-	config, err := ParseConfig("example")
+	config, err := ParseConfig("zciti")
 	if err != nil && !fiber.IsChild() {
 		// panic if config is not found
 		log.Panic().Err(err).Msg("config not found")

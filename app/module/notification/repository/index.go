@@ -28,7 +28,7 @@ type repo struct {
 }
 
 func (_i *repo) GetAll(req request.Notifications) (notifications []*response.Notification, paging paginator.Pagination, err error) {
-	query := _i.DB.DB.
+	query := _i.DB.Main.
 		Model(&schema.Notification{}).
 		Select("notifications.*, " +
 			"users.first_name || ' ' || users.last_name as receiver_full_name, " +
@@ -58,7 +58,7 @@ func (_i *repo) GetAll(req request.Notifications) (notifications []*response.Not
 }
 
 func (_i *repo) GetOne(id uint64) (notification *response.Notification, err error) {
-	if err := _i.DB.DB.First(&notification, id).Error; err != nil {
+	if err := _i.DB.Main.First(&notification, id).Error; err != nil {
 		return nil, err
 	}
 
@@ -66,15 +66,15 @@ func (_i *repo) GetOne(id uint64) (notification *response.Notification, err erro
 }
 
 func (_i *repo) Create(notification *schema.Notification) (err error) {
-	return _i.DB.DB.Create(notification).Error
+	return _i.DB.Main.Create(notification).Error
 }
 
 func (_i *repo) Update(id uint64, notification *schema.Notification) (err error) {
-	return _i.DB.DB.Model(&schema.Notification{}).
+	return _i.DB.Main.Model(&schema.Notification{}).
 		Where(&schema.Notification{ID: id}).
 		Updates(notification).Error
 }
 
 func (_i *repo) Delete(id uint64) error {
-	return _i.DB.DB.Delete(&schema.Notification{}, id).Error
+	return _i.DB.Main.Delete(&schema.Notification{}, id).Error
 }

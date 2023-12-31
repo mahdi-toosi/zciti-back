@@ -26,7 +26,7 @@ type repo struct {
 }
 
 func (_i *repo) GetAll(req ntrequest.Index) (notificationTemplates []*schema.NotificationTemplate, paging paginator.Pagination, err error) {
-	query := _i.DB.DB.Model(&schema.NotificationTemplate{})
+	query := _i.DB.Main.Model(&schema.NotificationTemplate{})
 
 	if req.Pagination.Page > 0 {
 		var total int64
@@ -48,7 +48,7 @@ func (_i *repo) GetAll(req ntrequest.Index) (notificationTemplates []*schema.Not
 }
 
 func (_i *repo) GetOne(id uint64) (notificationTemplate *schema.NotificationTemplate, err error) {
-	if err := _i.DB.DB.First(&notificationTemplate, id).Error; err != nil {
+	if err := _i.DB.Main.First(&notificationTemplate, id).Error; err != nil {
 		return nil, err
 	}
 
@@ -56,15 +56,15 @@ func (_i *repo) GetOne(id uint64) (notificationTemplate *schema.NotificationTemp
 }
 
 func (_i *repo) Create(notificationTemplate *schema.NotificationTemplate) (err error) {
-	return _i.DB.DB.Create(notificationTemplate).Error
+	return _i.DB.Main.Create(notificationTemplate).Error
 }
 
 func (_i *repo) Update(id uint64, notificationTemplate *schema.NotificationTemplate) (err error) {
-	return _i.DB.DB.Model(&schema.NotificationTemplate{}).
+	return _i.DB.Main.Model(&schema.NotificationTemplate{}).
 		Where(&schema.NotificationTemplate{ID: id}).
 		Updates(notificationTemplate).Error
 }
 
 func (_i *repo) Delete(id uint64) error {
-	return _i.DB.DB.Delete(&schema.NotificationTemplate{}, id).Error
+	return _i.DB.Main.Delete(&schema.NotificationTemplate{}, id).Error
 }

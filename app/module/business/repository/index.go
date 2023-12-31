@@ -30,7 +30,7 @@ type repo struct {
 }
 
 func (_i *repo) GetAll(req request.Businesses) (businesses []*schema.Business, paging paginator.Pagination, err error) {
-	query := _i.DB.DB.Model(&schema.Business{})
+	query := _i.DB.Main.Model(&schema.Business{})
 
 	if req.Keyword != "" {
 		query.Where("title Like ?", fmt.Sprint("%", req.Keyword, "%"))
@@ -56,7 +56,7 @@ func (_i *repo) GetAll(req request.Businesses) (businesses []*schema.Business, p
 }
 
 func (_i *repo) GetUsers(req request.Users) (users []*schema.User, paging paginator.Pagination, err error) {
-	query := _i.DB.DB.
+	query := _i.DB.Main.
 		Model(&users).
 		Joins("JOIN business_users ON business_users.user_id = users.id").
 		Where("business_users.business_id = ?", req.BusinessID).
@@ -86,7 +86,7 @@ func (_i *repo) GetUsers(req request.Users) (users []*schema.User, paging pagina
 }
 
 func (_i *repo) InsertUser(businessID uint64, userID uint64) (err error) {
-	err = _i.DB.DB.
+	err = _i.DB.Main.
 		Exec(`INSERT INTO business_users 
     		(user_id, business_id) VALUES (?, ?)`,
 			userID, businessID).
@@ -100,7 +100,7 @@ func (_i *repo) InsertUser(businessID uint64, userID uint64) (err error) {
 }
 
 func (_i *repo) DeleteUser(businessID uint64, userID uint64) (err error) {
-	err = _i.DB.DB.
+	err = _i.DB.Main.
 		Exec(`DELETE FROM business_users 
        		WHERE user_id = ? AND business_id = ?`,
 			userID, businessID).
@@ -114,7 +114,7 @@ func (_i *repo) DeleteUser(businessID uint64, userID uint64) (err error) {
 }
 
 func (_i *repo) GetOne(id uint64) (business *schema.Business, err error) {
-	if err := _i.DB.DB.First(&business, id).Error; err != nil {
+	if err := _i.DB.Main.First(&business, id).Error; err != nil {
 		return nil, err
 	}
 
@@ -122,15 +122,15 @@ func (_i *repo) GetOne(id uint64) (business *schema.Business, err error) {
 }
 
 func (_i *repo) Create(business *schema.Business) (err error) {
-	return _i.DB.DB.Create(business).Error
+	return _i.DB.Main.Create(business).Error
 }
 
 func (_i *repo) Update(id uint64, business *schema.Business) (err error) {
-	return _i.DB.DB.Model(&schema.Business{}).
+	return _i.DB.Main.Model(&schema.Business{}).
 		Where(&schema.Business{ID: id}).
 		Updates(business).Error
 }
 
 func (_i *repo) Delete(id uint64) error {
-	return _i.DB.DB.Delete(&schema.Business{}, id).Error
+	return _i.DB.Main.Delete(&schema.Business{}, id).Error
 }
