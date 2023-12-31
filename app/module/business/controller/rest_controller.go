@@ -37,6 +37,9 @@ type controller struct {
 // @Security     Bearer
 // @Router       /businesses [get]
 func (_i *controller) Index(c *fiber.Ctx) error {
+	// TODO we need new endpoint for hiding business phone numbers
+	// TODO only admins can access this endpoint
+
 	paginate, err := paginator.Paginate(c)
 	if err != nil {
 		return err
@@ -147,7 +150,12 @@ func (_i *controller) InsertUser(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	if !user.IsAdmin() && user.ID != userID {
+	business, err := _i.service.Show(businessID)
+	if err != nil {
+		return fiber.ErrNotFound
+	}
+
+	if user.ID != userID && user.ID != business.OwnerID && !user.IsAdmin() {
 		return fiber.ErrForbidden
 	}
 
@@ -183,7 +191,12 @@ func (_i *controller) DeleteUser(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	if !user.IsAdmin() && user.ID != userID {
+	business, err := _i.service.Show(businessID)
+	if err != nil {
+		return fiber.ErrNotFound
+	}
+
+	if user.ID != userID && user.ID != business.OwnerID && !user.IsAdmin() {
 		return fiber.ErrForbidden
 	}
 
@@ -224,9 +237,23 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 // @Param        id path int true "Business ID"
 // @Router       /businesses/:id [put]
 func (_i *controller) Update(c *fiber.Ctx) error {
-	id, err := utils.GetIntInParams(c, "id")
+	businessID, err := utils.GetIntInParams(c, "id")
 	if err != nil {
-		return err
+		return fiber.ErrBadRequest
+	}
+
+	user, err := utils.GetAuthenticatedUser(c)
+	if err != nil {
+		return fiber.ErrBadRequest
+	}
+
+	business, err := _i.service.Show(businessID)
+	if err != nil {
+		return fiber.ErrNotFound
+	}
+
+	if user.ID != business.OwnerID && !user.IsAdmin() {
+		return fiber.ErrForbidden
 	}
 
 	req := new(request.Business)
@@ -234,7 +261,7 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 		return err
 	}
 
-	err = _i.service.Update(id, *req)
+	err = _i.service.Update(businessID, *req)
 	if err != nil {
 		return err
 	}
@@ -249,12 +276,26 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 // @Param        id path int true "Business ID"
 // @Router       /businesses/:id [delete]
 func (_i *controller) Delete(c *fiber.Ctx) error {
-	id, err := utils.GetIntInParams(c, "id")
+	businessID, err := utils.GetIntInParams(c, "id")
 	if err != nil {
-		return err
+		return fiber.ErrBadRequest
 	}
 
-	err = _i.service.Destroy(id)
+	user, err := utils.GetAuthenticatedUser(c)
+	if err != nil {
+		return fiber.ErrBadRequest
+	}
+
+	business, err := _i.service.Show(businessID)
+	if err != nil {
+		return fiber.ErrNotFound
+	}
+
+	if user.ID != business.OwnerID && !user.IsAdmin() {
+		return fiber.ErrForbidden
+	}
+
+	err = _i.service.Destroy(businessID)
 	if err != nil {
 		return err
 	}

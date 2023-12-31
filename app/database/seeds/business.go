@@ -1,6 +1,7 @@
 package seeds
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/bxcodec/faker/v4"
 	"github.com/rs/zerolog/log"
@@ -23,6 +24,8 @@ func (Business) Seed(db *gorm.DB) error {
 		}
 
 		fakeData.OwnerID = utils.Random(0, UserSeedCount)
+		meta, _ := json.Marshal(map[string]any{"ShebaNumber": 2323})
+		fakeData.Meta = string(meta)
 
 		if err := db.Create(fakeData).Error; err != nil {
 			log.Error().Err(err)

@@ -8,6 +8,7 @@ type Business struct {
 	OwnerID     uint64       `gorm:"not null" faker:"-"`
 	Owner       User         `gorm:"foreignKey:OwnerID" faker:"-"`
 	Users       []*User      `gorm:"many2many:business_users;" faker:"-"`
+	Meta        string       `faker:"-"`
 	Base
 }
 
