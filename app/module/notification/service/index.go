@@ -26,13 +26,9 @@ type service struct {
 }
 
 func (_i *service) Index(req request.Notifications) (notifications []*response.Notification, paging paginator.Pagination, err error) {
-	results, paging, err := _i.Repo.GetAll(req)
+	notifications, paging, err = _i.Repo.GetAll(req)
 	if err != nil {
 		return
-	}
-
-	for _, result := range results {
-		notifications = append(notifications, response.FromDomain(result))
 	}
 
 	return
@@ -44,7 +40,7 @@ func (_i *service) Show(id uint64) (article *response.Notification, err error) {
 		return nil, err
 	}
 
-	return response.FromDomain(result), nil
+	return result, nil
 }
 
 func (_i *service) Store(req request.Notification) (err error) {

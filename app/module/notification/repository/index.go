@@ -1,15 +1,17 @@
 package repository
 
 import (
+	"github.com/rs/zerolog/log"
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/notification/request"
+	"go-fiber-starter/app/module/notification/response"
 	"go-fiber-starter/internal/bootstrap/database"
 	"go-fiber-starter/utils/paginator"
 )
 
 type IRepository interface {
-	GetAll(req request.Notifications) (notifications []*schema.Notification, paging paginator.Pagination, err error)
-	GetOne(id uint64) (notification *schema.Notification, err error)
+	GetAll(req request.Notifications) (notifications []*response.Notification, paging paginator.Pagination, err error)
+	GetOne(id uint64) (notification *response.Notification, err error)
 	Create(notification *schema.Notification) (err error)
 	Update(id uint64, notification *schema.Notification) (err error)
 	Delete(id uint64) (err error)
@@ -25,8 +27,14 @@ type repo struct {
 	DB *database.Database
 }
 
-func (_i *repo) GetAll(req request.Notifications) (notifications []*schema.Notification, paging paginator.Pagination, err error) {
-	query := _i.DB.DB.Model(&schema.Notification{})
+func (_i *repo) GetAll(req request.Notifications) (notifications []*response.Notification, paging paginator.Pagination, err error) {
+	query := _i.DB.DB.
+		Model(&schema.Notification{}).
+		Select("notifications.*, " +
+			"users.first_name || ' ' || users.last_name as receiver_full_name, " +
+			"businesses.title as business_title").
+		Joins("INNER JOIN users ON users.id = notifications.receiver_id").
+		Joins("INNER JOIN businesses ON businesses.id = notifications.business_id")
 
 	if req.Pagination.Page > 0 {
 		var total int64
@@ -37,17 +45,19 @@ func (_i *repo) GetAll(req request.Notifications) (notifications []*schema.Notif
 		query.Limit(req.Pagination.Limit)
 	}
 
-	err = query.Order("created_at asc").Find(&notifications).Error
+	err = query.Debug().Order("created_at asc").Find(&notifications).Error
 	if err != nil {
 		return
 	}
 
+	log.Debug().Msg("")
+	log.Debug().Msgf("%+v", notifications[0])
 	paging = *req.Pagination
 
 	return
 }
 
-func (_i *repo) GetOne(id uint64) (notification *schema.Notification, err error) {
+func (_i *repo) GetOne(id uint64) (notification *response.Notification, err error) {
 	if err := _i.DB.DB.First(&notification, id).Error; err != nil {
 		return nil, err
 	}

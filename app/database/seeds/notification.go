@@ -28,6 +28,7 @@ func (Notification) Seed(db *gorm.DB) error {
 		}
 
 		fakeData.ReceiverID = utils.Random(1, UserSeedCount)
+		fakeData.BusinessID = utils.Random(1, BusinessSeedCount)
 		fakeData.TemplateID = utils.Random(1, NotificationTemplateSeedCount)
 
 		if err := db.Create(fakeData).Error; err != nil {

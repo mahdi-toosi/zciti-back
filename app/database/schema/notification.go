@@ -10,7 +10,7 @@ type Notification struct {
 	ReceiverID uint64         `gorm:"not null" faker:"-"`
 	Receiver   User           `gorm:"foreignKey:ReceiverID" faker:"-"`
 	Type       pq.StringArray `gorm:"type:text[];not null" faker:"-"`
-	BusinessID uint64         `gorm:"not null"`
+	BusinessID uint64         `gorm:"not null" faker:"-"`
 	SentAt     time.Time      `gorm:"not null"`
 	TemplateID uint64         `faker:"-"`
 	//Template   NotificationTemplate `gorm:"foreignKey:TemplateID" faker:"-"`
