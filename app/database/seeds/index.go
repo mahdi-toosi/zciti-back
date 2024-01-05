@@ -20,5 +20,8 @@ func MainDBSeeders() []Seeder {
 
 func ChatDBSeeders() []Seeder {
 	// order matters
-	return []Seeder{}
+	return []Seeder{
+		MessageRoom{},
+		Message{},
+	}
 }

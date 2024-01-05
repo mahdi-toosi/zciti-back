@@ -3,6 +3,8 @@ package main
 import (
 	"go-fiber-starter/app/module/auth"
 	"go-fiber-starter/app/module/business"
+	"go-fiber-starter/app/module/message"
+	"go-fiber-starter/app/module/messageRoom"
 	"go-fiber-starter/app/module/notification"
 	"go-fiber-starter/app/module/notificationTemplate"
 	"go-fiber-starter/app/module/post"
@@ -56,7 +58,9 @@ func main() {
 		post.Module,
 		user.Module,
 		auth.Module,
+		message.Module,
 		business.Module,
+		messageRoom.Module,
 		notification.Module,
 		notificationtemplate.Module,
 		// End provide modules

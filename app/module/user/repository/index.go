@@ -41,14 +41,11 @@ func (_i *repo) GetAll(req request.Users) (users []*schema.User, paging paginato
 		query.Count(&total)
 		req.Pagination.Total = total
 
-		req.Pagination.Total = total
-
 		query.Offset(req.Pagination.Offset)
 		query.Limit(req.Pagination.Limit)
 	}
 
-	err = query.Debug().Order("created_at asc").Find(&users).Error
-	err = query.Offset(req.Pagination.Offset).Limit(req.Pagination.Limit).Find(&users).Error
+	err = query.Order("created_at asc").Find(&users).Error
 	if err != nil {
 		return
 	}

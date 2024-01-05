@@ -104,6 +104,25 @@ func (_i *controller) Show(c *fiber.Ctx) error {
 // @Param        id path int true "Business ID"
 // @Router       /businesses/:id/users [get]
 func (_i *controller) Users(c *fiber.Ctx) error {
+	businessID, err := utils.GetIntInParams(c, "id")
+	if err != nil {
+		return fiber.ErrBadRequest
+	}
+
+	user, err := utils.GetAuthenticatedUser(c)
+	if err != nil {
+		return fiber.ErrBadRequest
+	}
+
+	business, err := _i.service.Show(businessID)
+	if err != nil {
+		return fiber.ErrNotFound
+	}
+
+	if user.ID != business.OwnerID && !user.IsAdmin() {
+		return fiber.ErrForbidden
+	}
+
 	paginate, err := paginator.Paginate(c)
 	if err != nil {
 		return err

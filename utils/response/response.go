@@ -24,7 +24,7 @@ func (e *Error) Error() string {
 
 // A struct to return normal response
 type Response struct {
-	Code     int
+	Code     int      `json:",omitempty"`
 	Messages Messages `json:",omitempty"`
 	Data     any      `json:",omitempty"`
 	Meta     any      `json:",omitempty"`

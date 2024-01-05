@@ -13,6 +13,8 @@ type User struct{}
 const UserSeedCount = 30
 
 func (User) Seed(db *gorm.DB) error {
+	pass := helpers.Hash([]byte("123456"))
+
 	for i := 0; i <= UserSeedCount; i++ {
 		fakeData := &schema.User{}
 		err := faker.FakeData(&fakeData)
@@ -21,9 +23,9 @@ func (User) Seed(db *gorm.DB) error {
 			return err
 		}
 
-		fakeData.Mobile = uint64(9180338500 + i)
+		fakeData.Password = pass
 		fakeData.Roles = []string{"user"}
-		fakeData.Password = helpers.Hash([]byte("123456"))
+		fakeData.Mobile = uint64(9180338500 + i)
 		if err := db.Create(fakeData).Error; err != nil {
 			log.Error().Err(err)
 		}
@@ -31,12 +33,13 @@ func (User) Seed(db *gorm.DB) error {
 
 	// create admin
 	admin := &schema.User{}
+
+	admin.Password = pass
 	admin.LastName = "admin"
 	admin.FirstName = "mahdi"
 	admin.Mobile = 9380338494
 	admin.MobileConfirmed = true
 	admin.Roles = []string{"admin"}
-	admin.Password = helpers.Hash([]byte("123456"))
 
 	if err := db.Create(admin).Error; err != nil {
 		log.Error().Err(err)
