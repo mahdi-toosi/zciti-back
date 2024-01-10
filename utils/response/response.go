@@ -24,7 +24,7 @@ func (e *Error) Error() string {
 
 // A struct to return normal response
 type Response struct {
-	Code     int
+	Code     int      `json:",omitempty"`
 	Messages Messages `json:",omitempty"`
 	Data     any      `json:",omitempty"`
 	Meta     any      `json:",omitempty"`
@@ -69,6 +69,10 @@ var ErrorHandler = func(c *fiber.Ctx, err error) error {
 
 // function to return pretty json response
 func Resp(c *fiber.Ctx, resp Response) error {
+	// set Data
+	if resp.Data == nil {
+		resp.Data = []any{}
+	}
 	// set status
 	if resp.Code == 0 {
 		resp.Code = fiber.StatusOK
