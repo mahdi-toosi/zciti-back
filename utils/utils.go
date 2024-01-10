@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"regexp"
 	"strconv"
+	"time"
 )
 
 func IsEnabled(key bool) func(c *fiber.Ctx) bool {
@@ -26,6 +27,10 @@ func InlineCondition(condition bool, ifResult any, elseResult any) any {
 
 func GetIntInParams(c *fiber.Ctx, key string) (uint64, error) {
 	return strconv.ParseUint(c.Params(key), 10, 64)
+}
+
+func GetIntInQueries(c *fiber.Ctx, key string) (uint64, error) {
+	return strconv.ParseUint(c.Query(key), 10, 64)
 }
 
 func GetAuthenticatedUser(c *fiber.Ctx) (schema.User, error) {
@@ -54,4 +59,15 @@ func ValidateMobileNumber(number string) error {
 
 func Random(min int, max int) uint64 {
 	return uint64(rand.Intn(max-min) + min) //nolint:gosec
+}
+
+func RandomDateTime() time.Time {
+	year := rand.Intn(2023) //nolint:gosec
+	month := time.Month(rand.Intn(12) + 1)
+	day := rand.Intn(31) + 1 //nolint:gosec
+	hour := rand.Intn(24)    //nolint:gosec
+	min := rand.Intn(60)     //nolint:gosec
+	sec := rand.Intn(60)     //nolint:gosec
+
+	return time.Date(year, month, day, hour, min, sec, 0, time.UTC)
 }
