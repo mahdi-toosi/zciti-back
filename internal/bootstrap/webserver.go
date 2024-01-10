@@ -78,13 +78,13 @@ func Start(lifecycle fx.Lifecycle, cfg *config.Config, fiber *fiber.App, router 
 						prefork = "Disabled"
 					}
 
-					log.Debug().Msgf("Version: %s", "-")
-					log.Debug().Msgf("Host: %s", host)
-					log.Debug().Msgf("Port: %s", port)
-					log.Debug().Msgf("Prefork: %s", prefork)
-					log.Debug().Msgf("Handlers: %d", fiber.HandlersCount())
-					log.Debug().Msgf("Processes: %d", procs)
-					log.Debug().Msgf("PID: %d", os.Getpid())
+					log.Info().Msgf("Version: %s", "-")
+					log.Info().Msgf("Host: %s", host)
+					log.Info().Msgf("Port: %s", port)
+					log.Info().Msgf("Prefork: %s", prefork)
+					log.Info().Msgf("Handlers: %d", fiber.HandlersCount())
+					log.Info().Msgf("Processes: %d", procs)
+					log.Info().Msgf("PID: %d", os.Getpid())
 				}
 
 				// Listen the app (with TLS Support)
