@@ -1,7 +1,7 @@
 package request
 
 type Login struct {
-	Mobile   uint64 `example:"9180338595" validate:"required,number"`
+	Mobile   uint64 `example:"9380338494" validate:"required,number"`
 	Password string `example:"123456" validate:"required,min=6,max=255"`
 }
 
@@ -12,7 +12,7 @@ type Register struct {
 }
 
 type SendOtp struct {
-	Mobile uint64 `example:"9180338595" validate:"required,number"`
+	Mobile uint64 `example:"9380338494" validate:"required,number"`
 }
 
 type ResetPass struct {

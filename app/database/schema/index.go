@@ -15,7 +15,10 @@ func MainDBModels() []any {
 
 func ChatDBModels() []any {
 	// order matters
-	return []any{}
+	return []any{
+		MessageRoom{},
+		Message{},
+	}
 }
 
 func MainDBDropExtraCommands(db *gorm.DB) {

@@ -6,6 +6,7 @@ import (
 	"go-fiber-starter/app/module/user/controller"
 	"go-fiber-starter/app/module/user/repository"
 	"go-fiber-starter/app/module/user/service"
+	"go-fiber-starter/utils/config"
 	"go.uber.org/fx"
 )
 
@@ -14,17 +15,17 @@ type Router struct {
 	Controller *controller.Controller
 }
 
-func (_i *Router) RegisterRoutes() {
+func (_i *Router) RegisterRoutes(cfg *config.Config) {
 	// define controllers
 	c := _i.Controller.RestController
 
 	// define routes
 	_i.App.Route("/api/v1/users", func(router fiber.Router) {
-		router.Get("/", mdl.Protected(), mdl.Permission(mdl.DUser, mdl.PReadAll), c.Index)
-		router.Get("/:id", mdl.Protected(), mdl.Permission(mdl.DUser, mdl.PReadSingle), c.Show)
-		router.Post("/", mdl.Protected(), mdl.Permission(mdl.DUser, mdl.PCreate), c.Store)
-		router.Put("/:id", mdl.Protected(), mdl.Permission(mdl.DUser, mdl.PUpdate), c.Update)
-		router.Delete("/:id", mdl.Protected(), mdl.Permission(mdl.DUser, mdl.PDelete), c.Delete)
+		router.Get("/", mdl.Protected(cfg), mdl.Permission(mdl.DUser, mdl.PReadAll), c.Index)
+		router.Get("/:id", mdl.Protected(cfg), mdl.Permission(mdl.DUser, mdl.PReadSingle), c.Show)
+		router.Post("/", mdl.Protected(cfg), mdl.Permission(mdl.DUser, mdl.PCreate), c.Store)
+		router.Put("/:id", mdl.Protected(cfg), mdl.Permission(mdl.DUser, mdl.PUpdate), c.Update)
+		router.Delete("/:id", mdl.Protected(cfg), mdl.Permission(mdl.DUser, mdl.PDelete), c.Delete)
 	})
 }
 

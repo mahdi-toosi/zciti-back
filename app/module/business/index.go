@@ -6,6 +6,7 @@ import (
 	"go-fiber-starter/app/module/business/controller"
 	"go-fiber-starter/app/module/business/repository"
 	"go-fiber-starter/app/module/business/service"
+	"go-fiber-starter/utils/config"
 	"go.uber.org/fx"
 )
 
@@ -14,21 +15,21 @@ type Router struct {
 	Controller *controller.Controller
 }
 
-func (_i *Router) RegisterRoutes() {
+func (_i *Router) RegisterRoutes(cfg *config.Config) {
 	// define controllers
 	c := _i.Controller.RestController
 
 	// define routes
 	_i.App.Route("/api/v1/businesses", func(router fiber.Router) {
-		router.Get("/", mdl.Protected(), mdl.Permission(mdl.DBusiness, mdl.PReadAll), c.Index)
-		router.Get("/types", mdl.Protected(), mdl.Permission(mdl.DBusiness, mdl.PReadSingle), c.Types)
-		router.Get("/:id", mdl.Protected(), mdl.Permission(mdl.DBusiness, mdl.PReadSingle), c.Show)
-		router.Get("/:id/users", mdl.Protected(), mdl.Permission(mdl.DBusiness, mdl.PReadSingle), c.Users)
-		router.Post("/:businessID/users/:userID", mdl.Protected(), mdl.Permission(mdl.DBusiness, mdl.PReadSingle), c.InsertUser)
-		router.Delete("/:businessID/users/:userID", mdl.Protected(), mdl.Permission(mdl.DBusiness, mdl.PDelete), c.DeleteUser)
-		router.Post("/", mdl.Protected(), mdl.Permission(mdl.DBusiness, mdl.PCreate), c.Store)
-		router.Put("/:id", mdl.Protected(), mdl.Permission(mdl.DBusiness, mdl.PUpdate), c.Update)
-		router.Delete("/:id", mdl.Protected(), mdl.Permission(mdl.DBusiness, mdl.PDelete), c.Delete)
+		router.Get("/", mdl.Protected(cfg), mdl.Permission(mdl.DBusiness, mdl.PReadAll), c.Index)
+		router.Get("/types", mdl.Protected(cfg), mdl.Permission(mdl.DBusiness, mdl.PReadSingle), c.Types)
+		router.Get("/:id", mdl.Protected(cfg), mdl.Permission(mdl.DBusiness, mdl.PReadSingle), c.Show)
+		router.Get("/:id/users", mdl.Protected(cfg), mdl.Permission(mdl.DBusiness, mdl.PReadSingle), c.Users)
+		router.Post("/:businessID/users/:userID", mdl.Protected(cfg), mdl.Permission(mdl.DBusiness, mdl.PReadSingle), c.InsertUser)
+		router.Delete("/:businessID/users/:userID", mdl.Protected(cfg), mdl.Permission(mdl.DBusiness, mdl.PDelete), c.DeleteUser)
+		router.Post("/", mdl.Protected(cfg), mdl.Permission(mdl.DBusiness, mdl.PCreate), c.Store)
+		router.Put("/:id", mdl.Protected(cfg), mdl.Permission(mdl.DBusiness, mdl.PUpdate), c.Update)
+		router.Delete("/:id", mdl.Protected(cfg), mdl.Permission(mdl.DBusiness, mdl.PDelete), c.Delete)
 	})
 }
 

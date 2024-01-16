@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"github.com/rs/zerolog/log"
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/notification/request"
 	"go-fiber-starter/app/module/notification/response"
@@ -45,13 +44,11 @@ func (_i *repo) GetAll(req request.Notifications) (notifications []*response.Not
 		query.Limit(req.Pagination.Limit)
 	}
 
-	err = query.Debug().Order("created_at asc").Find(&notifications).Error
+	err = query.Order("created_at asc").Find(&notifications).Error
 	if err != nil {
 		return
 	}
 
-	log.Debug().Msg("")
-	log.Debug().Msgf("%+v", notifications[0])
 	paging = *req.Pagination
 
 	return

@@ -4,8 +4,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"go-fiber-starter/app/module/auth/request"
 	"go-fiber-starter/app/module/auth/service"
-	usersRepo "go-fiber-starter/app/module/user/repository"
 	"go-fiber-starter/utils"
+	"go-fiber-starter/utils/config"
 	"go-fiber-starter/utils/response"
 	"strconv"
 )
@@ -17,13 +17,13 @@ type IRestController interface {
 	ResetPass(c *fiber.Ctx) error
 }
 
-func RestController(service service.IService, usersRepo usersRepo.IRepository) IRestController {
-	return &controller{service, usersRepo}
+func RestController(service service.IService, config *config.Config) IRestController {
+	return &controller{service: service, config: config}
 }
 
 type controller struct {
-	service   service.IService
-	usersRepo usersRepo.IRepository
+	config  *config.Config
+	service service.IService
 }
 
 // Login
@@ -38,7 +38,7 @@ func (_i *controller) Login(c *fiber.Ctx) error {
 		return err
 	}
 
-	res, err := _i.service.Login(*req)
+	res, err := _i.service.Login(*req, _i.config.Middleware.Jwt)
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func (_i *controller) Register(c *fiber.Ctx) error {
 		return err
 	}
 
-	res, err := _i.service.Register(req)
+	res, err := _i.service.Register(req, _i.config.Middleware.Jwt)
 	if err != nil {
 		return err
 	}

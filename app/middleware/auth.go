@@ -14,15 +14,13 @@ import (
 	"time"
 )
 
-func Protected() fiber.Handler {
-	conf := config.NewConfig()
-
-	if conf.Middleware.Jwt.Secret == "" {
+func Protected(cfg *config.Config) fiber.Handler {
+	if cfg.Middleware.Jwt.Secret == "" {
 		panic("JWT secret is not set")
 	}
 
 	return jwtware.New(jwtware.Config{
-		SigningKey:     []byte(conf.Middleware.Jwt.Secret),
+		SigningKey:     []byte(cfg.Middleware.Jwt.Secret),
 		ErrorHandler:   jwtError,
 		SuccessHandler: jwtSuccess,
 	})
@@ -56,10 +54,10 @@ func jwtSuccess(c *fiber.Ctx) error {
 	return c.Next()
 }
 
-func GenerateTokenAccess(user response.User) (token string, err error) {
+func GenerateTokenAccess(user response.User, jwtConfig config.Jwt) (token string, err error) {
 	conf := config.NewConfig()
 
-	ExpiresAt := jwt.NewNumericDate(time.Now().Add(conf.Middleware.Jwt.Expiration * time.Second))
+	ExpiresAt := jwt.NewNumericDate(time.Now().Add(jwtConfig.Expiration * time.Second))
 
 	unSignedToken := jwt.NewWithClaims(
 		jwt.SigningMethodHS256,

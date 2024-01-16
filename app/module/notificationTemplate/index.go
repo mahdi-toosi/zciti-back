@@ -6,6 +6,7 @@ import (
 	"go-fiber-starter/app/module/notificationTemplate/controller"
 	"go-fiber-starter/app/module/notificationTemplate/repository"
 	"go-fiber-starter/app/module/notificationTemplate/service"
+	"go-fiber-starter/utils/config"
 	"go.uber.org/fx"
 )
 
@@ -14,17 +15,17 @@ type Router struct {
 	Controller *controller.Controller
 }
 
-func (_i *Router) RegisterRoutes() {
+func (_i *Router) RegisterRoutes(cfg *config.Config) {
 	// define controllers
 	c := _i.Controller.RestController
 
 	// define routes
 	_i.App.Route("/api/v1/notificationTemplates", func(router fiber.Router) {
-		router.Get("/", mdl.Protected(), mdl.Permission(mdl.DNotificationTemplate, mdl.PReadAll), c.Index)
-		router.Get("/keywords", mdl.Protected(), mdl.Permission(mdl.DNotificationTemplate, mdl.PReadSingle), c.Keywords)
-		router.Post("/", mdl.Protected(), mdl.Permission(mdl.DNotificationTemplate, mdl.PCreate), c.Store)
-		router.Patch("/:id", mdl.Protected(), mdl.Permission(mdl.DNotificationTemplate, mdl.PUpdate), c.Update)
-		router.Delete("/:id", mdl.Protected(), mdl.Permission(mdl.DNotificationTemplate, mdl.PDelete), c.Delete)
+		router.Get("/", mdl.Protected(cfg), mdl.Permission(mdl.DNotificationTemplate, mdl.PReadAll), c.Index)
+		router.Get("/keywords", mdl.Protected(cfg), mdl.Permission(mdl.DNotificationTemplate, mdl.PReadSingle), c.Keywords)
+		router.Post("/", mdl.Protected(cfg), mdl.Permission(mdl.DNotificationTemplate, mdl.PCreate), c.Store)
+		router.Patch("/:id", mdl.Protected(cfg), mdl.Permission(mdl.DNotificationTemplate, mdl.PUpdate), c.Update)
+		router.Delete("/:id", mdl.Protected(cfg), mdl.Permission(mdl.DNotificationTemplate, mdl.PDelete), c.Delete)
 	})
 }
 

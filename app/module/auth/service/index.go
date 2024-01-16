@@ -10,13 +10,14 @@ import (
 	"go-fiber-starter/app/module/auth/response"
 	usersRepo "go-fiber-starter/app/module/user/repository"
 	userResponse "go-fiber-starter/app/module/user/response"
+	"go-fiber-starter/utils/config"
 	"go-fiber-starter/utils/helpers"
 )
 
 //go:generate mockgen -destination=article_service_mock.go -package=service . AuthService
 type IService interface {
-	Login(req request.Login) (res response.Login, err error)
-	Register(req *request.Register) (res response.Register, err error)
+	Login(req request.Login, jwtConfig config.Jwt) (res response.Login, err error)
+	Register(req *request.Register, jwtConfig config.Jwt) (res response.Register, err error)
 	SendOtp(req *request.SendOtp) error
 	ResetPass(req *request.ResetPass) error
 }
@@ -33,7 +34,7 @@ type service struct {
 	MessageWay *MessageWay.App
 }
 
-func (_i *service) Login(req request.Login) (res response.Login, err error) {
+func (_i *service) Login(req request.Login, jwtConfig config.Jwt) (res response.Login, err error) {
 	// check user by username
 	user, err := _i.Repo.FindUserByMobile(req.Mobile)
 	if err != nil {
@@ -52,7 +53,7 @@ func (_i *service) Login(req request.Login) (res response.Login, err error) {
 	}
 
 	// do create token
-	token, err := middleware.GenerateTokenAccess(*userResponse.FromDomain(user))
+	token, err := middleware.GenerateTokenAccess(*userResponse.FromDomain(user), jwtConfig)
 	if err != nil {
 		return
 	}
@@ -63,7 +64,7 @@ func (_i *service) Login(req request.Login) (res response.Login, err error) {
 	return
 }
 
-func (_i *service) Register(req *request.Register) (res response.Register, err error) {
+func (_i *service) Register(req *request.Register, jwtConfig config.Jwt) (res response.Register, err error) {
 	// check user by username
 	user := &schema.User{
 		Mobile:    req.Mobile,
@@ -79,7 +80,7 @@ func (_i *service) Register(req *request.Register) (res response.Register, err e
 	}
 
 	// do create token
-	token, err := middleware.GenerateTokenAccess(*userResponse.FromDomain(user))
+	token, err := middleware.GenerateTokenAccess(*userResponse.FromDomain(user), jwtConfig)
 	if err != nil {
 		return
 	}

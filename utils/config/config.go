@@ -86,10 +86,12 @@ type middleware = struct {
 		Root   string
 	}
 
-	Jwt struct {
-		Secret     string        `toml:"secret"`
-		Expiration time.Duration `toml:"expiration_seconds"`
-	}
+	Jwt Jwt
+}
+
+type Jwt struct {
+	Secret     string        `toml:"secret"`
+	Expiration time.Duration `toml:"expiration_seconds"`
 }
 
 type Config struct {
@@ -133,7 +135,6 @@ func NewConfig() *Config {
 		// panic if config is not found
 		log.Panic().Err(err).Msg("config not found")
 	}
-
 	return config
 }
 
