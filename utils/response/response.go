@@ -39,7 +39,6 @@ var ErrorHandler = func(c *fiber.Ctx, err error) error {
 	}
 
 	//_, ok := err.(validator.ValidationErrors)
-	//log.Debug().Msgf("%+v", ok)
 
 	// handle errors
 	if c, ok := err.(validator.ValidationErrors); ok {

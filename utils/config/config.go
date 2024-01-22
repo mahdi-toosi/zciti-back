@@ -39,6 +39,11 @@ type db = struct {
 	}
 }
 
+// redis struct config
+type redis = struct {
+	Url string `toml:"url"`
+}
+
 // log struct config
 type logger = struct {
 	TimeFormat string        `toml:"time-format"`
@@ -97,6 +102,7 @@ type Jwt struct {
 type Config struct {
 	App        app
 	DB         db
+	Redis      redis
 	Logger     logger
 	Middleware middleware
 	Services   services

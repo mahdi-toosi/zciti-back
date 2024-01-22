@@ -26,6 +26,9 @@ time-format = "" # https://pkg.go.dev/time#pkg-constants, https://github.com/rs/
 level = 0 # panic -> 5, fatal -> 4, error -> 3, warn -> 2, info -> 1, debug -> 0, trace -> -1
 prettier = true
 
+[redis]
+url="" # redis://<user>:<pass>@127.0.0.1:6379/<db>
+
 [middleware.compress]
 enable = true
 level = 1

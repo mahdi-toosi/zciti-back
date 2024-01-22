@@ -47,6 +47,8 @@ func main() {
 		fx.Provide(bootstrap.NewFiber),
 		// database
 		fx.Provide(database.NewDatabase),
+		// redis
+		fx.Provide(bootstrap.NewRedis),
 		// middleware
 		fx.Provide(middleware.NewMiddleware),
 		// router

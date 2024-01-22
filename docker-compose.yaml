@@ -25,6 +25,15 @@ services:
       - app
     ports:
       - "5433:5432"
+  redis:
+    image: bitnami/redis:latest
+    environment:
+      REDIS_PASSWORD: redis
+      REDIS_DATABASE: 1
+    networks:
+      - app
+    ports:
+      - "6489:6379"
 #  example:
 #    build:
 #      context: .
