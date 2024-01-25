@@ -5,7 +5,6 @@ import (
 	"flag"
 	"os"
 	"runtime"
-	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -16,8 +15,6 @@ import (
 	"go-fiber-starter/utils/config"
 	"go-fiber-starter/utils/response"
 	"go.uber.org/fx"
-
-	futils "github.com/gofiber/fiber/v2/utils"
 )
 
 func NewFiber(cfg *config.Config) *fiber.App {
@@ -56,17 +53,6 @@ func Start(lifecycle fx.Lifecycle, cfg *config.Config, fiber *fiber.App, router 
 					}
 				}
 
-				// ASCII Art
-				ascii, err := os.ReadFile("./storage/ascii_art.txt")
-				if err != nil {
-					log.Debug().Err(err).Msg("An unknown error occurred when to print ASCII art!")
-				}
-
-				for _, line := range strings.Split(futils.UnsafeString(ascii), "\n") {
-					log.Info().Msg(line)
-				}
-
-				// Information message
 				log.Info().Msg(fiber.Config().AppName + " is running at the moment!")
 
 				// Debug information
