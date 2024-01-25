@@ -37,7 +37,7 @@ func (_i *repo) GetAll(req request.PostsRequest) (posts []*schema.Post, paging p
 		query.Limit(req.Pagination.Limit)
 	}
 
-	err = query.Order("created_at asc").Find(&posts).Error
+	err = query.Preload("Author").Preload("Business").Order("created_at asc").Find(&posts).Error
 	if err != nil {
 		return
 	}

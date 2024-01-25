@@ -10,7 +10,7 @@ import (
 
 type Post struct{}
 
-const PostSeedCount = 30
+const PostSeedCount = 60
 
 func (Post) Seed(db *gorm.DB) error {
 	for i := 0; i <= PostSeedCount; i++ {
@@ -22,6 +22,7 @@ func (Post) Seed(db *gorm.DB) error {
 		}
 
 		fakeData.AuthorID = utils.Random(1, UserSeedCount)
+		fakeData.BusinessID = utils.Random(1, BusinessSeedCount)
 
 		if err := db.Create(fakeData).Error; err != nil {
 			log.Error().Err(err)
