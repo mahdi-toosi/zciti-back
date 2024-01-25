@@ -7,14 +7,14 @@ import (
 )
 
 type Business struct {
-	ID          uint64
-	Title       string
-	Type        schema.BusinessType
-	TypeDisplay string
-	Description string
-	Meta        string
-	OwnerID     uint64
-	Owner       response.User
+	ID          uint64              `json:",omitempty"`
+	Title       string              `json:",omitempty"`
+	Type        schema.BusinessType `json:",omitempty"`
+	TypeDisplay string              `json:",omitempty"`
+	Description string              `json:",omitempty"`
+	Meta        string              `json:",omitempty"`
+	OwnerID     uint64              `json:",omitempty"`
+	Owner       response.User       `json:",omitempty"`
 }
 
 type BusinessTypesOption struct {

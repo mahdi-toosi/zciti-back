@@ -9,7 +9,7 @@ type MessageRoom struct {
 	ID         uint64
 	BusinessID uint64 `example:"1" validate:"number"`
 	UserID     uint64 `example:"1" validate:"number"`
-	Status     string `example:"active" validate:"oneof:active,archived,blocked"`
+	Status     string `example:"active" validate:"oneof=active archived blocked"`
 }
 
 type MessageRooms struct {

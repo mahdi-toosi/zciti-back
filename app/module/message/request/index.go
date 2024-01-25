@@ -10,7 +10,7 @@ type Message struct {
 	RoomID  uint64 `example:"1" validate:"number"`
 	FromID  uint64 `example:"1" validate:"number"`
 	ToID    uint64 `example:"1" validate:"number"`
-	Type    string `example:"text" validate:"oneof:text,image"`
+	Type    string `example:"text" validate:"oneof=text image"`
 	Content string `example:"bla bla bla" validate:"max:2000"`
 }
 
