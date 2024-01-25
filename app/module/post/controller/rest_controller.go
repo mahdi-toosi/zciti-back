@@ -1,11 +1,10 @@
 package controller
 
 import (
-	"strconv"
-
 	"github.com/gofiber/fiber/v2"
 	"go-fiber-starter/app/module/post/request"
 	"go-fiber-starter/app/module/post/service"
+	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
 	"go-fiber-starter/utils/response"
 )
@@ -58,7 +57,7 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 // @Param        id path int true "Post ID"
 // @Router       /posts/:id [get]
 func (_i *controller) Show(c *fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+	id, err := utils.GetIntInParams(c, "id")
 	if err != nil {
 		return err
 	}
@@ -99,7 +98,7 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 // @Param        id path int true "Post ID"
 // @Router       /posts/:id [put]
 func (_i *controller) Update(c *fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+	id, err := utils.GetIntInParams(c, "id")
 	if err != nil {
 		return err
 	}
@@ -124,7 +123,7 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 // @Param        id path int true "Post ID"
 // @Router       /posts/:id [delete]
 func (_i *controller) Delete(c *fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+	id, err := utils.GetIntInParams(c, "id")
 	if err != nil {
 		return err
 	}
