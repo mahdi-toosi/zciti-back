@@ -13,6 +13,7 @@ type IRepository interface {
 	GetAll(req request.MessageRooms) (messageRooms []*schema.MessageRoom, paging paginator.Pagination, err error)
 	Delete(id uint64) (err error)
 	GetOne(businessID uint64, userID uint64) (messageRoom *schema.MessageRoom, err error)
+	GetOneByID(id uint64) (messageRoom *schema.MessageRoom, err error)
 	Create(messageRoom *schema.MessageRoom) (err error)
 	Update(id uint64, messageRoom *schema.MessageRoom) (err error)
 }
@@ -47,6 +48,15 @@ func (_i *repo) GetAll(req request.MessageRooms) (messageRooms []*schema.Message
 	paging = *req.Pagination
 
 	return
+}
+
+func (_i *repo) GetOneByID(id uint64) (messageRoom *schema.MessageRoom, err error) {
+	err = _i.DB.Chat.First(&messageRoom, id).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return messageRoom, nil
 }
 
 func (_i *repo) GetOne(businessID uint64, userID uint64) (messageRoom *schema.MessageRoom, err error) {

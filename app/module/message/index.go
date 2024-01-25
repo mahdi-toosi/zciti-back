@@ -22,6 +22,7 @@ func (_i *Router) RegisterRoutes(cfg *config.Config) {
 	// define routes
 	_i.App.Route("/api/v1/messages", func(router fiber.Router) {
 		router.Get("/:businessID", mdl.Protected(cfg), mdl.Permission(mdl.DMessage, mdl.PReadAll), c.Index)
+		router.Get("/:businessID/stream", mdl.Protected(cfg), mdl.Permission(mdl.DMessage, mdl.PReadAll), c.Stream)
 		router.Post("/", mdl.Protected(cfg), mdl.Permission(mdl.DMessage, mdl.PCreate), c.Store)
 		router.Put("/:id", mdl.Protected(cfg), mdl.Permission(mdl.DMessage, mdl.PUpdate), c.Update)
 		router.Delete("/:id", mdl.Protected(cfg), mdl.Permission(mdl.DMessage, mdl.PDelete), c.Delete)

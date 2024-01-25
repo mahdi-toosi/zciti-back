@@ -2,7 +2,6 @@ package controller
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/rs/zerolog/log"
 	"go-fiber-starter/app/module/messageRoom/request"
 	"go-fiber-starter/app/module/messageRoom/service"
 	"go-fiber-starter/utils"
@@ -29,16 +28,16 @@ type controller struct {
 // @Security     Bearer
 // @Router       /message-rooms [get]
 func (_i *controller) Index(c *fiber.Ctx) error {
-	userID, err := utils.GetIntInQueries(c, "userID")
-	if err != nil {
-		return err
-	}
-	businessID, err := utils.GetIntInQueries(c, "businessID")
-	if err != nil {
-		return err
-	}
-
-	log.Debug().Msgf("%+v", userID, businessID)
+	//userID, err := utils.GetIntInQueries(c, "userID")
+	//if err != nil {
+	//	return err
+	//}
+	//businessID, err := utils.GetIntInQueries(c, "businessID")
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//log.Debug().Msgf("%+v", userID, businessID)
 
 	paginate, err := paginator.Paginate(c)
 	if err != nil {

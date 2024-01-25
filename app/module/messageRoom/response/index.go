@@ -2,6 +2,9 @@ package response
 
 import (
 	"go-fiber-starter/app/database/schema"
+	"golang.org/x/exp/slices"
+	"strconv"
+	"strings"
 )
 
 type MessageRoom struct {
@@ -20,6 +23,11 @@ type MessageRoomToken struct {
 	BusinessID      uint64
 	UserID          uint64
 	Status          string
+}
+
+func (token *MessageRoomToken) HasMember(id uint64) bool {
+	ids := strings.Split(token.MembersAsString, ",")
+	return slices.Contains(ids, strconv.FormatUint(id, 10))
 }
 
 func FromDomain(messageRoom *schema.MessageRoom, token *string) (res *MessageRoom) {

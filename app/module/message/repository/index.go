@@ -1,28 +1,33 @@
 package repository
 
 import (
+	"encoding/json"
+	"fmt"
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/message/request"
+	"go-fiber-starter/internal/bootstrap"
 	"go-fiber-starter/internal/bootstrap/database"
 	"go-fiber-starter/utils/paginator"
 )
 
 type IRepository interface {
 	GetAll(req request.Messages) (messages []*schema.Message, paging paginator.Pagination, err error)
-	//GetOne(id uint64) (message *schema.Message, err error)
-	Create(message *schema.Message) (err error)
+	CheckForNewMessages(roomId uint64) (messages []*schema.Message) //GetOne(id uint64) (message *schema.Message, err error)
+	Create(msg *schema.Message) (message *schema.Message, err error)
 	Update(id uint64, message *schema.Message) (err error)
 	Delete(id uint64) (err error)
 }
 
-func Repository(DB *database.Database) IRepository {
+func Repository(DB *database.Database, Redis *bootstrap.Redis) IRepository {
 	return &repo{
-		DB,
+		DB:    DB,
+		Redis: Redis,
 	}
 }
 
 type repo struct {
-	DB *database.Database
+	Redis *bootstrap.Redis
+	DB    *database.Database
 }
 
 func (_i *repo) GetAll(req request.Messages) (messages []*schema.Message, paging paginator.Pagination, err error) {
@@ -37,13 +42,28 @@ func (_i *repo) GetAll(req request.Messages) (messages []*schema.Message, paging
 		query.Limit(req.Pagination.Limit)
 	}
 
-	err = query.Order("created_at asc").Find(&messages).Error
+	err = query.Order("created_at desc").Find(&messages).Error
 	if err != nil {
 		return
 	}
 
 	paging = *req.Pagination
 
+	return
+}
+
+func generateRoomIDForRedis(id uint64) string {
+	return fmt.Sprintf("RoomID=%d", id)
+}
+
+func (_i *repo) CheckForNewMessages(roomId uint64) (messages []*schema.Message) {
+	data, err := _i.Redis.Storage.Get(generateRoomIDForRedis(roomId))
+	if err != nil {
+		return nil
+	}
+	if err := json.Unmarshal(data, &messages); err != nil {
+		return nil
+	}
 	return
 }
 
@@ -55,8 +75,10 @@ func (_i *repo) GetOne(id uint64) (message *schema.Message, err error) {
 	return message, nil
 }
 
-func (_i *repo) Create(message *schema.Message) (err error) {
-	return _i.DB.Chat.Create(message).Error
+func (_i *repo) Create(msg *schema.Message) (message *schema.Message, err error) {
+	message = msg
+	err = _i.DB.Chat.Create(&message).Error
+	return message, err
 }
 
 func (_i *repo) Update(id uint64, message *schema.Message) (err error) {

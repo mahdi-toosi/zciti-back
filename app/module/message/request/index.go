@@ -7,11 +7,11 @@ import (
 
 type Message struct {
 	ID      uint64
-	RoomID  uint64 `example:"1" validate:"number"`
-	FromID  uint64 `example:"1" validate:"number"`
-	ToID    uint64 `example:"1" validate:"number"`
-	Type    string `example:"text" validate:"oneof:text,image"`
-	Content string `example:"bla bla bla" validate:"max:2000"`
+	RoomID  uint64 `example:"1" validate:"required,number"`
+	FromID  uint64 `example:"1" validate:"required,number"`
+	Type    string `example:"text" validate:"required,oneof=text image"`
+	Content string `example:"bla bla bla" validate:"required,max=2000"`
+	Token   string `example:"token" validate:"required,min=10"`
 }
 
 type Messages struct {
@@ -26,7 +26,6 @@ func (req *Message) ToDomain() *schema.Message {
 		ID:      req.ID,
 		RoomID:  req.RoomID,
 		FromID:  req.FromID,
-		ToID:    req.ToID,
 		Type:    req.Type,
 		Content: req.Content,
 	}

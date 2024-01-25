@@ -1,7 +1,6 @@
 package service
 
 import (
-	"github.com/rs/zerolog/log"
 	"go-fiber-starter/app/database/schema"
 	businessRepo "go-fiber-starter/app/module/business/repository"
 	"go-fiber-starter/app/module/message/repository"
@@ -13,15 +12,16 @@ import (
 
 type IService interface {
 	Index(req request.Messages, roomID *uint64) (messages []*response.Message, paging paginator.Pagination, msgRoom *schema.MessageRoom, business *schema.Business, err error)
-	Store(req request.Message) (err error)
+	CheckForNewMessages(roomId uint64) (messages []*response.Message)
+	Store(req request.Message) (message *schema.Message, err error)
 	Update(id uint64, req request.Message) (err error)
 	Destroy(id uint64) error
 	//Show(id uint64) (message *response.Message, err error)
 }
 
-func Service(Repo repository.IRepository, messageRoomRepo messageRoomRepo.IRepository, businessRepo businessRepo.IRepository) IService {
+func Service(repo repository.IRepository, messageRoomRepo messageRoomRepo.IRepository, businessRepo businessRepo.IRepository) IService {
 	return &service{
-		Repo:            Repo,
+		Repo:            repo,
 		BusinessRepo:    businessRepo,
 		MessageRoomRepo: messageRoomRepo,
 	}
@@ -45,7 +45,6 @@ func (_i *service) Index(req request.Messages, roomID *uint64) (messages []*resp
 		if err != nil {
 			return
 		}
-		log.Debug().Msgf("msgRoom => %+v", msgRoom)
 	} else {
 		req.RoomID = roomID
 	}
@@ -62,6 +61,15 @@ func (_i *service) Index(req request.Messages, roomID *uint64) (messages []*resp
 	return
 }
 
+func (_i *service) CheckForNewMessages(roomID uint64) (messages []*response.Message) {
+	results := _i.Repo.CheckForNewMessages(roomID)
+
+	for _, result := range results {
+		messages = append(messages, response.FromDomain(result))
+	}
+	return
+}
+
 //func (_i *service) Show(id uint64) (message *response.Message, err error) {
 //	result, err := _i.Repo.GetOne(id)
 //	if err != nil {
@@ -71,7 +79,7 @@ func (_i *service) Index(req request.Messages, roomID *uint64) (messages []*resp
 //	return response.FromDomain(result), nil
 //}
 
-func (_i *service) Store(req request.Message) (err error) {
+func (_i *service) Store(req request.Message) (message *schema.Message, err error) {
 	return _i.Repo.Create(req.ToDomain())
 }
 

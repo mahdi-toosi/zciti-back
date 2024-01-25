@@ -29,7 +29,6 @@ func (Message) Seed(db *gorm.DB) error {
 
 		fakeData.SeenAt = utils.RandomDateTime()
 		fakeData.FromID = 1 // admin
-		fakeData.ToID = utils.Random(1, BusinessSeedCount)
 		fakeData.RoomID = rooms[int(utils.Random(0, 3))].ID
 
 		if err := db.Create(fakeData).Error; err != nil {
