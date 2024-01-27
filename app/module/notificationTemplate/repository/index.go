@@ -37,7 +37,7 @@ func (_i *repo) GetAll(req ntrequest.Index) (notificationTemplates []*schema.Not
 		query.Limit(req.Pagination.Limit)
 	}
 
-	err = query.Order("created_at asc").Find(&notificationTemplates).Error
+	err = query.Order("created_at desc").Find(&notificationTemplates).Error
 	if err != nil {
 		return
 	}

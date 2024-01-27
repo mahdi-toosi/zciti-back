@@ -24,5 +24,7 @@ func (_db *Redis) ConnectRedis() {
 		URL: _db.Cfg.Redis.Url,
 	})
 
+	_db.Log.Info().Msg("Connected the Redis successfully!")
+
 	_db.Storage = storage
 }

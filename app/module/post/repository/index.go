@@ -37,7 +37,7 @@ func (_i *repo) GetAll(req request.PostsRequest) (posts []*schema.Post, paging p
 		query.Limit(req.Pagination.Limit)
 	}
 
-	err = query.Preload("Author").Preload("Business").Order("created_at asc").Find(&posts).Error
+	err = query.Preload("Author").Preload("Business").Order("created_at desc").Find(&posts).Error
 	if err != nil {
 		return
 	}
@@ -48,7 +48,7 @@ func (_i *repo) GetAll(req request.PostsRequest) (posts []*schema.Post, paging p
 }
 
 func (_i *repo) GetOne(id uint64) (post *schema.Post, err error) {
-	if err := _i.DB.Main.First(&post, id).Error; err != nil {
+	if err := _i.DB.Main.Preload("Business").First(&post, id).Error; err != nil {
 		return nil, err
 	}
 

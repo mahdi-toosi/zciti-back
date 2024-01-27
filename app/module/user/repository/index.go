@@ -45,7 +45,7 @@ func (_i *repo) GetAll(req request.Users) (users []*schema.User, paging paginato
 		query.Limit(req.Pagination.Limit)
 	}
 
-	err = query.Order("created_at asc").Find(&users).Error
+	err = query.Order("created_at desc").Find(&users).Error
 	if err != nil {
 		return
 	}

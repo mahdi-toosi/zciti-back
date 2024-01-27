@@ -92,12 +92,10 @@ func (_db *Database) SeedModels() {
 			if err := model.Seed(_db.Main); err != nil {
 				_db.Log.Error().Err(err).Msg("An unknown error occurred when to seed the *Main* database!")
 			}
-
-			_db.Log.Info().Msg("*Main* Seeded the database successfully!")
-		} else {
-			_db.Log.Info().Msg("*Main* Database is already seeded!")
 		}
 	}
+
+	_db.Log.Info().Msg("*Main* Seeded the database successfully!")
 
 	for _, model := range seeds.ChatDBSeeders() {
 		count, err := model.Count(_db.Chat)
@@ -109,12 +107,10 @@ func (_db *Database) SeedModels() {
 			if err := model.Seed(_db.Chat); err != nil {
 				_db.Log.Error().Err(err).Msg("An unknown error occurred when to seed the *Chat* database!")
 			}
-
-			_db.Log.Info().Msg("*Chat* Seeded the database successfully!")
-		} else {
-			_db.Log.Info().Msg("*Chat* Database is already seeded!")
 		}
 	}
+
+	_db.Log.Info().Msg("*Chat* Seeded the database successfully!")
 }
 
 func (_db *Database) DropTables() {

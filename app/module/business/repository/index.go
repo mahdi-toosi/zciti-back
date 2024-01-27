@@ -45,7 +45,7 @@ func (_i *repo) GetAll(req request.Businesses) (businesses []*schema.Business, p
 		query.Limit(req.Pagination.Limit)
 	}
 
-	err = query.Preload("Owner").Order("created_at asc").Find(&businesses).Error
+	err = query.Preload("Owner").Order("created_at desc").Find(&businesses).Error
 	if err != nil {
 		return
 	}

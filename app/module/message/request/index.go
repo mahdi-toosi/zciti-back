@@ -7,11 +7,11 @@ import (
 
 type Message struct {
 	ID      uint64
-	RoomID  uint64 `example:"1" validate:"number"`
-	FromID  uint64 `example:"1" validate:"number"`
+	RoomID  uint64 `example:"1" validate:"required,number"`
+	FromID  uint64 `example:"1" validate:"required,number"`
 	ToID    uint64 `example:"1" validate:"number"`
-	Type    string `example:"text" validate:"oneof=text image"`
-	Content string `example:"bla bla bla" validate:"max:2000"`
+	Type    string `example:"text" validate:"required,oneof=text image"`
+	Content string `example:"bla bla bla" validate:"required,max:2000"`
 }
 
 type Messages struct {

@@ -7,8 +7,8 @@ import (
 
 type MessageRoom struct {
 	ID         uint64
-	BusinessID uint64 `example:"1" validate:"number"`
-	UserID     uint64 `example:"1" validate:"number"`
+	BusinessID uint64 `example:"1" validate:"required,number"`
+	UserID     uint64 `example:"1" validate:"required,number"`
 	Status     string `example:"active" validate:"oneof=active archived blocked"`
 }
 
