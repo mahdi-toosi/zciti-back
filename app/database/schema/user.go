@@ -23,10 +23,15 @@ func (u *User) ComparePassword(password string) bool {
 }
 
 const (
-	RAdmin = "admin"
-	RUser  = "user"
+	RUser          = "user"
+	RAdmin         = "admin"
+	RBusinessOwner = "businessOwner"
 )
 
 func (u *User) IsAdmin() bool {
 	return slices.Contains(u.Roles, RAdmin)
+}
+
+func (u *User) IsBusinessOwner() bool {
+	return slices.Contains(u.Roles, RBusinessOwner)
 }

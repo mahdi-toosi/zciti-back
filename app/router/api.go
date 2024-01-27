@@ -5,6 +5,7 @@ import (
 	"github.com/gofiber/swagger"
 	"go-fiber-starter/app/module/auth"
 	"go-fiber-starter/app/module/business"
+	"go-fiber-starter/app/module/comment"
 	"go-fiber-starter/app/module/message"
 	"go-fiber-starter/app/module/messageRoom"
 	"go-fiber-starter/app/module/notification"
@@ -22,6 +23,7 @@ type Router struct {
 	UserRouter                 *user.Router
 	PostRouter                 *post.Router
 	MessageRouter              *message.Router
+	CommentRouter              *comment.Router
 	BusinessRouter             *business.Router
 	MessageRoomRouter          *messageRoom.Router
 	NotificationRouter         *notification.Router
@@ -35,6 +37,7 @@ func NewRouter(
 	authRouter *auth.Router,
 	userRouter *user.Router,
 	postRouter *post.Router,
+	commentRouter *comment.Router,
 	messageRouter *message.Router,
 	businessRouter *business.Router,
 	messageRoomRouter *messageRoom.Router,
@@ -48,6 +51,7 @@ func NewRouter(
 		AuthRouter:                 authRouter,
 		UserRouter:                 userRouter,
 		PostRouter:                 postRouter,
+		CommentRouter:              commentRouter,
 		MessageRouter:              messageRouter,
 		BusinessRouter:             businessRouter,
 		MessageRoomRouter:          messageRoomRouter,
@@ -58,9 +62,10 @@ func NewRouter(
 
 // Register routes
 func (r *Router) Register() { // Register routes of modules
-	r.UserRouter.RegisterRoutes(r.Cfg)
 	r.AuthRouter.RegisterRoutes()
+	r.UserRouter.RegisterRoutes(r.Cfg)
 	r.PostRouter.RegisterRoutes(r.Cfg)
+	r.CommentRouter.RegisterRoutes(r.Cfg)
 	r.MessageRouter.RegisterRoutes(r.Cfg)
 	r.BusinessRouter.RegisterRoutes(r.Cfg)
 	r.MessageRoomRouter.RegisterRoutes(r.Cfg)

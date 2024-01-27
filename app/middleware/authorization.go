@@ -48,11 +48,12 @@ var Permissions = map[string]map[DomainType]map[PermissionType]bool{
 	schema.RAdmin: {
 		DUser:                 {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DPost:                 {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
+		DComment:              {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
+		DMessage:              {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DBusiness:             {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
+		DMessageRoom:          {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DNotification:         {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DNotificationTemplate: {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
-		DMessage:              {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
-		DMessageRoom:          {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 	},
 	schema.RUser: {},
 }
@@ -70,11 +71,12 @@ type DomainType int
 const (
 	DPost DomainType = iota
 	DUser
-	DNotification
-	DNotificationTemplate
-	DBusiness
+	DComment
 	DMessage
+	DBusiness
+	DNotification
 	DMessageRoom
+	DNotificationTemplate
 )
 
 // end define Domains
@@ -85,10 +87,10 @@ type PermissionType int
 
 const (
 	PCreate PermissionType = iota
-	PReadAll
-	PReadSingle
 	PUpdate
 	PDelete
+	PReadAll
+	PReadSingle
 )
 
 // end define Permissions

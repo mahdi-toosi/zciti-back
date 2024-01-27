@@ -6,8 +6,9 @@ func MainDBModels() []any {
 	// order matters
 	return []any{
 		User{},
-		Post{},
 		Business{},
+		Post{},
+		Comment{},
 		NotificationTemplate{},
 		Notification{},
 	}

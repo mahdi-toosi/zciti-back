@@ -14,3 +14,22 @@ type Post struct {
 	CommentsCount  uint64   `gorm:"not null"`
 	Base
 }
+
+const (
+	PostStatusDraft     = "draft"
+	PostStatusPublished = "published"
+	PostStatusPrivate   = "private"
+)
+
+const (
+	PostCommentStatusOpen          = "open"
+	PostCommentStatusClose         = "close"
+	PostCommentStatusOnlyBuyers    = "onlyBuyers"
+	PostCommentStatusOnlyCustomers = "onlyCustomers"
+)
+
+const (
+	PostTypePage    = "page"
+	PostTypeProduct = "product"
+	PostTypePost    = "post"
+)

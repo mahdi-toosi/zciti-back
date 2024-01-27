@@ -11,8 +11,9 @@ func MainDBSeeders() []Seeder {
 	// order matters
 	return []Seeder{
 		User{},
-		Post{},
 		Business{},
+		Post{},
+		Comment{},
 		NotificationTemplate{},
 		Notification{},
 	}
