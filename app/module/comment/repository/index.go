@@ -8,7 +8,7 @@ import (
 )
 
 type IRepository interface {
-	GetAll(postID uint64, req request.Comments) (comments []*schema.Comment, paging paginator.Pagination, err error)
+	GetAll(postID uint64, req request.Comments) (comments []map[string]interface{}, paging paginator.Pagination, err error)
 	GetOne(id uint64) (comment *schema.Comment, err error)
 	Create(comment *schema.Comment) (err error)
 	Update(id uint64, comment *schema.Comment) (err error)
@@ -25,19 +25,33 @@ type repo struct {
 	DB *database.Database
 }
 
-func (_i *repo) GetAll(postID uint64, req request.Comments) (comments []*schema.Comment, paging paginator.Pagination, err error) {
-	query := _i.DB.Main.Model(&schema.Comment{}).Where("post_id = ?", postID)
-
+func (_i *repo) GetAll(postID uint64, req request.Comments) (comments []map[string]interface{}, paging paginator.Pagination, err error) {
 	if req.Pagination.Page > 0 {
 		var total int64
-		query.Count(&total)
+		_i.DB.Main.Model(&schema.Comment{}).Where("post_id = ? and parent_id is null", postID).Count(&total)
 		req.Pagination.Total = total
-
-		query.Offset(req.Pagination.Offset)
-		query.Limit(req.Pagination.Limit)
 	}
 
-	err = query.Preload("Author").Order("created_at desc").Find(&comments).Error
+	err = _i.DB.Main.Raw(`
+		WITH roots AS (
+			SELECT id FROM comments WHERE parent_id IS NULL AND post_id = ? offset ? limit ?
+		),
+			 recursive AS (
+				 WITH RECURSIVE comment_tree(id, parent_id, content, author_id, status, is_business_owner, created_at, depth) AS (
+					 SELECT c.id, c.parent_id, c.content, c.author_id, c.status, c.is_business_owner, c.created_at, 1
+					 FROM comments c JOIN roots ON roots.id = c.id
+		
+					 UNION ALL
+		
+					 SELECT c.id, c.parent_id, c.content, c.author_id, c.status, c.is_business_owner, c.created_at, p.depth + 1
+					 FROM comments c JOIN comment_tree p ON c.parent_id = p.id
+				 )
+				 SELECT * FROM comment_tree
+			 )
+		SELECT r.*, u.first_name || ' ' || u.last_name as author_full_name FROM recursive r
+		left join users u on u.id = r.author_id
+		order by r.created_at desc;
+		`, postID, req.Pagination.Offset, req.Pagination.Limit).Scan(&comments).Error
 	if err != nil {
 		return
 	}

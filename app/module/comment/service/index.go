@@ -13,8 +13,8 @@ import (
 
 type IService interface {
 	Index(postID uint64, req request.Comments) (comments []*response.Comment, paging paginator.Pagination, err error)
-	Show(id uint64) (comment *response.Comment, err error)
-	Store(postID uint64, req request.Comment) (err error)
+	Show(id uint64) (comment *schema.Comment, err error)
+	Store(postID uint64, req request.Comment, isUserOwnerOfSomeBusiness bool) (err error)
 	Update(postID uint64, id uint64, req request.Comment) (err error)
 	UpdateStatus(id uint64, req request.UpdateCommentStatus) (err error)
 	Destroy(id uint64) error
@@ -45,26 +45,47 @@ func (_i *service) Index(postID uint64, req request.Comments) (comments []*respo
 	return
 }
 
-func (_i *service) Show(id uint64) (comment *response.Comment, err error) {
+func (_i *service) Show(id uint64) (comment *schema.Comment, err error) {
 	result, err := _i.Repo.GetOne(id)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.FromDomain(result), nil
+	return result, nil
 }
 
-func (_i *service) Store(postID uint64, req request.Comment) (err error) {
-	log.Debug().Msgf(" req.AuthorID => %+v ", req.AuthorID)
-	if ok, _ := _i.hasPermissionToStore(postID, req.AuthorID); !ok {
+func (_i *service) Store(postID uint64, req request.Comment, isUserOwnerOfSomeBusiness bool) (err error) {
+	ok, _, post := _i.hasPermissionToStore(postID, req.AuthorID)
+	if !ok {
 		return fiber.ErrForbidden
 	}
 
-	return _i.Repo.Create(req.ToDomain(&postID))
+	var IsNotBusinessOwner = false
+	req.IsBusinessOwner = &IsNotBusinessOwner
+
+	if isUserOwnerOfSomeBusiness {
+		if err == nil && post.Business.OwnerID == req.AuthorID {
+			req.Status = schema.CommentStatusApproved
+			var IsBusinessOwner = true
+			req.IsBusinessOwner = &IsBusinessOwner
+		}
+	}
+
+	err = _i.Repo.Create(req.ToDomain(&postID))
+	if err != nil {
+		return err
+	}
+
+	err = _i.PostsRepo.Update(postID, &schema.Post{CommentsCount: post.CommentsCount + 1})
+	if err != nil {
+		return err
+	}
+
+	return
 }
 
 func (_i *service) Update(postID uint64, id uint64, req request.Comment) (err error) {
-	if ok, _ := _i.hasPermissionToStore(postID, req.AuthorID); !ok {
+	if ok, _, _ := _i.hasPermissionToStore(postID, req.AuthorID); !ok {
 		return fiber.ErrForbidden
 	}
 
@@ -79,18 +100,18 @@ func (_i *service) Destroy(id uint64) error {
 	return _i.Repo.Delete(id)
 }
 
-func (_i *service) hasPermissionToStore(postID uint64, authorID uint64) (ok bool, err error) {
-	post, err := _i.PostsRepo.GetOne(postID)
+func (_i *service) hasPermissionToStore(postID uint64, authorID uint64) (ok bool, err error, post *schema.Post) {
+	post, err = _i.PostsRepo.GetOne(postID)
 	if err != nil {
-		return false, nil
+		return false, nil, nil
 	}
 
 	if post.CommentsStatus == schema.PostCommentStatusClose {
-		return false, nil
+		return false, nil, post
 	}
 
 	if post.CommentsStatus == schema.PostCommentStatusOpen {
-		return true, nil
+		return true, nil, post
 	}
 
 	if post.CommentsStatus == schema.PostCommentStatusOnlyCustomers {
@@ -103,5 +124,5 @@ func (_i *service) hasPermissionToStore(postID uint64, authorID uint64) (ok bool
 		// TODO => complete it
 	}
 
-	return true, nil
+	return true, nil, post
 }

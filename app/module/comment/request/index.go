@@ -6,10 +6,12 @@ import (
 )
 
 type Comment struct {
-	ID       uint64
-	Content  string `example:"content content content" validate:"required,max=1000"`
-	Status   string
-	AuthorID uint64
+	ID              uint64
+	Content         string `example:"content content content" validate:"required,max=1000"`
+	Status          string
+	ParentID        *uint64
+	IsBusinessOwner *bool
+	AuthorID        uint64
 }
 
 type UpdateCommentStatus struct {
@@ -22,10 +24,12 @@ type Comments struct {
 
 func (req *Comment) ToDomain(postID *uint64) *schema.Comment {
 	return &schema.Comment{
-		ID:       req.ID,
-		Status:   req.Status,
-		Content:  req.Content,
-		AuthorID: req.AuthorID,
-		PostID:   *postID,
+		ID:              req.ID,
+		PostID:          *postID,
+		Status:          req.Status,
+		Content:         req.Content,
+		AuthorID:        req.AuthorID,
+		ParentID:        req.ParentID,
+		IsBusinessOwner: *req.IsBusinessOwner,
 	}
 }

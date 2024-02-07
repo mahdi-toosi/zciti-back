@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/comment/request"
 	"go-fiber-starter/app/module/comment/service"
 	"go-fiber-starter/app/module/post/repository"
@@ -99,9 +100,9 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 	req.AuthorID = user.ID
-	req.Status = "pending"
+	req.Status = schema.CommentStatusPending
 
-	err = _i.service.Store(postID, *req)
+	err = _i.service.Store(postID, *req, user.IsBusinessOwner())
 	if err != nil {
 		return err
 	}
@@ -145,8 +146,7 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 	if comment.AuthorID != user.ID {
 		return fiber.ErrForbidden
 	}
-
-	req.Status = "pending"
+	req.Status = schema.CommentStatusPending
 
 	err = _i.service.Update(postID, id, *req)
 	if err != nil {
@@ -186,7 +186,6 @@ func (_i *controller) UpdateStatus(c *fiber.Ctx) error {
 	if !user.IsBusinessOwner() {
 		return fiber.ErrForbidden
 	}
-
 	post, err := _i.postsRepo.GetOne(postID)
 	if err != nil || post.Business.OwnerID != user.ID {
 		return fiber.ErrBadRequest
