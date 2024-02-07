@@ -13,6 +13,15 @@ type Comment struct{}
 const CommentSeedCount = 400
 
 func (Comment) Seed(db *gorm.DB) error {
+	userIDs, err := utils.GetFakeTableIDs(db, schema.User{})
+	if err != nil {
+		return err
+	}
+	postIDs, err := utils.GetFakeTableIDs(db, schema.Post{})
+	if err != nil {
+		return err
+	}
+
 	for i := 0; i <= CommentSeedCount; i++ {
 		fakeData := &schema.Comment{}
 		err := faker.FakeData(&fakeData)
@@ -21,8 +30,8 @@ func (Comment) Seed(db *gorm.DB) error {
 			return err
 		}
 
-		fakeData.PostID = utils.Random(1, PostSeedCount)
-		fakeData.AuthorID = utils.Random(1, UserSeedCount)
+		fakeData.PostID = utils.RandomFromArray(postIDs)
+		fakeData.AuthorID = utils.RandomFromArray(userIDs)
 
 		if err := db.Create(fakeData).Error; err != nil {
 			log.Error().Err(err)

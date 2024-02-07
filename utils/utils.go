@@ -3,7 +3,9 @@ package utils
 import (
 	"errors"
 	"github.com/gofiber/fiber/v2"
+	"github.com/rs/zerolog/log"
 	"go-fiber-starter/app/database/schema"
+	"gorm.io/gorm"
 	"math/rand"
 	"regexp"
 	"strconv"
@@ -59,6 +61,19 @@ func ValidateMobileNumber(number string) error {
 
 func Random(min int, max int) uint64 {
 	return uint64(rand.Intn(max-min) + min) //nolint:gosec
+}
+
+func RandomFromArray(arr []uint64) uint64 {
+	randomIndex := rand.Intn(len(arr))
+	return arr[randomIndex]
+}
+
+func GetFakeTableIDs(db *gorm.DB, table any) (ids []uint64, err error) {
+	err = db.Model(&table).Select("id").Find(&ids).Error
+	if err != nil {
+		log.Err(err)
+	}
+	return
 }
 
 func RandomDateTime() time.Time {

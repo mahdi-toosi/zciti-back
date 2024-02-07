@@ -15,6 +15,11 @@ type Business struct{}
 const BusinessSeedCount = 30
 
 func (Business) Seed(db *gorm.DB) error {
+	userIDs, err := utils.GetFakeTableIDs(db, schema.User{})
+	if err != nil {
+		return err
+	}
+
 	for i := 0; i <= BusinessSeedCount; i++ {
 		fakeData := &schema.Business{}
 		err := faker.FakeData(&fakeData)
@@ -23,7 +28,7 @@ func (Business) Seed(db *gorm.DB) error {
 			return err
 		}
 
-		fakeData.OwnerID = utils.Random(0, UserSeedCount)
+		fakeData.OwnerID = utils.RandomFromArray(userIDs)
 		meta, _ := json.Marshal(map[string]any{"ShebaNumber": 2323})
 		fakeData.Meta = string(meta)
 

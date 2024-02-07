@@ -13,6 +13,21 @@ type Notification struct{}
 const NotificationSeedCount = 40
 
 func (Notification) Seed(db *gorm.DB) error {
+	userIDs, err := utils.GetFakeTableIDs(db, schema.User{})
+	if err != nil {
+		return err
+	}
+
+	businessIDs, err := utils.GetFakeTableIDs(db, schema.Business{})
+	if err != nil {
+		return err
+	}
+
+	notifTemplateIDs, err := utils.GetFakeTableIDs(db, schema.NotificationTemplate{})
+	if err != nil {
+		return err
+	}
+
 	for i := 0; i <= NotificationSeedCount; i++ {
 		fakeData := &schema.Notification{}
 		err := faker.FakeData(&fakeData)
@@ -27,9 +42,9 @@ func (Notification) Seed(db *gorm.DB) error {
 			fakeData.Type = []string{string(schema.TSms)}
 		}
 
-		fakeData.ReceiverID = utils.Random(1, UserSeedCount)
-		fakeData.BusinessID = utils.Random(1, BusinessSeedCount)
-		fakeData.TemplateID = utils.Random(1, NotificationTemplateSeedCount)
+		fakeData.ReceiverID = utils.RandomFromArray(userIDs)
+		fakeData.BusinessID = utils.RandomFromArray(businessIDs)
+		fakeData.TemplateID = utils.RandomFromArray(notifTemplateIDs)
 
 		if err := db.Create(fakeData).Error; err != nil {
 			log.Error().Err(err)

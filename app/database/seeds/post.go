@@ -13,6 +13,16 @@ type Post struct{}
 const PostSeedCount = 60
 
 func (Post) Seed(db *gorm.DB) error {
+	userIDs, err := utils.GetFakeTableIDs(db, schema.User{})
+	if err != nil {
+		return err
+	}
+
+	businessIDs, err := utils.GetFakeTableIDs(db, schema.Business{})
+	if err != nil {
+		return err
+	}
+
 	for i := 0; i <= PostSeedCount; i++ {
 		fakeData := &schema.Post{}
 		err := faker.FakeData(&fakeData)
@@ -21,8 +31,8 @@ func (Post) Seed(db *gorm.DB) error {
 			return err
 		}
 
-		fakeData.AuthorID = utils.Random(1, UserSeedCount)
-		fakeData.BusinessID = utils.Random(1, BusinessSeedCount)
+		fakeData.AuthorID = utils.RandomFromArray(userIDs)
+		fakeData.BusinessID = utils.RandomFromArray(businessIDs)
 
 		if err := db.Create(fakeData).Error; err != nil {
 			log.Error().Err(err)

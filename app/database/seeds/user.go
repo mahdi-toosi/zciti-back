@@ -23,7 +23,7 @@ func (User) Seed(db *gorm.DB) error {
 	admin.FirstName = "mahdi"
 	admin.Mobile = 9380338494
 	admin.MobileConfirmed = true
-	admin.Roles = []string{"admin"}
+	admin.Roles = []string{schema.RAdmin, schema.RBusinessOwner}
 
 	if err := db.Create(admin).Error; err != nil {
 		log.Error().Err(err)

@@ -13,6 +13,11 @@ type NotificationTemplate struct{}
 const NotificationTemplateSeedCount = 30
 
 func (NotificationTemplate) Seed(db *gorm.DB) error {
+	businessIDs, err := utils.GetFakeTableIDs(db, schema.Business{})
+	if err != nil {
+		return err
+	}
+
 	for i := 0; i <= NotificationTemplateSeedCount; i++ {
 		fakeData := &schema.NotificationTemplate{}
 		err := faker.FakeData(&fakeData)
@@ -21,7 +26,7 @@ func (NotificationTemplate) Seed(db *gorm.DB) error {
 			return err
 		}
 
-		fakeData.BusinessID = utils.Random(1, BusinessSeedCount)
+		fakeData.BusinessID = utils.RandomFromArray(businessIDs)
 
 		if err := db.Create(fakeData).Error; err != nil {
 			log.Error().Err(err)
