@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"fmt"
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/user/request"
 	"go-fiber-starter/internal/bootstrap/database"
@@ -31,8 +30,8 @@ func (_i *repo) GetAll(req request.Users) (users []*schema.User, paging paginato
 	query := _i.DB.Main.Model(&schema.User{})
 
 	if req.Keyword != "" {
-		query.Where("first_name Like ?", fmt.Sprint("%", req.Keyword, "%"))
-		query.Or("last_name Like ?", fmt.Sprint("%", req.Keyword, "%"))
+		query.Where("first_name Like ?", "%"+req.Keyword+"%")
+		query.Or("last_name Like ?", "%"+req.Keyword+"%")
 		query.Or("mobile", req.Keyword)
 	}
 

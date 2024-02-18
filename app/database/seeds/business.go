@@ -35,10 +35,17 @@ func (Business) Seed(db *gorm.DB) error {
 		if err := db.Create(fakeData).Error; err != nil {
 			log.Error().Err(err)
 		}
+	}
 
-		query := "INSERT INTO business_users (business_id, user_id) VALUES  (%d, %d)"
-		for userID := 1; userID < UserSeedCount; userID++ {
-			db.Exec(fmt.Sprintf(query, i+1, userID))
+	businessIDs, err := utils.GetFakeTableIDs(db, schema.Business{})
+	if err != nil {
+		return err
+	}
+
+	query := "INSERT INTO business_users (business_id, user_id) VALUES  (%d, %d)"
+	for b := 0; b < len(businessIDs); b++ {
+		for u := 0; u < len(userIDs); u++ {
+			db.Exec(fmt.Sprintf(query, businessIDs[b], userIDs[u]))
 		}
 	}
 

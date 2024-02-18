@@ -26,3 +26,9 @@ docs/
 # configs
 config/*
 !config/example.toml
+
+# storage
+storage/public/*
+!storage/public/example.txt
+storage/private/*
+!storage/private/example.html

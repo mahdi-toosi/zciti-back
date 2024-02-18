@@ -64,7 +64,7 @@ func (m *Middleware) Register() {
 		Next: utils.IsEnabled(m.Cfg.Middleware.Pprof.Enable),
 	}))
 
-	m.App.Use(filesystem.New(filesystem.Config{
+	m.App.Use("/asset", filesystem.New(filesystem.Config{
 		Next:   utils.IsEnabled(m.Cfg.Middleware.FileSystem.Enable),
 		Root:   http.Dir(m.Cfg.Middleware.FileSystem.Root),
 		Browse: m.Cfg.Middleware.FileSystem.Browse,

@@ -26,12 +26,17 @@ func NewDatabase(cfg *config.Config, log zerolog.Logger) *Database {
 }
 
 func (_db *Database) ConnectDatabase() {
-	mainDB, err := gorm.Open(postgres.Open(_db.Cfg.DB.Main.Url), &gorm.Config{})
+	mainDB, err := gorm.Open(postgres.Open(_db.Cfg.DB.Main.Url), &gorm.Config{
+		PrepareStmt:            true,
+		SkipDefaultTransaction: true,
+	})
 	if err != nil {
 		_db.Log.Error().Err(err).Msg("An unknown error occurred when to connect the *Main* database!")
 	} else {
 		_db.Log.Info().Msg("Connected the *Main* database successfully!")
 	}
+
+	_ = mainDB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"").Error
 
 	_db.Main = mainDB
 

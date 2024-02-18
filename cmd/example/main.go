@@ -1,6 +1,7 @@
 package main
 
 import (
+	"go-fiber-starter/app/module/asset"
 	"go-fiber-starter/app/module/auth"
 	"go-fiber-starter/app/module/business"
 	"go-fiber-starter/app/module/comment"
@@ -61,6 +62,7 @@ func main() {
 		post.Module,
 		user.Module,
 		auth.Module,
+		asset.Module,
 		message.Module,
 		comment.Module,
 		business.Module,

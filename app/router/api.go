@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
+	"go-fiber-starter/app/module/asset"
 	"go-fiber-starter/app/module/auth"
 	"go-fiber-starter/app/module/business"
 	"go-fiber-starter/app/module/comment"
@@ -22,6 +23,7 @@ type Router struct {
 	AuthRouter                 *auth.Router
 	UserRouter                 *user.Router
 	PostRouter                 *post.Router
+	AssetRouter                *asset.Router
 	MessageRouter              *message.Router
 	CommentRouter              *comment.Router
 	BusinessRouter             *business.Router
@@ -37,6 +39,7 @@ func NewRouter(
 	authRouter *auth.Router,
 	userRouter *user.Router,
 	postRouter *post.Router,
+	AssetRouter *asset.Router,
 	commentRouter *comment.Router,
 	messageRouter *message.Router,
 	businessRouter *business.Router,
@@ -51,6 +54,7 @@ func NewRouter(
 		AuthRouter:                 authRouter,
 		UserRouter:                 userRouter,
 		PostRouter:                 postRouter,
+		AssetRouter:                AssetRouter,
 		CommentRouter:              commentRouter,
 		MessageRouter:              messageRouter,
 		BusinessRouter:             businessRouter,
@@ -65,6 +69,7 @@ func (r *Router) Register() { // Register routes of modules
 	r.AuthRouter.RegisterRoutes()
 	r.UserRouter.RegisterRoutes(r.Cfg)
 	r.PostRouter.RegisterRoutes(r.Cfg)
+	r.AssetRouter.RegisterRoutes(r.Cfg)
 	r.CommentRouter.RegisterRoutes(r.Cfg)
 	r.MessageRouter.RegisterRoutes(r.Cfg)
 	r.BusinessRouter.RegisterRoutes(r.Cfg)

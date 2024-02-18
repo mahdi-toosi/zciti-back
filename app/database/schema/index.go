@@ -7,6 +7,7 @@ func MainDBModels() []any {
 	return []any{
 		User{},
 		Business{},
+		Asset{},
 		Post{},
 		Comment{},
 		NotificationTemplate{},
@@ -23,7 +24,7 @@ func ChatDBModels() []any {
 }
 
 func MainDBDropExtraCommands(db *gorm.DB) {
-	db.Exec("DROP TABLE business_users")
+	db.Exec("DROP TABLE IF EXISTS business_users")
 }
 
 func ChatDBDropExtraCommands(db *gorm.DB) {

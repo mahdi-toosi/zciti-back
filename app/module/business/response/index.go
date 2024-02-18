@@ -1,7 +1,6 @@
 package response
 
 import (
-	"fmt"
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/user/response"
 )
@@ -33,7 +32,7 @@ func FromDomain(business *schema.Business) (res *Business) {
 		Title: business.Title,
 		Owner: response.User{
 			ID:       business.Owner.ID,
-			FullName: fmt.Sprint(business.Owner.FirstName, " ", business.Owner.LastName),
+			FullName: business.Owner.FirstName + " " + business.Owner.LastName,
 		},
 		Meta:        business.Meta,
 		OwnerID:     business.OwnerID,

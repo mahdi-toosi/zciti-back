@@ -1,7 +1,6 @@
 package response
 
 import (
-	"fmt"
 	"go-fiber-starter/app/database/schema"
 )
 
@@ -19,7 +18,7 @@ func FromDomain(user *schema.User) (res *User) {
 	if user != nil {
 		res = &User{
 			ID:              user.ID,
-			FullName:        fmt.Sprint(user.FirstName, " ", user.LastName),
+			FullName:        user.FirstName + " " + user.LastName,
 			Mobile:          user.Mobile,
 			MobileConfirmed: user.MobileConfirmed,
 			Roles:           user.Roles,

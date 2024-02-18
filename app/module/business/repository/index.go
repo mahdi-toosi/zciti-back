@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"fmt"
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/business/request"
 	"go-fiber-starter/internal/bootstrap/database"
@@ -33,7 +32,7 @@ func (_i *repo) GetAll(req request.Businesses) (businesses []*schema.Business, p
 	query := _i.DB.Main.Model(&schema.Business{})
 
 	if req.Keyword != "" {
-		query.Where("title Like ?", fmt.Sprint("%", req.Keyword, "%"))
+		query.Where("title Like ?", "%"+req.Keyword+"%")
 	}
 
 	if req.Pagination.Page > 0 {
