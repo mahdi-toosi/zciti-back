@@ -44,14 +44,6 @@ func Start(lifecycle fx.Lifecycle, cfg *config.Config, fiber *fiber.App, router 
 				router.Register()
 
 				// Custom Startup Messages
-				host, port := config.ParseAddress(cfg.App.Port)
-				if host == "" {
-					if fiber.Config().Network == "tcp6" {
-						host = "[::1]"
-					} else {
-						host = "0.0.0.0"
-					}
-				}
 
 				log.Info().Msg(fiber.Config().AppName + " is running at the moment!")
 
@@ -65,8 +57,7 @@ func Start(lifecycle fx.Lifecycle, cfg *config.Config, fiber *fiber.App, router 
 					}
 
 					log.Info().Msgf("Version: %s", "-")
-					log.Info().Msgf("Host: %s", host)
-					log.Info().Msgf("Port: %s", port)
+					log.Info().Msgf("Serve On: %s", cfg.ParseAddress())
 					log.Info().Msgf("Prefork: %s", prefork)
 					log.Info().Msgf("Handlers: %d", fiber.HandlersCount())
 					log.Info().Msgf("Processes: %d", procs)
@@ -83,7 +74,7 @@ func Start(lifecycle fx.Lifecycle, cfg *config.Config, fiber *fiber.App, router 
 				}
 
 				go func() {
-					if err := fiber.Listen(port); err != nil {
+					if err := fiber.Listen(":" + cfg.App.Port); err != nil {
 						log.Error().Err(err).Msg("An unknown error occurred when to run server!")
 					}
 				}()

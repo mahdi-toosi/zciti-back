@@ -4,7 +4,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -17,6 +16,7 @@ import (
 // app struct config
 type app = struct {
 	Name        string        `toml:"name"`
+	Domain      string        `toml:"domain"`
 	Port        string        `toml:"port"`
 	PrintRoutes bool          `toml:"print-routes"`
 	Prefork     bool          `toml:"prefork"`
@@ -24,8 +24,8 @@ type app = struct {
 	IdleTimeout time.Duration `toml:"idle-timeout"`
 	TLS         struct {
 		Enable   bool   `toml:"enable"`
-		CertFile string `toml:"cert-file"`
-		KeyFile  string `toml:"key-file"`
+		CertFile string `toml:"cert-asset"`
+		KeyFile  string `toml:"key-asset"`
 	}
 }
 
@@ -108,7 +108,7 @@ type Config struct {
 	Services   services
 }
 
-// func to parse config
+// ParseConfig func to parse config
 func ParseConfig(name string, debug ...bool) (*Config, error) {
 	var (
 		contents *Config
@@ -134,7 +134,7 @@ func ParseConfig(name string, debug ...bool) (*Config, error) {
 	return contents, err
 }
 
-// initialize config
+// NewConfig initialize config
 func NewConfig() *Config {
 	config, err := ParseConfig("zciti")
 	if err != nil && !fiber.IsChild() {
@@ -144,11 +144,7 @@ func NewConfig() *Config {
 	return config
 }
 
-// func to parse address
-func ParseAddress(raw string) (host, port string) {
-	if i := strings.LastIndex(raw, ":"); i > 0 {
-		return raw[:i], raw[i+1:]
-	}
-
-	return "", ":" + raw
+// ParseAddress func to parse address
+func (c Config) ParseAddress() string {
+	return c.App.Domain + ":" + c.App.Port
 }

@@ -3,13 +3,12 @@ package response
 import (
 	"reflect"
 
-	"github.com/rs/zerolog/log"
-
 	"github.com/go-playground/locales/fa_IR"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	fat "github.com/go-playground/validator/v10/translations/fa"
 	"github.com/gofiber/fiber/v2"
+	"github.com/rs/zerolog/log"
 )
 
 var (
