@@ -13,6 +13,7 @@ type Asset struct {
 	Title      string
 	Path       string
 	Ext        string
+	Size       uint64
 	IsPrivate  bool `example:"true" validate:"boolean"`
 	UserID     uint64
 	BusinessID uint64
@@ -24,8 +25,9 @@ type UpdateAsset struct {
 }
 
 type Assets struct {
-	Pagination *paginator.Pagination
+	BusinessID uint64
 	Keyword    string
+	Pagination *paginator.Pagination
 }
 
 func (req *Asset) ToDomain() *schema.Asset {
@@ -34,6 +36,7 @@ func (req *Asset) ToDomain() *schema.Asset {
 		Title:      req.Title,
 		Path:       req.Path,
 		Ext:        req.Ext,
+		Size:       req.Size,
 		IsPrivate:  req.IsPrivate,
 		UserID:     req.UserID,
 		BusinessID: req.BusinessID,

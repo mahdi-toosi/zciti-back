@@ -20,7 +20,7 @@ func (_i *Router) RegisterRoutes(cfg *config.Config) {
 	c := _i.Controller.RestController
 
 	// define routes
-	_i.App.Route("/api/v1/assets", func(router fiber.Router) {
+	_i.App.Route("/api/v1/business/:businessID/assets", func(router fiber.Router) {
 		router.Get("/", mdl.Protected(cfg), mdl.Permission(mdl.DFile, mdl.PReadAll), c.Index)
 		router.Post("/", mdl.Protected(cfg), mdl.Permission(mdl.DFile, mdl.PCreate), c.Store)
 		router.Delete("/:id", mdl.Protected(cfg), mdl.Permission(mdl.DFile, mdl.PDelete), c.Delete)

@@ -11,7 +11,6 @@ type Business struct {
 	Type        schema.BusinessType `json:",omitempty"`
 	TypeDisplay string              `json:",omitempty"`
 	Description string              `json:",omitempty"`
-	Meta        string              `json:",omitempty"`
 	OwnerID     uint64              `json:",omitempty"`
 	Owner       response.User       `json:",omitempty"`
 }
@@ -34,7 +33,6 @@ func FromDomain(business *schema.Business) (res *Business) {
 			ID:       business.Owner.ID,
 			FullName: business.Owner.FirstName + " " + business.Owner.LastName,
 		},
-		Meta:        business.Meta,
 		OwnerID:     business.OwnerID,
 		Description: business.Description,
 		TypeDisplay: schema.TypeDisplayProxy[business.Type],

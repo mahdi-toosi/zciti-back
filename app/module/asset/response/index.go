@@ -12,6 +12,7 @@ type Asset struct {
 	Path          string    `json:",omitempty"`
 	Ext           string    `json:",omitempty"`
 	IsPrivate     bool      `json:",omitempty"`
+	Size          uint64    `json:",omitempty"`
 	UserID        uint64    `json:",omitempty"`
 	BusinessID    uint64    `json:",omitempty"`
 	BusinessTitle string    `json:",omitempty"`
@@ -27,6 +28,7 @@ func FromDomain(asset *schema.Asset, domain string) (res *Asset) {
 		ID:            asset.ID,
 		Ext:           asset.Ext,
 		Path:          asset.Path,
+		Size:          asset.Size,
 		Title:         asset.Title,
 		UserID:        asset.UserID,
 		IsPrivate:     asset.IsPrivate,

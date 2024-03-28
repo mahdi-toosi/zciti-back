@@ -11,7 +11,7 @@ type Message struct {
 	FromID  uint64 `example:"1" validate:"required,number"`
 	ToID    uint64 `example:"1" validate:"number"`
 	Type    string `example:"text" validate:"required,oneof=text image"`
-	Content string `example:"bla bla bla" validate:"required,max:2000"`
+	Content string `example:"bla bla bla" validate:"required,max=2000"`
 }
 
 type Messages struct {

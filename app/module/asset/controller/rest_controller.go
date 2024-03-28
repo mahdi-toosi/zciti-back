@@ -9,18 +9,13 @@ import (
 	"go-fiber-starter/utils/paginator"
 	"go-fiber-starter/utils/response"
 	"golang.org/x/exp/slices"
-	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
-	"time"
 )
 
 type IRestController interface {
 	Index(c *fiber.Ctx) error
-	Show(c *fiber.Ctx) error
 	Store(c *fiber.Ctx) error
-	Update(c *fiber.Ctx) error
 	Delete(c *fiber.Ctx) error
 }
 
@@ -38,6 +33,10 @@ type controller struct {
 // @Security     Bearer
 // @Router       /assets [get]
 func (_i *controller) Index(c *fiber.Ctx) error {
+	businessID, err := utils.GetIntInParams(c, "businessID")
+	if err != nil {
+		return err
+	}
 	paginate, err := paginator.Paginate(c)
 	if err != nil {
 		return err
@@ -45,6 +44,7 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 
 	var req request.Assets
 	req.Pagination = paginate
+	req.BusinessID = businessID
 	req.Keyword = c.Query("Keyword")
 
 	assets, paging, err := _i.service.Index(req)
@@ -56,23 +56,6 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 		Data: assets,
 		Meta: paging,
 	})
-}
-
-// Show
-// @Summary      Get one asset
-// @Tags         Assets
-// @Security     Bearer
-// @Param        id path int true "Asset ID"
-// @Router       /assets/:id [get]
-func (_i *controller) Show(c *fiber.Ctx) error {
-	id, err := uuid.Parse(c.Params("id"))
-
-	asset, err := _i.service.Show(id)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(asset)
 }
 
 // Store
@@ -105,54 +88,10 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 	req.UserID = user.ID
 	req.Title = strings.TrimSuffix(req.Asset.Filename, filepath.Ext(req.Asset.Filename))
 
-	var folder string
-	if req.IsPrivate {
-		folder = "private"
-	} else {
-		folder = "public"
-	}
-	path := filepath.Join("./storage", folder, time.DateOnly)
-	_ = os.MkdirAll(path, 0755)
-	prefix := strconv.FormatInt(time.Now().UnixMilli(), 10) + "-"
-	fileName := prefix + strings.ReplaceAll(req.Asset.Filename, " ", "-")
-	path = filepath.Join(path, fileName)
-	req.Path = path
-
-	err = c.SaveFile(&req.Asset, path)
+	err = _i.service.Store(c, *req)
 	if err != nil {
 		return err
 	}
-
-	err = _i.service.Store(*req)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON("success")
-}
-
-// Update
-// @Summary      update asset
-// @Security     Bearer
-// @Tags         Assets
-// @Param 		 asset body request.Asset true "Asset details"
-// @Param        id path int true "Asset ID"
-// @Router       /assets/:id [put]
-func (_i *controller) Update(c *fiber.Ctx) error {
-	//id, err := utils.GetIntInParams(c, "id")
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//req := new(request.Asset)
-	//if err := response.ParseAndValidate(c, req); err != nil {
-	//	return err
-	//}
-	//
-	//err = _i.service.Update(id, *req)
-	//if err != nil {
-	//	return err
-	//}
 
 	return c.JSON("success")
 }
@@ -166,7 +105,7 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 func (_i *controller) Delete(c *fiber.Ctx) error {
 	id, err := uuid.Parse(c.Params("id"))
 	if err != nil {
-		// handle error
+		return err
 	}
 
 	user, err := utils.GetAuthenticatedUser(c)

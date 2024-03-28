@@ -12,7 +12,6 @@ type IRepository interface {
 	GetAll(req request.Assets) (assets []*schema.Asset, paging paginator.Pagination, err error)
 	GetOne(id uuid.UUID) (asset *schema.Asset, err error)
 	Create(asset *schema.Asset) (err error)
-	Update(id uuid.UUID, asset *schema.Asset) (err error)
 	Delete(id uuid.UUID) (err error)
 }
 
@@ -27,12 +26,10 @@ type repo struct {
 }
 
 func (_i *repo) GetAll(req request.Assets) (assets []*schema.Asset, paging paginator.Pagination, err error) {
-	query := _i.DB.Main.Model(&schema.Asset{})
+	query := _i.DB.Main.Model(&schema.Asset{}).Where("business_id", req.BusinessID)
 
 	if req.Keyword != "" {
-		query.Where("first_name Like ?", "%"+req.Keyword+"%")
-		query.Or("last_name Like ?", "%"+req.Keyword+"%")
-		query.Or("mobile", req.Keyword)
+		query.Where("title Like ?", "%"+req.Keyword+"%")
 	}
 
 	if req.Pagination.Page > 0 {
@@ -64,12 +61,6 @@ func (_i *repo) GetOne(id uuid.UUID) (asset *schema.Asset, err error) {
 
 func (_i *repo) Create(asset *schema.Asset) (err error) {
 	return _i.DB.Main.Create(asset).Error
-}
-
-func (_i *repo) Update(id uuid.UUID, asset *schema.Asset) (err error) {
-	return _i.DB.Main.Model(&schema.Asset{}).
-		Where(&schema.Asset{ID: id}).
-		Updates(asset).Error
 }
 
 func (_i *repo) Delete(id uuid.UUID) error {

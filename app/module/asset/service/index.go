@@ -4,19 +4,23 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"go-fiber-starter/app/database/schema"
+	"go-fiber-starter/app/middleware"
 	"go-fiber-starter/app/module/asset/repository"
 	"go-fiber-starter/app/module/asset/request"
 	"go-fiber-starter/app/module/asset/response"
 	businessRepo "go-fiber-starter/app/module/business/repository"
 	"go-fiber-starter/utils/config"
 	"go-fiber-starter/utils/paginator"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"time"
 )
 
 type IService interface {
 	Index(req request.Assets) (assets []*response.Asset, paging paginator.Pagination, err error)
-	Show(id uuid.UUID) (asset *response.Asset, err error)
-	Store(req request.Asset) (err error)
-	Update(id uuid.UUID, req request.Asset) (err error)
+	Store(ctx *fiber.Ctx, req request.Asset) (err error)
 	Destroy(user schema.User, id uuid.UUID) error
 }
 
@@ -47,22 +51,45 @@ func (_i *service) Index(req request.Assets) (assets []*response.Asset, paging p
 	return
 }
 
-func (_i *service) Show(id uuid.UUID) (asset *response.Asset, err error) {
-	result, err := _i.Repo.GetOne(id)
+func (_i *service) Store(c *fiber.Ctx, req request.Asset) (err error) {
+	business, err := _i.BusinessRepo.GetOne(req.BusinessID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return response.FromDomain(result, _i.config.ParseAddress()), nil
-}
+	accountAssetLimit := middleware.Accounts[business.Account].AssetsSizeLimit
+	business.AssetsSize += uint64(req.Asset.Size)
 
-func (_i *service) Store(req request.Asset) (err error) {
-	// TODO => add asset size to business meta
+	if business.AssetsSize > accountAssetLimit {
+		return fiber.ErrForbidden
+	}
+
+	var folder string
+	if req.IsPrivate {
+		folder = "private"
+	} else {
+		folder = "public"
+	}
+	path := filepath.Join("./storage", folder, time.DateOnly)
+	_ = os.MkdirAll(path, 0755)
+	prefix := strconv.FormatInt(time.Now().UnixMilli(), 10) + "-"
+	fileName := prefix + strings.ReplaceAll(req.Asset.Filename, " ", "-")
+	path = filepath.Join(path, fileName)
+	req.Path = path
+	req.Size = uint64(req.Asset.Size)
+
+	err = c.SaveFile(&req.Asset, path)
+	if err != nil {
+		return err
+	}
+
+	err = _i.BusinessRepo.Update(business.ID, business)
+	if err != nil {
+
+		return err
+	}
+
 	return _i.Repo.Create(req.ToDomain())
-}
-
-func (_i *service) Update(id uuid.UUID, req request.Asset) (err error) {
-	return _i.Repo.Update(id, req.ToDomain())
 }
 
 func (_i *service) Destroy(user schema.User, id uuid.UUID) error {

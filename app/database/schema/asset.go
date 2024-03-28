@@ -10,6 +10,7 @@ type Asset struct {
 	Path       string
 	Ext        string
 	IsPrivate  bool
+	Size       uint64
 	UserID     uint64
 	User       User `gorm:"foreignKey:UserID"`
 	BusinessID uint64

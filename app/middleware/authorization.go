@@ -61,10 +61,6 @@ var Permissions = map[string]map[DomainType]map[PermissionType]bool{
 
 // end define Permissions
 
-// define Roles
-
-// end define Roles
-
 // define Domains
 
 type DomainType int
@@ -96,3 +92,14 @@ const (
 )
 
 // end define Permissions
+
+type account struct {
+	Title           string
+	AssetsSizeLimit uint64
+}
+
+const megabyte = 1000 * 1024
+
+var Accounts = map[schema.BusinessAccount]account{
+	schema.BusinessAccountDefault: account{Title: "DefaultAccount", AssetsSizeLimit: 1 * megabyte},
+}
