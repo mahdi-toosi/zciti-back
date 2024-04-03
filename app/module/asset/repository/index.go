@@ -9,7 +9,7 @@ import (
 )
 
 type IRepository interface {
-	GetAll(req request.Assets) (assets []*schema.Asset, paging paginator.Pagination, err error)
+	GetAll(req request.Assets) (assets []*schema.Asset, assetsSize uint64, paging paginator.Pagination, err error)
 	GetOne(id uuid.UUID) (asset *schema.Asset, err error)
 	Create(asset *schema.Asset) (err error)
 	Delete(id uuid.UUID) (err error)
@@ -25,7 +25,7 @@ type repo struct {
 	DB *database.Database
 }
 
-func (_i *repo) GetAll(req request.Assets) (assets []*schema.Asset, paging paginator.Pagination, err error) {
+func (_i *repo) GetAll(req request.Assets) (assets []*schema.Asset, assetsSize uint64, paging paginator.Pagination, err error) {
 	query := _i.DB.Main.Model(&schema.Asset{}).Where("business_id", req.BusinessID)
 
 	if req.Keyword != "" {
@@ -47,6 +47,11 @@ func (_i *repo) GetAll(req request.Assets) (assets []*schema.Asset, paging pagin
 	}
 
 	paging = *req.Pagination
+
+	err = _i.DB.Main.Raw("SELECT SUM(size) FROM assets where business_id = ?", req.BusinessID).Scan(&assetsSize).Error
+	if err != nil {
+		return
+	}
 
 	return
 }

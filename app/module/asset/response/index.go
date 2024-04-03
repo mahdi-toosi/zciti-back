@@ -3,6 +3,7 @@ package response
 import (
 	"github.com/google/uuid"
 	"go-fiber-starter/app/database/schema"
+	"go-fiber-starter/utils/paginator"
 	"strings"
 )
 
@@ -17,6 +18,12 @@ type Asset struct {
 	BusinessID    uint64    `json:",omitempty"`
 	BusinessTitle string    `json:",omitempty"`
 	UserFullName  string    `json:",omitempty"`
+}
+
+type Assets struct {
+	Data       []*Asset `json:",omitempty"`
+	AssetsSize uint64
+	Meta       paginator.Pagination `json:",omitempty"`
 }
 
 func FromDomain(asset *schema.Asset, domain string) (res *Asset) {

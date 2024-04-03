@@ -4,6 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"go-fiber-starter/app/module/asset/request"
+	assetsResponse "go-fiber-starter/app/module/asset/response"
 	"go-fiber-starter/app/module/asset/service"
 	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
@@ -47,14 +48,17 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	req.BusinessID = businessID
 	req.Keyword = c.Query("Keyword")
 
-	assets, paging, err := _i.service.Index(req)
+	assets, assetsSize, paging, err := _i.service.Index(req)
 	if err != nil {
 		return err
 	}
 
 	return response.Resp(c, response.Response{
 		Data: assets,
-		Meta: paging,
+		Meta: assetsResponse.Assets{
+			Meta:       paging,
+			AssetsSize: assetsSize,
+		},
 	})
 }
 

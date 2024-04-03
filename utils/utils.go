@@ -2,13 +2,20 @@ package utils
 
 import (
 	"errors"
+	"fmt"
+	"github.com/disintegration/imaging"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
 	"go-fiber-starter/app/database/schema"
+	"golang.org/x/exp/slices"
 	"gorm.io/gorm"
+	"io/ioutil"
 	"math/rand"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -85,4 +92,92 @@ func RandomDateTime() time.Time {
 	sec := rand.Intn(60)     //nolint:gosec
 
 	return time.Date(year, month, day, hour, min, sec, 0, time.UTC)
+}
+
+var imageOptimizedWidths = []int{600, 300}
+
+func StoreImageOptimizedVersions(path string, fileName string) (resultSizes int64, err error) {
+	for _, size := range imageOptimizedWidths {
+		resultSize, err := resizeAndSaveImage(path, fileName, size)
+		if err != nil {
+			return 0, err
+		}
+		resultSizes += resultSize
+	}
+	return resultSizes, nil
+}
+
+func resizeAndSaveImage(folderPath string, imageName string, newWidth int) (size int64, err error) {
+	tempFile, err := ioutil.TempFile("", "resize-*.jpg")
+	if err != nil {
+		return 0, err
+	}
+	defer tempFile.Close()
+	defer os.Remove(tempFile.Name()) // Remove the temporary file after processing
+
+	inputPath := filepath.Join(folderPath, imageName)
+	img, err := imaging.Open(inputPath)
+	if err != nil {
+		return 0, err
+	}
+
+	if newWidth > img.Bounds().Size().X {
+		return 0, nil
+	}
+
+	resizedImg := imaging.Resize(img, newWidth, 0, imaging.NearestNeighbor)
+
+	ext := filepath.Ext(imageName)
+	switch ext {
+	case ".jpeg":
+		err = imaging.Encode(tempFile, resizedImg, imaging.JPEG)
+	case ".jpg":
+		err = imaging.Encode(tempFile, resizedImg, imaging.JPEG)
+	case ".png":
+		err = imaging.Encode(tempFile, resizedImg, imaging.PNG)
+	}
+	if err != nil {
+		return 0, err
+	}
+
+	// Remove the extension from the file name
+	baseName := strings.TrimSuffix(imageName, ext)
+
+	// Create the new file name
+	newFileName := fmt.Sprintf("%s-%dx%d%s", baseName, newWidth, newWidth, ext)
+
+	outputPath := filepath.Join(folderPath, newFileName)
+	// Move the temporary file to the desired output path
+	err = os.Rename(tempFile.Name(), outputPath)
+	if err != nil {
+		return 0, err
+	}
+
+	// Get the file size of the resized image
+	fileInfo, err := os.Stat(outputPath)
+	if err != nil {
+		return 0, err
+	}
+
+	fileSize := fileInfo.Size()
+
+	return fileSize, nil
+}
+
+func DeleteFile(filePath string) error {
+	err := os.Remove(filePath)
+	if err != nil {
+		return err
+	}
+
+	ext := filepath.Ext(filePath)
+	if slices.Contains([]string{".jpg", ".jpeg", ".png"}, ext) {
+		baseName := strings.TrimSuffix(filePath, ext)
+		for _, width := range imageOptimizedWidths {
+			filePath := fmt.Sprintf("%s-%dx%d%s", baseName, width, width, ext)
+			os.Remove(filePath)
+		}
+	}
+
+	return nil
 }

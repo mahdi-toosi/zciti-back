@@ -8,15 +8,16 @@ import (
 )
 
 type Asset struct {
-	ID         uuid.UUID
-	Asset      multipart.FileHeader `example:"file" validate:"required,file"`
-	Title      string
-	Path       string
-	Ext        string
-	Size       uint64
-	IsPrivate  bool `example:"true" validate:"boolean"`
-	UserID     uint64
-	BusinessID uint64
+	ID           uuid.UUID
+	Asset        multipart.FileHeader `example:"file" validate:"required,file"`
+	Title        string
+	Path         string
+	Ext          string
+	AlsoOptimize bool
+	Size         uint64
+	IsPrivate    bool `example:"true" validate:"boolean"`
+	UserID       uint64
+	BusinessID   uint64
 }
 
 type UpdateAsset struct {
