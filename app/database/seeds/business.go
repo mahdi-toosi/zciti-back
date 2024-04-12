@@ -1,6 +1,7 @@
 package seeds
 
 import (
+	"errors"
 	"fmt"
 	"github.com/bxcodec/faker/v4"
 	"github.com/rs/zerolog/log"
@@ -55,6 +56,33 @@ func (Business) Count(db *gorm.DB) (int, error) {
 	if err := db.Model(schema.Business{}).Count(&count).Error; err != nil {
 		return 0, err
 	}
+	if count <= 1 {
+		return 0, nil
+	}
 
 	return int(count), nil
+}
+
+func GenerateRootBusiness(db *gorm.DB) error {
+	const title = "Root"
+	err := db.First(&schema.Business{}, "title = ? AND type = ?", title, schema.BTypeROOT).Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+	if err == nil {
+		return nil
+	}
+
+	business := schema.Business{OwnerID: 1, Title: title, Type: schema.BTypeROOT}
+	if err = db.Create(&business).Error; err != nil {
+		return err
+	}
+
+	admin := schema.User{}
+	if err = db.First(&admin, "mobile = ?", AdminMobile).Error; err != nil {
+		return err
+	}
+
+	query := "INSERT INTO business_users (business_id, user_id) VALUES  (%d, %d)"
+	return db.Exec(fmt.Sprintf(query, business.ID, admin.ID)).Error
 }

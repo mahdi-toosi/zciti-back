@@ -31,7 +31,7 @@ func FromDomain(business *schema.Business) (res *Business) {
 		Title: business.Title,
 		Owner: response.User{
 			ID:       business.Owner.ID,
-			FullName: business.Owner.FirstName + " " + business.Owner.LastName,
+			FullName: business.Owner.FullName(),
 		},
 		OwnerID:     business.OwnerID,
 		Description: business.Description,

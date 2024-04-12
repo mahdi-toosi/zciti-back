@@ -20,12 +20,12 @@ func (_i *Router) RegisterRoutes(cfg *config.Config) {
 	c := _i.Controller.RestController
 
 	// define routes
-	_i.App.Route("/api/v1/notificationTemplates", func(router fiber.Router) {
-		router.Get("/", mdl.Protected(cfg), mdl.Permission(mdl.DNotificationTemplate, mdl.PReadAll), c.Index)
-		router.Get("/keywords", mdl.Protected(cfg), mdl.Permission(mdl.DNotificationTemplate, mdl.PReadSingle), c.Keywords)
-		router.Post("/", mdl.Protected(cfg), mdl.Permission(mdl.DNotificationTemplate, mdl.PCreate), c.Store)
-		router.Patch("/:id", mdl.Protected(cfg), mdl.Permission(mdl.DNotificationTemplate, mdl.PUpdate), c.Update)
-		router.Delete("/:id", mdl.Protected(cfg), mdl.Permission(mdl.DNotificationTemplate, mdl.PDelete), c.Delete)
+	_i.App.Route("/api/v1/business/:businessID/notificationTemplates", func(router fiber.Router) {
+		router.Get("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DNotificationTemplate, mdl.PReadAll), c.Index)
+		router.Get("/keywords", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DNotificationTemplate, mdl.PReadSingle), c.Keywords)
+		router.Post("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DNotificationTemplate, mdl.PCreate), c.Store)
+		router.Patch("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DNotificationTemplate, mdl.PUpdate), c.Update)
+		router.Delete("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DNotificationTemplate, mdl.PDelete), c.Delete)
 	})
 }
 

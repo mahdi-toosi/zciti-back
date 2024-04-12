@@ -9,10 +9,10 @@ import (
 
 type IRepository interface {
 	GetAll(req request.PostsRequest) (posts []*schema.Post, paging paginator.Pagination, err error)
-	GetOne(id uint64) (post *schema.Post, err error)
+	GetOne(businessID uint64, id uint64) (post *schema.Post, err error)
 	Create(post *schema.Post) (err error)
 	Update(id uint64, post *schema.Post) (err error)
-	Delete(id uint64) (err error)
+	Delete(businessID uint64, id uint64) (err error)
 }
 
 func Repository(DB *database.Database) IRepository {
@@ -26,7 +26,7 @@ type repo struct {
 }
 
 func (_i *repo) GetAll(req request.PostsRequest) (posts []*schema.Post, paging paginator.Pagination, err error) {
-	query := _i.DB.Main.Model(&schema.Post{})
+	query := _i.DB.Main.Model(&schema.Post{}).Where("business_id = ?", req.BusinessID)
 
 	if req.Pagination.Page > 0 {
 		var total int64
@@ -47,8 +47,11 @@ func (_i *repo) GetAll(req request.PostsRequest) (posts []*schema.Post, paging p
 	return
 }
 
-func (_i *repo) GetOne(id uint64) (post *schema.Post, err error) {
-	if err := _i.DB.Main.Preload("Business").First(&post, id).Error; err != nil {
+func (_i *repo) GetOne(businessID uint64, id uint64) (post *schema.Post, err error) {
+	err = _i.DB.Main.Preload("Business").
+		Where("business_id = ?", businessID).
+		First(&post, id).Error
+	if err != nil {
 		return nil, err
 	}
 
@@ -65,6 +68,6 @@ func (_i *repo) Update(id uint64, post *schema.Post) (err error) {
 		Updates(post).Error
 }
 
-func (_i *repo) Delete(id uint64) error {
+func (_i *repo) Delete(businessID uint64, id uint64) error {
 	return _i.DB.Main.Delete(&schema.Post{}, id).Error
 }

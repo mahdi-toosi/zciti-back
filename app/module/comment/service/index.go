@@ -14,8 +14,8 @@ import (
 type IService interface {
 	Index(postID uint64, req request.Comments) (comments []*response.Comment, paging paginator.Pagination, err error)
 	Show(id uint64) (comment *schema.Comment, err error)
-	Store(postID uint64, req request.Comment, isUserOwnerOfSomeBusiness bool) (err error)
-	Update(postID uint64, id uint64, req request.Comment) (err error)
+	Store(businessID uint64, postID uint64, req request.Comment, isUserOwnerOfSomeBusiness bool) (err error)
+	Update(businessID uint64, postID uint64, id uint64, req request.Comment) (err error)
 	UpdateStatus(id uint64, req request.UpdateCommentStatus) (err error)
 	Destroy(id uint64) error
 }
@@ -54,8 +54,8 @@ func (_i *service) Show(id uint64) (comment *schema.Comment, err error) {
 	return result, nil
 }
 
-func (_i *service) Store(postID uint64, req request.Comment, isUserOwnerOfSomeBusiness bool) (err error) {
-	ok, _, post := _i.hasPermissionToStore(postID, req.AuthorID)
+func (_i *service) Store(businessID uint64, postID uint64, req request.Comment, isUserOwnerOfSomeBusiness bool) (err error) {
+	ok, _, post := _i.hasPermissionToStore(businessID, postID, req.AuthorID)
 	if !ok {
 		return fiber.ErrForbidden
 	}
@@ -84,8 +84,8 @@ func (_i *service) Store(postID uint64, req request.Comment, isUserOwnerOfSomeBu
 	return
 }
 
-func (_i *service) Update(postID uint64, id uint64, req request.Comment) (err error) {
-	if ok, _, _ := _i.hasPermissionToStore(postID, req.AuthorID); !ok {
+func (_i *service) Update(businessID uint64, postID uint64, id uint64, req request.Comment) (err error) {
+	if ok, _, _ := _i.hasPermissionToStore(businessID, postID, req.AuthorID); !ok {
 		return fiber.ErrForbidden
 	}
 
@@ -100,8 +100,8 @@ func (_i *service) Destroy(id uint64) error {
 	return _i.Repo.Delete(id)
 }
 
-func (_i *service) hasPermissionToStore(postID uint64, authorID uint64) (ok bool, err error, post *schema.Post) {
-	post, err = _i.PostsRepo.GetOne(postID)
+func (_i *service) hasPermissionToStore(businessID uint64, postID uint64, authorID uint64) (ok bool, err error, post *schema.Post) {
+	post, err = _i.PostsRepo.GetOne(businessID, postID)
 	if err != nil {
 		return false, nil, nil
 	}
@@ -114,7 +114,7 @@ func (_i *service) hasPermissionToStore(postID uint64, authorID uint64) (ok bool
 		return true, nil, post
 	}
 
-	if post.CommentsStatus == schema.PostCommentStatusOnlyCustomers {
+	if post.CommentsStatus == schema.PostCommentStatusOnlyBusinessUsers {
 		log.Debug().Msgf("%+v", authorID)
 		// TODO => complete it
 	}

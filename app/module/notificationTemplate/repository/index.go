@@ -12,7 +12,7 @@ type IRepository interface {
 	GetOne(id uint64) (NotificationTemplate *schema.NotificationTemplate, err error)
 	Create(NotificationTemplate *schema.NotificationTemplate) (err error)
 	Update(id uint64, NotificationTemplate *schema.NotificationTemplate) (err error)
-	Delete(id uint64) (err error)
+	Delete(businessID uint64, id uint64) (err error)
 }
 
 func Repository(DB *database.Database) IRepository {
@@ -61,10 +61,10 @@ func (_i *repo) Create(notificationTemplate *schema.NotificationTemplate) (err e
 
 func (_i *repo) Update(id uint64, notificationTemplate *schema.NotificationTemplate) (err error) {
 	return _i.DB.Main.Model(&schema.NotificationTemplate{}).
-		Where(&schema.NotificationTemplate{ID: id}).
+		Where(&schema.NotificationTemplate{ID: id, BusinessID: notificationTemplate.BusinessID}).
 		Updates(notificationTemplate).Error
 }
 
-func (_i *repo) Delete(id uint64) error {
-	return _i.DB.Main.Delete(&schema.NotificationTemplate{}, id).Error
+func (_i *repo) Delete(businessID uint64, id uint64) error {
+	return _i.DB.Main.Debug().Delete(&schema.NotificationTemplate{}, id).Where("business_id = ?", businessID).Error
 }

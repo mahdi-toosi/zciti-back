@@ -21,8 +21,8 @@ func (_i *Router) RegisterRoutes(cfg *config.Config) {
 
 	// define routes
 	_i.App.Route("/api/v1/message-rooms", func(router fiber.Router) {
-		router.Get("/", mdl.Protected(cfg), mdl.Permission(mdl.DMessageRoom, mdl.PReadAll), c.Index)
-		router.Delete("/:id", mdl.Protected(cfg), mdl.Permission(mdl.DMessageRoom, mdl.PDelete), c.Delete)
+		router.Get("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DMessageRoom, mdl.PReadAll), c.Index)
+		router.Delete("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DMessageRoom, mdl.PDelete), c.Delete)
 	})
 }
 

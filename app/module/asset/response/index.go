@@ -41,7 +41,7 @@ func FromDomain(asset *schema.Asset, domain string) (res *Asset) {
 		IsPrivate:     asset.IsPrivate,
 		BusinessID:    asset.BusinessID,
 		BusinessTitle: asset.Business.Title,
-		UserFullName:  asset.User.FirstName + " " + asset.User.LastName,
+		UserFullName:  asset.User.FullName(),
 	}
 
 	if strings.Contains(a.Path, "/private/") {

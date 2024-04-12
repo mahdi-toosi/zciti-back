@@ -22,10 +22,10 @@ const (
 )
 
 const (
-	PostCommentStatusOpen          = "open"
-	PostCommentStatusClose         = "close"
-	PostCommentStatusOnlyBuyers    = "onlyBuyers"
-	PostCommentStatusOnlyCustomers = "onlyCustomers"
+	PostCommentStatusOpen              = "open"
+	PostCommentStatusClose             = "close"
+	PostCommentStatusOnlyBuyers        = "onlyBuyers"
+	PostCommentStatusOnlyBusinessUsers = "onlyCustomers"
 )
 
 const (

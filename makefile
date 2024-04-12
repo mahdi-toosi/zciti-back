@@ -1,6 +1,7 @@
-dms:
+rebuild:
 	make drop
 	make migrate
+	make generateNecessaryData
 	make seed
 
 drop:
@@ -8,6 +9,9 @@ drop:
 
 migrate:
 	go run cmd/example/main.go --migrate
+
+generateNecessaryData:
+	go run cmd/example/main.go --generate-necessary-data
 
 seed:
 	go run cmd/example/main.go --seed

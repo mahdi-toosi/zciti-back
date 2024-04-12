@@ -85,6 +85,10 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 // @Param 		 comment body request.Comment true "Comment details"
 // @Router       /posts/:postID/comments [post]
 func (_i *controller) Store(c *fiber.Ctx) error {
+	businessID, err := utils.GetIntInParams(c, "businessID")
+	if err != nil {
+		return err
+	}
 	postID, err := utils.GetIntInParams(c, "postID")
 	if err != nil {
 		return err
@@ -102,7 +106,7 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 	req.AuthorID = user.ID
 	req.Status = schema.CommentStatusPending
 
-	err = _i.service.Store(postID, *req, user.IsBusinessOwner())
+	err = _i.service.Store(businessID, postID, *req, user.IsBusinessOwner(businessID))
 	if err != nil {
 		return err
 	}
@@ -118,6 +122,10 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 // @Param        id path int true "Comment ID"
 // @Router       /posts/:postID/comments/:id [put]
 func (_i *controller) Update(c *fiber.Ctx) error {
+	businessID, err := utils.GetIntInParams(c, "businessID")
+	if err != nil {
+		return err
+	}
 	postID, err := utils.GetIntInParams(c, "postID")
 	if err != nil {
 		return err
@@ -148,7 +156,7 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 	}
 	req.Status = schema.CommentStatusPending
 
-	err = _i.service.Update(postID, id, *req)
+	err = _i.service.Update(businessID, postID, id, *req)
 	if err != nil {
 		return err
 	}
@@ -164,6 +172,10 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 // @Param        id path int true "Comment ID"
 // @Router       /posts/:postID/comments/:id/status [put]
 func (_i *controller) UpdateStatus(c *fiber.Ctx) error {
+	businessID, err := utils.GetIntInParams(c, "businessID")
+	if err != nil {
+		return err
+	}
 	postID, err := utils.GetIntInParams(c, "postID")
 	if err != nil {
 		return err
@@ -183,10 +195,10 @@ func (_i *controller) UpdateStatus(c *fiber.Ctx) error {
 	if err != nil {
 		return fiber.ErrBadRequest
 	}
-	if !user.IsBusinessOwner() {
+	if !user.IsBusinessOwner(businessID) {
 		return fiber.ErrForbidden
 	}
-	post, err := _i.postsRepo.GetOne(postID)
+	post, err := _i.postsRepo.GetOne(businessID, postID)
 	if err != nil || post.Business.OwnerID != user.ID {
 		return fiber.ErrBadRequest
 	}

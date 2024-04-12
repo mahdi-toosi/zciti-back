@@ -53,7 +53,7 @@ func (_i *service) Login(req request.Login, jwtConfig config.Jwt) (res response.
 	}
 
 	// do create token
-	token, err := middleware.GenerateTokenAccess(*userResponse.FromDomain(user), jwtConfig)
+	token, err := middleware.GenerateTokenAccess(*user, jwtConfig)
 	if err != nil {
 		return
 	}
@@ -67,11 +67,11 @@ func (_i *service) Login(req request.Login, jwtConfig config.Jwt) (res response.
 func (_i *service) Register(req *request.Register, jwtConfig config.Jwt) (res response.Register, err error) {
 	// check user by username
 	user := &schema.User{
-		Mobile:    req.Mobile,
-		LastName:  req.LastName,
-		FirstName: req.FirstName,
-		Roles:     []string{"user"},
-		Password:  helpers.Hash([]byte(req.Password)),
+		Mobile:      req.Mobile,
+		LastName:    req.LastName,
+		FirstName:   req.FirstName,
+		Permissions: schema.UserPermissionsMap{},
+		Password:    helpers.Hash([]byte(req.Password)),
 	}
 
 	err = _i.Repo.Create(user)
@@ -80,7 +80,7 @@ func (_i *service) Register(req *request.Register, jwtConfig config.Jwt) (res re
 	}
 
 	// do create token
-	token, err := middleware.GenerateTokenAccess(*userResponse.FromDomain(user), jwtConfig)
+	token, err := middleware.GenerateTokenAccess(*user, jwtConfig)
 	if err != nil {
 		return
 	}

@@ -9,10 +9,10 @@ import (
 
 type IService interface {
 	Index(req request.PostsRequest) (posts []*response.Post, paging paginator.Pagination, err error)
-	Show(id uint64) (post *response.Post, err error)
+	Show(businessID uint64, id uint64) (post *response.Post, err error)
 	Store(req request.Post) (err error)
 	Update(id uint64, req request.Post) (err error)
-	Delete(id uint64) error
+	Delete(businessID uint64, id uint64) error
 }
 
 func Service(repo repository.IRepository) IService {
@@ -26,6 +26,7 @@ type service struct {
 }
 
 func (_i *service) Index(req request.PostsRequest) (posts []*response.Post, paging paginator.Pagination, err error) {
+
 	results, paging, err := _i.Repo.GetAll(req)
 	if err != nil {
 		return
@@ -38,8 +39,8 @@ func (_i *service) Index(req request.PostsRequest) (posts []*response.Post, pagi
 	return
 }
 
-func (_i *service) Show(id uint64) (post *response.Post, err error) {
-	result, err := _i.Repo.GetOne(id)
+func (_i *service) Show(businessID uint64, id uint64) (post *response.Post, err error) {
+	result, err := _i.Repo.GetOne(businessID, id)
 	if err != nil {
 		return nil, err
 	}
@@ -55,6 +56,6 @@ func (_i *service) Update(id uint64, req request.Post) (err error) {
 	return _i.Repo.Update(id, req.ToDomain())
 }
 
-func (_i *service) Delete(id uint64) error {
-	return _i.Repo.Delete(id)
+func (_i *service) Delete(businessID uint64, id uint64) error {
+	return _i.Repo.Delete(businessID, id)
 }

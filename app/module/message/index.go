@@ -20,17 +20,17 @@ func (_i *Router) RegisterRoutes(cfg *config.Config) {
 	c := _i.Controller.RestController
 
 	// define routes
-	_i.App.Route("/api/v1/messages", func(router fiber.Router) {
-		router.Get("/:businessID", mdl.Protected(cfg), mdl.Permission(mdl.DMessage, mdl.PReadAll), c.Index)
-		router.Post("/", mdl.Protected(cfg), mdl.Permission(mdl.DMessage, mdl.PCreate), c.Store)
-		router.Put("/:id", mdl.Protected(cfg), mdl.Permission(mdl.DMessage, mdl.PUpdate), c.Update)
-		router.Delete("/:id", mdl.Protected(cfg), mdl.Permission(mdl.DMessage, mdl.PDelete), c.Delete)
+	_i.App.Route("/api/v1/business/:businessID/messages", func(router fiber.Router) {
+		router.Get("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DMessage, mdl.PReadAll), c.Index)
+		router.Post("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DMessage, mdl.PCreate), c.Store)
+		router.Put("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DMessage, mdl.PUpdate), c.Update)
+		router.Delete("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DMessage, mdl.PDelete), c.Delete)
 	})
 
 	//_i.App.Route("/api/v1/message-rooms", func(router fiber.Router) {
-	//	router.Get("/", mdl.Protected(cfg), mdl.Permission(mdl.DMessageRoom, mdl.PReadAll), c.IndexMessageRooms)
-	//	router.Post("/", mdl.Protected(cfg), mdl.Permission(mdl.DMessageRoom, mdl.PCreate), c.StoreMessageRoom)
-	//	router.Delete("/:id", mdl.Protected(cfg), mdl.Permission(mdl.DMessageRoom, mdl.PDelete), c.DeleteMessageRoom)
+	//	router.Get("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DMessageRoom, mdl.PReadAll), c.IndexMessageRooms)
+	//	router.Post("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DMessageRoom, mdl.PCreate), c.StoreMessageRoom)
+	//	router.Delete("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DMessageRoom, mdl.PDelete), c.DeleteMessageRoom)
 	//})
 }
 

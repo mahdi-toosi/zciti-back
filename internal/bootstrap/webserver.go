@@ -66,7 +66,7 @@ func Start(lifecycle fx.Lifecycle, cfg *config.Config, fiber *fiber.App, router 
 
 				// Listen the app (with TLS Support)
 				if cfg.App.TLS.Enable {
-					log.Debug().Msg("TLS support was enabled.")
+					log.Info().Msg("TLS support was enabled.")
 
 					if err := fiber.ListenTLS(cfg.App.Port, cfg.App.TLS.CertFile, cfg.App.TLS.KeyFile); err != nil {
 						log.Error().Err(err).Msg("An unknown error occurred when to run server!")
@@ -82,15 +82,20 @@ func Start(lifecycle fx.Lifecycle, cfg *config.Config, fiber *fiber.App, router 
 				redis.ConnectRedis()
 				database.ConnectDatabase()
 
-				migrate := flag.Bool("migrate", false, "migrate the databases")
 				seeder := flag.Bool("seed", false, "seed the databases")
+				migrate := flag.Bool("migrate", false, "migrate the databases")
 				drop := flag.Bool("drop-all-tables", false, "drop all tables in the databases")
+				generateNecessaryData := flag.Bool("generate-necessary-data", false, "generating necessary data")
 				flag.Parse()
 
-				if *migrate || *seeder || *drop {
+				if *migrate || *seeder || *drop || *generateNecessaryData {
 					// read flag -migrate to migrate the database
 					if *migrate {
 						database.MigrateModels()
+					}
+					// read flag -generate-necessary-data to generate necessary data in the database
+					if *generateNecessaryData {
+						database.GenerateNecessaryData()
 					}
 					// read flag -seed to seed the database
 					if *seeder {

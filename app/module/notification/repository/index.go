@@ -10,7 +10,7 @@ import (
 
 type IRepository interface {
 	GetAll(req request.Notifications) (notifications []*response.Notification, paging paginator.Pagination, err error)
-	GetOne(id uint64) (notification *response.Notification, err error)
+	GetOne(businessID uint64, id uint64) (notification *response.Notification, err error)
 	Create(notification *schema.Notification) (err error)
 	Update(id uint64, notification *schema.Notification) (err error)
 	Delete(id uint64) (err error)
@@ -29,6 +29,7 @@ type repo struct {
 func (_i *repo) GetAll(req request.Notifications) (notifications []*response.Notification, paging paginator.Pagination, err error) {
 	query := _i.DB.Main.
 		Model(&schema.Notification{}).
+		Where("business_id = ?", req.BusinessID).
 		Select("notifications.*, " +
 			"users.first_name || ' ' || users.last_name as receiver_full_name, " +
 			"businesses.title as business_title").
@@ -54,8 +55,8 @@ func (_i *repo) GetAll(req request.Notifications) (notifications []*response.Not
 	return
 }
 
-func (_i *repo) GetOne(id uint64) (notification *response.Notification, err error) {
-	if err := _i.DB.Main.First(&notification, id).Error; err != nil {
+func (_i *repo) GetOne(businessID uint64, id uint64) (notification *response.Notification, err error) {
+	if err := _i.DB.Main.First(&notification, id).Where("business_id = ?", businessID).Error; err != nil {
 		return nil, err
 	}
 
@@ -68,7 +69,7 @@ func (_i *repo) Create(notification *schema.Notification) (err error) {
 
 func (_i *repo) Update(id uint64, notification *schema.Notification) (err error) {
 	return _i.DB.Main.Model(&schema.Notification{}).
-		Where(&schema.Notification{ID: id}).
+		Where(&schema.Notification{ID: id, BusinessID: notification.BusinessID}).
 		Updates(notification).Error
 }
 

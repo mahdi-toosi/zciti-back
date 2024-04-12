@@ -82,14 +82,14 @@ func (_i *controller) Types(c *fiber.Ctx) error {
 // @Tags         Businesses
 // @Security     Bearer
 // @Param        id path int true "Business ID"
-// @Router       /businesses/:id [get]
+// @Router       /businesses/:businessID [get]
 func (_i *controller) Show(c *fiber.Ctx) error {
-	id, err := utils.GetIntInParams(c, "id")
+	businessID, err := utils.GetIntInParams(c, "businessID")
 	if err != nil {
 		return err
 	}
 
-	business, err := _i.service.Show(id)
+	business, err := _i.service.Show(businessID)
 	if err != nil {
 		return err
 	}
@@ -102,9 +102,9 @@ func (_i *controller) Show(c *fiber.Ctx) error {
 // @Tags         Businesses
 // @Security     Bearer
 // @Param        id path int true "Business ID"
-// @Router       /businesses/:id/users [get]
+// @Router       /businesses/:businessID/users [get]
 func (_i *controller) Users(c *fiber.Ctx) error {
-	businessID, err := utils.GetIntInParams(c, "id")
+	businessID, err := utils.GetIntInParams(c, "businessID")
 	if err != nil {
 		return fiber.ErrBadRequest
 	}
@@ -129,11 +129,8 @@ func (_i *controller) Users(c *fiber.Ctx) error {
 	}
 
 	var req request.Users
-	req.BusinessID, err = utils.GetIntInParams(c, "id")
-	if err != nil {
-		return fiber.ErrBadRequest
-	}
 	req.Pagination = paginate
+	req.BusinessID = businessID
 	req.Keyword = c.Query("Keyword")
 
 	users, paging, err := _i.service.Users(req)
@@ -254,9 +251,9 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 // @Tags         Businesses
 // @Param 		 business body request.Business true "Business details"
 // @Param        id path int true "Business ID"
-// @Router       /businesses/:id [put]
+// @Router       /businesses/:businessID [put]
 func (_i *controller) Update(c *fiber.Ctx) error {
-	businessID, err := utils.GetIntInParams(c, "id")
+	businessID, err := utils.GetIntInParams(c, "businessID")
 	if err != nil {
 		return fiber.ErrBadRequest
 	}
@@ -293,9 +290,9 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 // @Tags         Businesses
 // @Security     Bearer
 // @Param        id path int true "Business ID"
-// @Router       /businesses/:id [delete]
+// @Router       /businesses/:businessID [delete]
 func (_i *controller) Delete(c *fiber.Ctx) error {
-	businessID, err := utils.GetIntInParams(c, "id")
+	businessID, err := utils.GetIntInParams(c, "businessID")
 	if err != nil {
 		return fiber.ErrBadRequest
 	}

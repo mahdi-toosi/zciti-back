@@ -1,40 +1,44 @@
 package middleware
 
 import (
+	"errors"
 	"github.com/gofiber/fiber/v2"
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/utils"
 )
 
-func Permission(
-	domain DomainType,
-	permission PermissionType,
-) fiber.Handler {
+func AdminPermission(c *fiber.Ctx) error {
+	user, err := utils.GetAuthenticatedUser(c)
+	if err != nil {
+		return err
+	}
+	if user.IsAdmin() {
+		return c.Next()
+	}
+
+	return c.Status(fiber.StatusForbidden).
+		JSON(fiber.Map{"status": "error", "message": "you don't have permission", "data": nil})
+}
+
+func BusinessPermission(domain Domain, permission Permission) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		user, err := utils.GetAuthenticatedUser(c)
 		if err != nil {
 			return err
 		}
 
-		for _, role := range user.Roles {
-			r, ok1 := Permissions[role]
-			if !ok1 {
-				continue
-			}
+		// TODO should i remove it ?! 👇🏻
+		if user.IsAdmin() {
+			return c.Next()
+		}
 
-			d, ok2 := r[domain]
-			if !ok2 {
-				continue
-			}
+		businessID, err := utils.GetIntInParams(c, "businessID")
+		if err != nil {
+			return errors.New("there is no businessID param in this endpoint")
+		}
 
-			p, ok3 := d[permission]
-			if !ok3 {
-				continue
-			}
-
-			if p {
-				return c.Next()
-			}
+		if hasPermission(user.Permissions, businessID, domain, permission) {
+			return c.Next()
 		}
 
 		return c.Status(fiber.StatusForbidden).
@@ -42,10 +46,35 @@ func Permission(
 	}
 }
 
+func hasPermission(userPermissions schema.UserPermissionsMap, businessID uint64, domain Domain, permission Permission) bool {
+	for _, role := range userPermissions[businessID] {
+		r, ok1 := Permissions[role]
+		if !ok1 {
+			continue
+		}
+
+		d, ok2 := r[domain]
+		if !ok2 {
+			continue
+		}
+
+		p, ok3 := d[permission]
+		if !ok3 {
+			continue
+		}
+
+		if p {
+			return true
+		}
+	}
+
+	return false
+}
+
 // define Permissions
 
-var Permissions = map[string]map[DomainType]map[PermissionType]bool{
-	schema.RAdmin: {
+var Permissions = map[schema.UserRole]map[Domain]map[Permission]bool{
+	schema.URAdmin: {
 		DUser:                 {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DFile:                 {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DPost:                 {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
@@ -56,17 +85,17 @@ var Permissions = map[string]map[DomainType]map[PermissionType]bool{
 		DNotification:         {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DNotificationTemplate: {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 	},
-	schema.RUser: {},
+	schema.URUser: {},
 }
 
 // end define Permissions
 
 // define Domains
 
-type DomainType int
+type Domain int
 
 const (
-	DPost DomainType = iota
+	DPost Domain = iota
 	DUser
 	DFile
 	DComment
@@ -81,10 +110,10 @@ const (
 
 // define Permissions
 
-type PermissionType int
+type Permission int
 
 const (
-	PCreate PermissionType = iota
+	PCreate Permission = iota
 	PUpdate
 	PDelete
 	PReadAll

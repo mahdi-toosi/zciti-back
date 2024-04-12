@@ -86,6 +86,13 @@ func (_db *Database) MigrateModels() {
 	}
 }
 
+func (_db *Database) GenerateNecessaryData() {
+	err := seeds.GenerateNecessaryData(_db.Main)
+	if err != nil {
+		_db.Log.Error().Err(err).Msg("An unknown error occurred when generating necessary data wa running!")
+	}
+}
+
 func (_db *Database) SeedModels() {
 	for _, model := range seeds.MainDBSeeders() {
 		count, err := model.Count(_db.Main)

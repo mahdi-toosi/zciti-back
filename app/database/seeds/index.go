@@ -1,6 +1,8 @@
 package seeds
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type Seeder interface {
 	Seed(*gorm.DB) error
@@ -25,4 +27,16 @@ func ChatDBSeeders() []Seeder {
 		MessageRoom{},
 		Message{},
 	}
+}
+
+func GenerateNecessaryData(db *gorm.DB) error {
+	if err := GenerateAdmin(db); err != nil {
+		return err
+	}
+
+	if err := GenerateRootBusiness(db); err != nil {
+		return err
+	}
+
+	return nil
 }

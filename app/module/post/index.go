@@ -20,12 +20,12 @@ func (_i *Router) RegisterRoutes(cfg *config.Config) {
 	c := _i.Controller.RestController
 
 	// define routes
-	_i.App.Route("/api/v1/posts", func(router fiber.Router) {
-		router.Get("/", mdl.Protected(cfg), mdl.Permission(mdl.DPost, mdl.PReadAll), c.Index)
-		router.Get("/:id", mdl.Protected(cfg), mdl.Permission(mdl.DPost, mdl.PReadSingle), c.Show)
-		router.Post("/", mdl.Protected(cfg), mdl.Permission(mdl.DPost, mdl.PCreate), c.Store)
-		router.Put("/:id", mdl.Protected(cfg), mdl.Permission(mdl.DPost, mdl.PUpdate), c.Update)
-		router.Delete("/:id", mdl.Protected(cfg), mdl.Permission(mdl.DPost, mdl.PDelete), c.Delete)
+	_i.App.Route("/api/v1/business/:businessID/posts", func(router fiber.Router) {
+		router.Get("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DPost, mdl.PReadAll), c.Index)
+		router.Get("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DPost, mdl.PReadSingle), c.Show)
+		router.Post("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DPost, mdl.PCreate), c.Store)
+		router.Put("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DPost, mdl.PUpdate), c.Update)
+		router.Delete("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DPost, mdl.PDelete), c.Delete)
 	})
 }
 

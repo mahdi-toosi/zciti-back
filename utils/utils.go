@@ -19,6 +19,11 @@ import (
 	"time"
 )
 
+func Log(variable any) {
+	log.Debug().
+		Interface("", variable).Msg("LOGGER ")
+}
+
 func IsEnabled(key bool) func(c *fiber.Ctx) bool {
 	if key {
 		return nil

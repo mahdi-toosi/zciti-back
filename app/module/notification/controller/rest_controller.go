@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"go-fiber-starter/utils"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -30,14 +31,19 @@ type controller struct {
 // @Summary      Get all notifications
 // @Tags         Notifications
 // @Security     Bearer
-// @Router       /notifications [get]
+// @Router       /business/:businessID/notifications [get]
 func (_i *controller) Index(c *fiber.Ctx) error {
+	businessID, err := utils.GetIntInParams(c, "businessID")
+	if err != nil {
+		return err
+	}
 	paginate, err := paginator.Paginate(c)
 	if err != nil {
 		return err
 	}
 
 	var req request.Notifications
+	req.BusinessID = businessID
 	req.Pagination = paginate
 
 	notifications, paging, err := _i.service.Index(req)
@@ -56,14 +62,18 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 // @Tags         Notifications
 // @Security     Bearer
 // @Param        id path int true "Notification ID"
-// @Router       /notifications/:id [get]
+// @Router       /business/:businessID/notifications/:id [get]
 func (_i *controller) Show(c *fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+	businessID, err := utils.GetIntInParams(c, "businessID")
+	if err != nil {
+		return err
+	}
+	id, err := utils.GetIntInParams(c, "id")
 	if err != nil {
 		return err
 	}
 
-	notification, err := _i.service.Show(id)
+	notification, err := _i.service.Show(businessID, id)
 	if err != nil {
 		return err
 	}
@@ -75,14 +85,19 @@ func (_i *controller) Show(c *fiber.Ctx) error {
 // @Summary      Create notification
 // @Tags         Notifications
 // @Param 		 notification body request.Notification true "Notification details"
-// @Router       /notifications [post]
+// @Router       /business/:businessID/notifications [post]
 func (_i *controller) Store(c *fiber.Ctx) error {
+	businessID, err := utils.GetIntInParams(c, "businessID")
+	if err != nil {
+		return err
+	}
 	req := new(request.Notification)
 	if err := response.ParseAndValidate(c, req); err != nil {
 		return err
 	}
 
-	err := _i.service.Store(*req)
+	req.BusinessID = businessID
+	err = _i.service.Store(*req)
 	if err != nil {
 		return err
 	}
@@ -96,9 +111,13 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 // @Tags         Notifications
 // @Param 		 notification body request.Notification true "Notification details"
 // @Param        id path int true "Notification ID"
-// @Router       /notifications/:id [put]
+// @Router       /business/:businessID/notifications/:id [put]
 func (_i *controller) Update(c *fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+	businessID, err := utils.GetIntInParams(c, "businessID")
+	if err != nil {
+		return err
+	}
+	id, err := utils.GetIntInParams(c, "id")
 	if err != nil {
 		return err
 	}
@@ -108,6 +127,7 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 		return err
 	}
 
+	req.BusinessID = businessID
 	err = _i.service.Update(id, *req)
 	if err != nil {
 		return err
@@ -121,7 +141,7 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 // @Tags         Notifications
 // @Security     Bearer
 // @Param        id path int true "Notification ID"
-// @Router       /notifications/:id [delete]
+// @Router       /business/:businessID/notifications/:id [delete]
 func (_i *controller) Delete(c *fiber.Ctx) error {
 	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
 	if err != nil {

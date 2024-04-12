@@ -17,13 +17,14 @@ type Business struct {
 type BusinessType string
 
 const (
-	TypeGymManager BusinessType = "GymManager"
-	TypeBakery     BusinessType = "Bakery"
+	BTypeROOT       BusinessType = "ROOT"
+	BTypeBakery     BusinessType = "Bakery"
+	BTypeGymManager BusinessType = "GymManager"
 )
 
 var TypeDisplayProxy = map[BusinessType]string{
-	TypeGymManager: "مدیر باشگاه",
-	TypeBakery:     "نانوایی",
+	BTypeGymManager: "مدیر باشگاه",
+	BTypeBakery:     "نانوایی",
 }
 
 type BusinessAccount string
@@ -31,3 +32,5 @@ type BusinessAccount string
 const (
 	BusinessAccountDefault BusinessAccount = "default"
 )
+
+const ROOT_BUSINESS_ID = 1

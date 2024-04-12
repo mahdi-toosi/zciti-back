@@ -21,15 +21,16 @@ func (_i *Router) RegisterRoutes(cfg *config.Config) {
 
 	// define routes
 	_i.App.Route("/api/v1/businesses", func(router fiber.Router) {
-		router.Get("/", mdl.Protected(cfg), mdl.Permission(mdl.DBusiness, mdl.PReadAll), c.Index)
-		router.Get("/types", mdl.Protected(cfg), mdl.Permission(mdl.DBusiness, mdl.PReadSingle), c.Types)
-		router.Get("/:id", mdl.Protected(cfg), mdl.Permission(mdl.DBusiness, mdl.PReadSingle), c.Show)
-		router.Get("/:id/users", mdl.Protected(cfg), mdl.Permission(mdl.DBusiness, mdl.PReadSingle), c.Users)
-		router.Post("/:businessID/users/:userID", mdl.Protected(cfg), mdl.Permission(mdl.DBusiness, mdl.PReadSingle), c.InsertUser)
-		router.Delete("/:businessID/users/:userID", mdl.Protected(cfg), mdl.Permission(mdl.DBusiness, mdl.PDelete), c.DeleteUser)
-		router.Post("/", mdl.Protected(cfg), mdl.Permission(mdl.DBusiness, mdl.PCreate), c.Store)
-		router.Put("/:id", mdl.Protected(cfg), mdl.Permission(mdl.DBusiness, mdl.PUpdate), c.Update)
-		router.Delete("/:id", mdl.Protected(cfg), mdl.Permission(mdl.DBusiness, mdl.PDelete), c.Delete)
+		router.Get("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PReadAll), c.Index)
+		router.Get("/types", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PReadSingle), c.Types)
+		router.Get("/:businessID", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PReadSingle), c.Show)
+		router.Post("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PCreate), c.Store)
+		router.Put("/:businessID", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PUpdate), c.Update)
+		router.Delete("/:businessID", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PDelete), c.Delete)
+		// users
+		router.Get("/:businessID/users", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PReadSingle), c.Users)
+		router.Post("/:businessID/users/:userID", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PReadSingle), c.InsertUser)
+		router.Delete("/:businessID/users/:userID", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PDelete), c.DeleteUser)
 	})
 }
 

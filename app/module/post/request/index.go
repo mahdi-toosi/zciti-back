@@ -17,6 +17,7 @@ type Post struct {
 }
 
 type PostsRequest struct {
+	BusinessID uint64
 	Pagination *paginator.Pagination
 }
 

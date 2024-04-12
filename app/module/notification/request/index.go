@@ -16,6 +16,7 @@ type Notification struct {
 }
 
 type Notifications struct {
+	BusinessID uint64
 	Pagination *paginator.Pagination
 }
 

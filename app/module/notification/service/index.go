@@ -9,7 +9,7 @@ import (
 
 type IService interface {
 	Index(req request.Notifications) (notifications []*response.Notification, paging paginator.Pagination, err error)
-	Show(id uint64) (notification *response.Notification, err error)
+	Show(businessID uint64, id uint64) (notification *response.Notification, err error)
 	Store(req request.Notification) (err error)
 	Update(id uint64, req request.Notification) (err error)
 	Destroy(id uint64) error
@@ -34,8 +34,8 @@ func (_i *service) Index(req request.Notifications) (notifications []*response.N
 	return
 }
 
-func (_i *service) Show(id uint64) (article *response.Notification, err error) {
-	result, err := _i.Repo.GetOne(id)
+func (_i *service) Show(businessID uint64, id uint64) (article *response.Notification, err error) {
+	result, err := _i.Repo.GetOne(businessID, id)
 	if err != nil {
 		return nil, err
 	}
@@ -48,6 +48,7 @@ func (_i *service) Store(req request.Notification) (err error) {
 }
 
 func (_i *service) Update(id uint64, req request.Notification) (err error) {
+	// TODO : check business id permission
 	return _i.Repo.Update(id, req.ToDomain())
 }
 

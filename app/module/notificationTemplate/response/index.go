@@ -5,19 +5,21 @@ import (
 )
 
 type NotificationTemplate struct {
-	ID      uint64
-	Title   string
-	Content string
-	Tag     []string
+	ID         uint64
+	Title      string
+	Content    string
+	Tag        []string
+	BusinessID uint64
 }
 
 func FromDomain(nt *schema.NotificationTemplate) (res *NotificationTemplate) {
 	if nt != nil {
 		res = &NotificationTemplate{
-			ID:      nt.ID,
-			Title:   nt.Title,
-			Content: nt.Content,
-			Tag:     nt.Tag,
+			ID:         nt.ID,
+			Tag:        nt.Tag,
+			Title:      nt.Title,
+			Content:    nt.Content,
+			BusinessID: nt.BusinessID,
 		}
 	}
 

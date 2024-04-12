@@ -141,6 +141,11 @@ func NewConfig() *Config {
 		// panic if config is not found
 		log.Panic().Err(err).Msg("config not found")
 	}
+
+	if config.Middleware.Jwt.Secret == "" {
+		panic("JWT secret is not set")
+	}
+
 	return config
 }
 

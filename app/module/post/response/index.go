@@ -25,7 +25,7 @@ func FromDomain(post *schema.Post) (res *Post) {
 		res = &Post{
 			ID:             post.ID,
 			Title:          post.Title,
-			Author:         response.User{ID: post.Author.ID, FullName: post.Author.FirstName + " " + post.Author.LastName},
+			Author:         response.User{ID: post.Author.ID, FullName: post.Author.FullName()},
 			Content:        post.Content,
 			Type:           post.Type,
 			Status:         post.Status,

@@ -48,7 +48,7 @@ func (_i *repo) GetAll(req request.Assets) (assets []*schema.Asset, assetsSize u
 
 	paging = *req.Pagination
 
-	err = _i.DB.Main.Raw("SELECT SUM(size) FROM assets where business_id = ?", req.BusinessID).Scan(&assetsSize).Error
+	err = _i.DB.Main.Raw("SELECT COALESCE(SUM(size), 0) FROM assets where business_id = ?", req.BusinessID).Scan(&assetsSize).Error
 	if err != nil {
 		return
 	}

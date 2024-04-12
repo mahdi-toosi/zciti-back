@@ -6,11 +6,11 @@ import (
 )
 
 type User struct {
-	ID        uint64
-	FirstName string   `example:"mahdi" validate:"required,min=2,max=255"`
-	LastName  string   `example:"lastname" validate:"required,min=2,max=255"`
-	Mobile    uint64   `example:"9380338494" validate:"required,number"`
-	Roles     []string `example:"user"`
+	ID          uint64
+	FirstName   string                    `example:"mahdi" validate:"required,min=2,max=255"`
+	LastName    string                    `example:"lastname" validate:"required,min=2,max=255"`
+	Mobile      uint64                    `example:"9380338494" validate:"required,number"`
+	Permissions schema.UserPermissionsMap `example:"user"`
 }
 
 type Users struct {
@@ -20,10 +20,10 @@ type Users struct {
 
 func (req *User) ToDomain() *schema.User {
 	return &schema.User{
-		ID:        req.ID,
-		FirstName: req.FirstName,
-		LastName:  req.LastName,
-		Mobile:    req.Mobile,
-		Roles:     req.Roles,
+		ID:          req.ID,
+		FirstName:   req.FirstName,
+		LastName:    req.LastName,
+		Mobile:      req.Mobile,
+		Permissions: req.Permissions,
 	}
 }

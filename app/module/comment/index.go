@@ -20,13 +20,13 @@ func (_i *Router) RegisterRoutes(cfg *config.Config) {
 	c := _i.Controller.RestController
 
 	// define routes
-	_i.App.Route("/api/v1/posts/:postID/comments", func(router fiber.Router) {
-		router.Get("/", mdl.Protected(cfg), mdl.Permission(mdl.DComment, mdl.PReadAll), c.Index)
-		router.Post("/", mdl.Protected(cfg), mdl.Permission(mdl.DComment, mdl.PCreate), c.Store)
-		router.Put("/:id", mdl.Protected(cfg), mdl.Permission(mdl.DComment, mdl.PUpdate), c.Update)
-		router.Put("/:id/status", mdl.Protected(cfg), mdl.Permission(mdl.DComment, mdl.PUpdate), c.UpdateStatus)
-		//router.Delete("/:id", mdl.Protected(cfg), mdl.Permission(mdl.DComment, mdl.PDelete), c.Delete)
-		//router.Get("/:id", mdl.Protected(cfg), mdl.Permission(mdl.DComment, mdl.PReadSingle), c.Show)
+	_i.App.Route("/api/v1/business/:businessID/posts/:postID/comments", func(router fiber.Router) {
+		router.Get("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DComment, mdl.PReadAll), c.Index)
+		router.Post("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DComment, mdl.PCreate), c.Store)
+		router.Put("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DComment, mdl.PUpdate), c.Update)
+		router.Put("/:id/status", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DComment, mdl.PUpdate), c.UpdateStatus)
+		//router.Delete("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DComment, mdl.PDelete), c.Delete)
+		//router.Get("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DComment, mdl.PReadSingle), c.Show)
 	})
 }
 

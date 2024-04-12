@@ -6,13 +6,15 @@ import (
 )
 
 type NotificationTemplate struct {
-	ID      uint64
-	Title   string   `example:"title" validate:"min=2,max=255"`
-	Content string   `example:"some content some content some content" validate:"min=2"`
-	Tag     []string `example:"['tag']" validate:"dive"`
+	ID         uint64
+	Title      string   `example:"title" validate:"min=2,max=255"`
+	Content    string   `example:"some content some content some content" validate:"min=2"`
+	Tag        []string `example:"['tag']" validate:"dive"`
+	BusinessID uint64
 }
 
 type Index struct {
+	BusinessID uint64
 	Pagination *paginator.Pagination
 }
 

@@ -11,7 +11,7 @@ type IService interface {
 	Index(req request.Index) (notificationTemplates []*response.NotificationTemplate, paging paginator.Pagination, err error)
 	Store(req request.NotificationTemplate) (err error)
 	Update(id uint64, req request.NotificationTemplate) (err error)
-	Destroy(id uint64) error
+	Destroy(businessID uint64, id uint64) error
 }
 
 func Service(Repo repository.IRepository) IService {
@@ -54,6 +54,6 @@ func (_i *service) Update(id uint64, req request.NotificationTemplate) (err erro
 	return _i.Repo.Update(id, req.ToDomain())
 }
 
-func (_i *service) Destroy(id uint64) error {
-	return _i.Repo.Delete(id)
+func (_i *service) Destroy(businessID uint64, id uint64) error {
+	return _i.Repo.Delete(businessID, id)
 }
