@@ -10,6 +10,7 @@ type Post struct {
 	Author         User              `gorm:"foreignKey:AuthorID" faker:"-"`
 	BusinessID     uint64            `faker:"-"`
 	Business       Business          `gorm:"foreignKey:BusinessID" faker:"-"`
+	Taxonomies     []Taxonomy        `gorm:"many2many:post_taxonomy;" faker:"-"`
 	CommentsStatus PostCommentStatus `gorm:"varchar(100);" faker:"oneof: open, close, onlyBuyers, onlyCustomers"`
 	CommentsCount  uint64            `gorm:"not null"`
 	Base
