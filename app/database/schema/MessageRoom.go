@@ -7,3 +7,11 @@ type MessageRoom struct {
 	Status     string `gorm:"varchar(250);" faker:"oneof:active,archived,blocked"`
 	Base
 }
+
+type MessageRoomStatus string
+
+const (
+	MessageRoomStatusActive   MessageRoomStatus = "active"
+	MessageRoomStatusBlocked  MessageRoomStatus = "blocked"
+	MessageRoomStatusArchived MessageRoomStatus = "archived"
+)

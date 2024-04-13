@@ -8,14 +8,14 @@ import (
 type Comment struct {
 	ID              uint64
 	Content         string `example:"content content content" validate:"required,max=1000"`
-	Status          string
-	ParentID        *uint64
+	Status          schema.CommentStatus
+	ParentID        uint64
 	IsBusinessOwner *bool
 	AuthorID        uint64
 }
 
 type UpdateCommentStatus struct {
-	Status string `example:"pending" validate:"required,oneof=approved pending"`
+	Status schema.CommentStatus `example:"pending" validate:"required,oneof=approved pending"`
 }
 
 type Comments struct {

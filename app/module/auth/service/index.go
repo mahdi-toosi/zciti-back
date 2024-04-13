@@ -70,7 +70,7 @@ func (_i *service) Register(req *request.Register, jwtConfig config.Jwt) (res re
 		Mobile:      req.Mobile,
 		LastName:    req.LastName,
 		FirstName:   req.FirstName,
-		Permissions: schema.UserPermissionsMap{},
+		Permissions: schema.UserPermissions{},
 		Password:    helpers.Hash([]byte(req.Password)),
 	}
 

@@ -1,35 +1,41 @@
 package schema
 
 type Post struct {
-	ID             uint64   `gorm:"primaryKey" faker:"-"`
-	Title          string   `gorm:"varchar(600);" faker:"sentence"`
-	Content        string   `gorm:"not null" faker:"paragraph"`
-	Status         string   `gorm:"varchar(100); default:published" faker:"oneof: draft, published, private"`
-	Type           string   `gorm:"varchar(100);" faker:"oneof: product, post, page"`
-	AuthorID       uint64   `gorm:"not null" faker:"-"`
-	Author         User     `gorm:"foreignKey:AuthorID" faker:"-"`
-	BusinessID     uint64   `faker:"-"`
-	Business       Business `gorm:"foreignKey:BusinessID" faker:"-"`
-	CommentsStatus string   `gorm:"varchar(100);" faker:"oneof: open, close, onlyBuyers, onlyCustomers"`
-	CommentsCount  uint64   `gorm:"not null"`
+	ID             uint64            `gorm:"primaryKey" faker:"-"`
+	Title          string            `gorm:"varchar(600);" faker:"sentence"`
+	Content        string            `gorm:"not null" faker:"paragraph"`
+	Status         PostStatus        `gorm:"varchar(100); default:published" faker:"oneof: draft, published, private"`
+	Type           PostType          `gorm:"varchar(100);" faker:"oneof: product, post, page"`
+	AuthorID       uint64            `gorm:"not null" faker:"-"`
+	Author         User              `gorm:"foreignKey:AuthorID" faker:"-"`
+	BusinessID     uint64            `faker:"-"`
+	Business       Business          `gorm:"foreignKey:BusinessID" faker:"-"`
+	CommentsStatus PostCommentStatus `gorm:"varchar(100);" faker:"oneof: open, close, onlyBuyers, onlyCustomers"`
+	CommentsCount  uint64            `gorm:"not null"`
 	Base
 }
 
-const (
-	PostStatusDraft     = "draft"
-	PostStatusPublished = "published"
-	PostStatusPrivate   = "private"
-)
+type PostStatus string
 
 const (
-	PostCommentStatusOpen              = "open"
-	PostCommentStatusClose             = "close"
-	PostCommentStatusOnlyBuyers        = "onlyBuyers"
-	PostCommentStatusOnlyBusinessUsers = "onlyCustomers"
+	PostStatusDraft     PostStatus = "draft"
+	PostStatusPublished PostStatus = "published"
+	PostStatusPrivate   PostStatus = "private"
 )
 
+type PostCommentStatus string
+
 const (
-	PostTypePage    = "page"
-	PostTypeProduct = "product"
-	PostTypePost    = "post"
+	PostCommentStatusOpen              PostCommentStatus = "open"
+	PostCommentStatusClose             PostCommentStatus = "close"
+	PostCommentStatusOnlyBuyers        PostCommentStatus = "onlyBuyers"
+	PostCommentStatusOnlyBusinessUsers PostCommentStatus = "onlyCustomers"
+)
+
+type PostType string
+
+const (
+	PostTypePage    PostType = "page"
+	PostTypeProduct PostType = "product"
+	PostTypePost    PostType = "post"
 )

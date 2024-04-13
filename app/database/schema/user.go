@@ -9,28 +9,28 @@ import (
 )
 
 type User struct {
-	ID              uint64             `gorm:"primaryKey" faker:"-"`
-	FirstName       string             `gorm:"varchar(250);" faker:"first_name"`
-	LastName        string             `gorm:"varchar(250);" faker:"last_name"`
-	Mobile          uint64             `gorm:"not null;uniqueIndex"`
-	MobileConfirmed bool               `gorm:"default:false"`
-	Permissions     UserPermissionsMap `gorm:"type:json;not null"`
-	Password        string             `gorm:"varchar(250);not null"`
-	Businesses      []*Business        `gorm:"many2many:business_users;" faker:"-"`
+	ID              uint64          `gorm:"primaryKey" faker:"-"`
+	FirstName       string          `gorm:"varchar(250);" faker:"first_name"`
+	LastName        string          `gorm:"varchar(250);" faker:"last_name"`
+	Mobile          uint64          `gorm:"not null;uniqueIndex"`
+	MobileConfirmed bool            `gorm:"default:false"`
+	Permissions     UserPermissions `gorm:"type:json;not null"`
+	Password        string          `gorm:"varchar(250);not null"`
+	Businesses      []*Business     `gorm:"many2many:business_users;" faker:"-"`
 	Base
 }
 
-type UserPermissionsMap map[uint64] /* businessID*/ []UserRole
+type UserPermissions map[uint64] /* businessID*/ []UserRole
 
-func (rm *UserPermissionsMap) Scan(value any) error {
+func (rm *UserPermissions) Scan(value any) error {
 	byteValue, ok := value.([]byte)
 	if !ok {
-		return fmt.Errorf("failed to unmarshal UserPermissionsMap with value %v", value)
+		return fmt.Errorf("failed to unmarshal UserPermissions with value %v", value)
 	}
 	return json.Unmarshal(byteValue, rm)
 }
 
-func (rm UserPermissionsMap) Value() (driver.Value, error) {
+func (rm UserPermissions) Value() (driver.Value, error) {
 	return json.Marshal(rm)
 }
 

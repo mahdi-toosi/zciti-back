@@ -5,13 +5,13 @@ import (
 )
 
 type User struct {
-	ID              uint64                    `json:",omitempty"`
-	FirstName       string                    `json:",omitempty"`
-	LastName        string                    `json:",omitempty"`
-	FullName        string                    `json:",omitempty"`
-	Mobile          uint64                    `json:",omitempty"`
-	MobileConfirmed bool                      `json:",omitempty"`
-	Permissions     schema.UserPermissionsMap `json:",omitempty"`
+	ID              uint64                 `json:",omitempty"`
+	FirstName       string                 `json:",omitempty"`
+	LastName        string                 `json:",omitempty"`
+	FullName        string                 `json:",omitempty"`
+	Mobile          uint64                 `json:",omitempty"`
+	MobileConfirmed bool                   `json:",omitempty"`
+	Permissions     schema.UserPermissions `json:",omitempty"`
 }
 
 func FromDomain(user *schema.User) (res *User) {

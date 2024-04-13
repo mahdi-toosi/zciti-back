@@ -26,7 +26,7 @@ func (User) Seed(db *gorm.DB) error {
 		}
 
 		fakeData.Password = pass
-		fakeData.Permissions = schema.UserPermissionsMap{}
+		fakeData.Permissions = schema.UserPermissions{}
 		fakeData.Mobile = uint64(9180338500 + i)
 		if err := db.Create(fakeData).Error; err != nil {
 			log.Error().Err(err)
@@ -69,7 +69,7 @@ func GenerateAdmin(db *gorm.DB) error {
 	admin.FirstName = "mahdi"
 	admin.Mobile = AdminMobile
 	admin.MobileConfirmed = true
-	admin.Permissions = schema.UserPermissionsMap{
+	admin.Permissions = schema.UserPermissions{
 		schema.ROOT_BUSINESS_ID: []schema.UserRole{schema.URAdmin},
 	}
 

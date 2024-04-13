@@ -7,17 +7,17 @@ import (
 )
 
 type Post struct {
-	ID             uint64             `json:",omitempty"`
-	Title          string             `json:",omitempty"`
-	AuthorID       uint64             `json:",omitempty"`
-	Author         response.User      `json:",omitempty"`
-	Content        string             `json:",omitempty"`
-	Status         string             `json:",omitempty"`
-	Type           string             `json:",omitempty"`
-	BusinessID     uint64             `json:",omitempty"`
-	Business       bresponse.Business `json:",omitempty"`
-	CommentsStatus string             `json:",omitempty"`
-	CommentsCount  uint64             `json:",omitempty"`
+	ID             uint64                   `json:",omitempty"`
+	Title          string                   `json:",omitempty"`
+	AuthorID       uint64                   `json:",omitempty"`
+	Author         response.User            `json:",omitempty"`
+	Content        string                   `json:",omitempty"`
+	Status         schema.PostStatus        `json:",omitempty"`
+	Type           schema.PostType          `json:",omitempty"`
+	BusinessID     uint64                   `json:",omitempty"`
+	Business       bresponse.Business       `json:",omitempty"`
+	CommentsStatus schema.PostCommentStatus `json:",omitempty"`
+	CommentsCount  uint64                   `json:",omitempty"`
 }
 
 func FromDomain(post *schema.Post) (res *Post) {

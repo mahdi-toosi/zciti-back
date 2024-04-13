@@ -46,7 +46,7 @@ func BusinessPermission(domain Domain, permission Permission) fiber.Handler {
 	}
 }
 
-func hasPermission(userPermissions schema.UserPermissionsMap, businessID uint64, domain Domain, permission Permission) bool {
+func hasPermission(userPermissions schema.UserPermissions, businessID uint64, domain Domain, permission Permission) bool {
 	for _, role := range userPermissions[businessID] {
 		r, ok1 := Permissions[role]
 		if !ok1 {
@@ -130,5 +130,5 @@ type account struct {
 const megabyte = 1000 * 1024
 
 var Accounts = map[schema.BusinessAccount]account{
-	schema.BusinessAccountDefault: account{Title: "DefaultAccount", AssetsSizeLimit: 1 * megabyte},
+	schema.BusinessAccountDefault: {Title: "DefaultAccount", AssetsSizeLimit: 1 * megabyte},
 }

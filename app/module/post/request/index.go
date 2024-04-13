@@ -7,13 +7,13 @@ import (
 
 type Post struct {
 	ID             uint64
-	AuthorID       uint64 `example:"1" validate:"number"`
-	BusinessID     uint64 `example:"1" validate:"number"`
-	Title          string `example:"title" validate:"min=2,max=255"`
-	Content        string `example:"content content content" validate:"min=2,max=255"`
-	Status         string `example:"draft" validate:"oneof=draft published private"`
-	Type           string `example:"page" validate:"oneof=product post page"`
-	CommentsStatus string `example:"open" validate:"oneof=open close onlyBuyers onlyCustomers"`
+	AuthorID       uint64                   `example:"1" validate:"number"`
+	BusinessID     uint64                   `example:"1" validate:"number"`
+	Title          string                   `example:"title" validate:"min=2,max=255"`
+	Content        string                   `example:"content content content" validate:"min=2,max=255"`
+	Status         schema.PostStatus        `example:"draft" validate:"oneof=draft published private"`
+	Type           schema.PostType          `example:"page" validate:"oneof=product post page"`
+	CommentsStatus schema.PostCommentStatus `example:"open" validate:"oneof=open close onlyBuyers onlyCustomers"`
 }
 
 type PostsRequest struct {
