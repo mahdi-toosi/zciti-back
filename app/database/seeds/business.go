@@ -8,6 +8,7 @@ import (
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/utils"
 	"gorm.io/gorm"
+	"time"
 )
 
 type Business struct{}
@@ -34,6 +35,7 @@ func (Business) Seed(db *gorm.DB) error {
 		}
 	}
 
+	time.Sleep(time.Second * 1)
 	businessIDs, err := utils.GetFakeTableIDs(db, schema.Business{})
 	if err != nil {
 		return err

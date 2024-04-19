@@ -10,9 +10,11 @@ import (
 type IRepository interface {
 	GetAll(req request.PostsRequest) (posts []*schema.Post, paging paginator.Pagination, err error)
 	GetOne(businessID uint64, id uint64) (post *schema.Post, err error)
-	Create(post *schema.Post) (err error)
-	Update(id uint64, post *schema.Post) (err error)
-	Delete(businessID uint64, id uint64) (err error)
+	Create(post *schema.Post) (result *schema.Post, err error)
+	Update(id uint64, post *schema.Post) error
+	Delete(businessID uint64, id uint64) error
+	DeleteTaxonomies(req request.PostTaxonomies) error
+	InsertTaxonomies(req request.PostTaxonomies) error
 }
 
 func Repository(DB *database.Database) IRepository {
@@ -28,6 +30,10 @@ type repo struct {
 func (_i *repo) GetAll(req request.PostsRequest) (posts []*schema.Post, paging paginator.Pagination, err error) {
 	query := _i.DB.Main.Model(&schema.Post{}).Where("business_id = ?", req.BusinessID)
 
+	if req.Keyword != "" {
+		query.Where("title Like ?", "%"+req.Keyword+"%")
+	}
+
 	if req.Pagination.Page > 0 {
 		var total int64
 		query.Count(&total)
@@ -37,7 +43,11 @@ func (_i *repo) GetAll(req request.PostsRequest) (posts []*schema.Post, paging p
 		query.Limit(req.Pagination.Limit)
 	}
 
-	err = query.Preload("Author").Preload("Business").Order("created_at desc").Find(&posts).Error
+	err = query.
+		Preload("Author").
+		Preload("Business").
+		Preload("Taxonomies").
+		Order("created_at desc").Find(&posts).Error
 	if err != nil {
 		return
 	}
@@ -48,7 +58,10 @@ func (_i *repo) GetAll(req request.PostsRequest) (posts []*schema.Post, paging p
 }
 
 func (_i *repo) GetOne(businessID uint64, id uint64) (post *schema.Post, err error) {
-	err = _i.DB.Main.Preload("Business").
+	err = _i.DB.Main.
+		Preload("Author").
+		Preload("Business").
+		Preload("Taxonomies").
 		Where("business_id = ?", businessID).
 		First(&post, id).Error
 	if err != nil {
@@ -58,16 +71,36 @@ func (_i *repo) GetOne(businessID uint64, id uint64) (post *schema.Post, err err
 	return post, nil
 }
 
-func (_i *repo) Create(post *schema.Post) (err error) {
-	return _i.DB.Main.Create(post).Error
+func (_i *repo) Create(post *schema.Post) (result *schema.Post, err error) {
+	err = _i.DB.Main.Create(&post).Error
+	if err != nil {
+		return nil, err
+	}
+	return post, nil
 }
 
-func (_i *repo) Update(id uint64, post *schema.Post) (err error) {
+func (_i *repo) Update(id uint64, post *schema.Post) error {
 	return _i.DB.Main.Model(&schema.Post{}).
 		Where(&schema.Post{ID: id}).
 		Updates(post).Error
 }
 
 func (_i *repo) Delete(businessID uint64, id uint64) error {
-	return _i.DB.Main.Delete(&schema.Post{}, id).Error
+	return _i.DB.Main.Delete(&schema.Post{}, id).Where("business_id = ?", businessID).Error
+}
+
+func (_i *repo) DeleteTaxonomies(req request.PostTaxonomies) error {
+	return _i.DB.Main.Exec(
+		"DELETE FROM post_taxonomy WHERE post_id = ? AND taxonomy_id IN (?)",
+		req.PostID,
+		req.IDs,
+	).Error
+}
+
+func (_i *repo) InsertTaxonomies(req request.PostTaxonomies) error {
+	return _i.DB.Main.Exec(
+		"INSERT INTO post_taxonomy (post_id, taxonomy_id) VALUES (?, ?)",
+		req.PostID,
+		req.IDs,
+	).Error
 }

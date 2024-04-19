@@ -33,6 +33,7 @@ func (Post) Seed(db *gorm.DB) error {
 
 		fakeData.AuthorID = utils.RandomFromArray(userIDs)
 		fakeData.BusinessID = utils.RandomFromArray(businessIDs)
+		fakeData.Slug = fakeData.GenerateSlug() + "-" + utils.RandomStringBytes(5)
 
 		if err := db.Create(fakeData).Error; err != nil {
 			log.Error().Err(err)

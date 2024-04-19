@@ -12,6 +12,7 @@ import (
 	"go-fiber-starter/app/module/notification"
 	"go-fiber-starter/app/module/notificationTemplate"
 	"go-fiber-starter/app/module/post"
+	"go-fiber-starter/app/module/taxonomy"
 	"go-fiber-starter/app/module/user"
 	"go-fiber-starter/utils/config"
 )
@@ -26,6 +27,7 @@ type Router struct {
 	AssetRouter                *asset.Router
 	MessageRouter              *message.Router
 	CommentRouter              *comment.Router
+	TaxonomyRouter             *taxonomy.Router
 	BusinessRouter             *business.Router
 	MessageRoomRouter          *messageRoom.Router
 	NotificationRouter         *notification.Router
@@ -39,9 +41,10 @@ func NewRouter(
 	authRouter *auth.Router,
 	userRouter *user.Router,
 	postRouter *post.Router,
-	AssetRouter *asset.Router,
+	assetRouter *asset.Router,
 	commentRouter *comment.Router,
 	messageRouter *message.Router,
+	taxonomyRouter *taxonomy.Router,
 	businessRouter *business.Router,
 	messageRoomRouter *messageRoom.Router,
 	notificationRouter *notification.Router,
@@ -54,9 +57,10 @@ func NewRouter(
 		AuthRouter:                 authRouter,
 		UserRouter:                 userRouter,
 		PostRouter:                 postRouter,
-		AssetRouter:                AssetRouter,
+		AssetRouter:                assetRouter,
 		CommentRouter:              commentRouter,
 		MessageRouter:              messageRouter,
+		TaxonomyRouter:             taxonomyRouter,
 		BusinessRouter:             businessRouter,
 		MessageRoomRouter:          messageRoomRouter,
 		NotificationRouter:         notificationRouter,
@@ -72,6 +76,7 @@ func (r *Router) Register() { // Register routes of modules
 	r.AssetRouter.RegisterRoutes(r.Cfg)
 	r.CommentRouter.RegisterRoutes(r.Cfg)
 	r.MessageRouter.RegisterRoutes(r.Cfg)
+	r.TaxonomyRouter.RegisterRoutes(r.Cfg)
 	r.BusinessRouter.RegisterRoutes(r.Cfg)
 	r.MessageRoomRouter.RegisterRoutes(r.Cfg)
 	r.NotificationRouter.RegisterRoutes(r.Cfg)

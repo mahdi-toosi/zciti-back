@@ -7,23 +7,30 @@ import (
 
 type Taxonomy struct {
 	ID          uint64
-	FirstName   string                 `example:"mahdi" validate:"required,min=2,max=255"`
-	LastName    string                 `example:"lastname" validate:"required,min=2,max=255"`
-	Mobile      uint64                 `example:"9380338494" validate:"required,number"`
-	Permissions schema.UserPermissions `example:"taxonomy"`
+	Title       string              `example:"title" validate:"required,min=2,max=100"`
+	Description string              `example:"description" validate:"min=2,max=500"`
+	Type        schema.TaxonomyType `example:"tag" validate:"required,oneof=category tag"`
+	Domain      schema.PostType     `example:"post" validate:"required,oneof=post page product"`
+	BusinessID  uint64              `example:"1" validate:"number"`
+	Business    schema.Business     ``
+	ParentID    uint64              `example:"1" validate:"number"`
 }
 
 type Taxonomies struct {
-	Pagination *paginator.Pagination
+	BusinessID uint64
 	Keyword    string
+	Domain     schema.PostType     `example:"post" validate:"omitempty,oneof=post page product"`
+	Type       schema.TaxonomyType `example:"post" validate:"omitempty,oneof=category tag"`
+	Pagination *paginator.Pagination
 }
 
 func (req *Taxonomy) ToDomain() *schema.Taxonomy {
 	return &schema.Taxonomy{
 		ID:          req.ID,
-		FirstName:   req.FirstName,
-		LastName:    req.LastName,
-		Mobile:      req.Mobile,
-		Permissions: req.Permissions,
+		Type:        req.Type,
+		Title:       req.Title,
+		Business:    req.Business,
+		ParentID:    req.ParentID,
+		Description: req.Description,
 	}
 }

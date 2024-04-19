@@ -24,6 +24,8 @@ func (_i *Router) RegisterRoutes(cfg *config.Config) {
 		router.Get("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DPost, mdl.PReadAll), c.Index)
 		router.Get("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DPost, mdl.PReadSingle), c.Show)
 		router.Post("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DPost, mdl.PCreate), c.Store)
+		router.Post("/:id/delete-taxonomies", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DPost, mdl.PCreate), c.DeleteTaxonomies)
+		router.Post("/:id/insert-taxonomies", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DPost, mdl.PCreate), c.InsertTaxonomies)
 		router.Put("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DPost, mdl.PUpdate), c.Update)
 		router.Delete("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DPost, mdl.PDelete), c.Delete)
 	})

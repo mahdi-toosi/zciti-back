@@ -15,6 +15,8 @@ type IRestController interface {
 	Store(c *fiber.Ctx) error
 	Update(c *fiber.Ctx) error
 	Delete(c *fiber.Ctx) error
+	DeleteTaxonomies(c *fiber.Ctx) error
+	InsertTaxonomies(c *fiber.Ctx) error
 }
 
 func RestController(s service.IService) IRestController {
@@ -29,6 +31,7 @@ type controller struct {
 // @Summary      Get all posts
 // @Tags         Post
 // @Security     Bearer
+// @Param        businessID path int true "Business ID"
 // @Router       business/:businessID/posts [get]
 func (_i *controller) Index(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")
@@ -43,6 +46,7 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	var req request.PostsRequest
 	req.Pagination = paginate
 	req.BusinessID = businessID
+	req.Keyword = c.Query("keyword")
 
 	posts, paging, err := _i.service.Index(req)
 	if err != nil {
@@ -60,6 +64,7 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 // @Tags         Post
 // @Security     Bearer
 // @Param        id path int true "Post ID"
+// @Param        businessID path int true "Business ID"
 // @Router       /business/:businessID/posts/:id [get]
 func (_i *controller) Show(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")
@@ -84,25 +89,33 @@ func (_i *controller) Show(c *fiber.Ctx) error {
 // @Tags         Post
 // @Param 		 post body request.Post true "Post details"
 // @Security     Bearer
+// @Param        businessID path int true "Business ID"
 // @Router       /business/:businessID/posts [post]
 func (_i *controller) Store(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")
 	if err != nil {
 		return err
 	}
+
+	user, err := utils.GetAuthenticatedUser(c)
+	if err != nil {
+		return fiber.ErrForbidden
+	}
+
 	req := new(request.Post)
 	if err := response.ParseAndValidate(c, req); err != nil {
 		return err
 	}
 
+	req.AuthorID = user.ID
 	req.BusinessID = businessID
 
-	err = _i.service.Store(*req)
+	p, err := _i.service.Store(*req)
 	if err != nil {
 		return err
 	}
 
-	return c.JSON("success")
+	return c.JSON(p)
 }
 
 // Update
@@ -111,6 +124,7 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 // @Param 		 post body request.Post true "Post details"
 // @Security     Bearer
 // @Param        id path int true "Post ID"
+// @Param        businessID path int true "Business ID"
 // @Router       /business/:businessID/posts/:id [put]
 func (_i *controller) Update(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")
@@ -141,6 +155,7 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 // @Tags         Post
 // @Security     Bearer
 // @Param        id path int true "Post ID"
+// @Param        businessID path int true "Business ID"
 // @Router       /business/:businessID/posts/:id [delete]
 func (_i *controller) Delete(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")
@@ -154,6 +169,72 @@ func (_i *controller) Delete(c *fiber.Ctx) error {
 	}
 
 	err = _i.service.Delete(businessID, id)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON("success")
+}
+
+// DeleteTaxonomies
+// @Summary      delete post
+// @Tags         Post
+// @Security     Bearer
+// @Param        id path int true "Post ID"
+// @Param        businessID path int true "Business ID"
+// @Router       /business/:businessID/posts/:id/delete-taxonomies [delete]
+func (_i *controller) DeleteTaxonomies(c *fiber.Ctx) error {
+	businessID, err := utils.GetIntInParams(c, "businessID")
+	if err != nil {
+		return err
+	}
+
+	id, err := utils.GetIntInParams(c, "id")
+	if err != nil {
+		return err
+	}
+
+	req := new(request.PostTaxonomies)
+	if err := response.ParseAndValidate(c, req); err != nil {
+		return err
+	}
+
+	req.PostID = id
+	req.BusinessID = businessID
+	err = _i.service.DeleteTaxonomies(*req)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON("success")
+}
+
+// InsertTaxonomies
+// @Summary      delete post
+// @Tags         Post
+// @Security     Bearer
+// @Param        id path int true "Post ID"
+// @Param        businessID path int true "Business ID"
+// @Router       /business/:businessID/posts/:id/insert-taxonomies [delete]
+func (_i *controller) InsertTaxonomies(c *fiber.Ctx) error {
+	businessID, err := utils.GetIntInParams(c, "businessID")
+	if err != nil {
+		return err
+	}
+
+	id, err := utils.GetIntInParams(c, "id")
+	if err != nil {
+		return err
+	}
+
+	req := new(request.PostTaxonomies)
+	if err := response.ParseAndValidate(c, req); err != nil {
+		return err
+	}
+
+	req.PostID = id
+	req.BusinessID = businessID
+	err = _i.service.InsertTaxonomies(*req)
 	if err != nil {
 		return err
 	}

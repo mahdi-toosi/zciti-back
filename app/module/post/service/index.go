@@ -10,9 +10,11 @@ import (
 type IService interface {
 	Index(req request.PostsRequest) (posts []*response.Post, paging paginator.Pagination, err error)
 	Show(businessID uint64, id uint64) (post *response.Post, err error)
-	Store(req request.Post) (err error)
+	Store(req request.Post) (post *response.Post, err error)
 	Update(id uint64, req request.Post) (err error)
 	Delete(businessID uint64, id uint64) error
+	DeleteTaxonomies(req request.PostTaxonomies) error
+	InsertTaxonomies(req request.PostTaxonomies) error
 }
 
 func Service(repo repository.IRepository) IService {
@@ -48,8 +50,12 @@ func (_i *service) Show(businessID uint64, id uint64) (post *response.Post, err 
 	return response.FromDomain(result), nil
 }
 
-func (_i *service) Store(req request.Post) (err error) {
-	return _i.Repo.Create(req.ToDomain())
+func (_i *service) Store(req request.Post) (post *response.Post, err error) {
+	p, err := _i.Repo.Create(req.ToDomain())
+	if err != nil {
+		return nil, err
+	}
+	return response.FromDomain(p), nil
 }
 
 func (_i *service) Update(id uint64, req request.Post) (err error) {
@@ -58,4 +64,12 @@ func (_i *service) Update(id uint64, req request.Post) (err error) {
 
 func (_i *service) Delete(businessID uint64, id uint64) error {
 	return _i.Repo.Delete(businessID, id)
+}
+
+func (_i *service) DeleteTaxonomies(req request.PostTaxonomies) error {
+	return _i.Repo.DeleteTaxonomies(req)
+}
+
+func (_i *service) InsertTaxonomies(req request.PostTaxonomies) error {
+	return _i.Repo.InsertTaxonomies(req)
 }

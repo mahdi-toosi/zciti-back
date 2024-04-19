@@ -9,10 +9,10 @@ import (
 
 type IService interface {
 	Index(req request.Taxonomies) (taxonomies []*response.Taxonomy, paging paginator.Pagination, err error)
-	Show(id uint64) (taxonomy *response.Taxonomy, err error)
+	Show(BusinessID uint64, id uint64) (taxonomy *response.Taxonomy, err error)
 	Store(req request.Taxonomy) (err error)
 	Update(id uint64, req request.Taxonomy) (err error)
-	Destroy(id uint64) error
+	Destroy(BusinessID uint64, id uint64) error
 }
 
 func Service(Repo repository.IRepository) IService {
@@ -38,8 +38,8 @@ func (_i *service) Index(req request.Taxonomies) (taxonomies []*response.Taxonom
 	return
 }
 
-func (_i *service) Show(id uint64) (taxonomy *response.Taxonomy, err error) {
-	result, err := _i.Repo.GetOne(id)
+func (_i *service) Show(businessID uint64, id uint64) (taxonomy *response.Taxonomy, err error) {
+	result, err := _i.Repo.GetOne(businessID, id)
 	if err != nil {
 		return nil, err
 	}
@@ -55,6 +55,6 @@ func (_i *service) Update(id uint64, req request.Taxonomy) (err error) {
 	return _i.Repo.Update(id, req.ToDomain())
 }
 
-func (_i *service) Destroy(id uint64) error {
-	return _i.Repo.Delete(id)
+func (_i *service) Destroy(businessID uint64, id uint64) error {
+	return _i.Repo.Delete(businessID, id)
 }

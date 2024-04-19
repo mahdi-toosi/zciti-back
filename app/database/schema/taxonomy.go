@@ -1,21 +1,31 @@
 package schema
 
+import (
+	"fmt"
+	"github.com/gosimple/slug"
+)
+
 type Taxonomy struct {
-	ID         uint64       `gorm:"primaryKey" faker:"-"`
-	Name       string       `gorm:"varchar(100); not null;" faker:"word"`
-	Type       TaxonomyType `gorm:"varchar(100); not null;" faker:"word"`
-	IsGeneral  bool         ``
-	Slug       string       `gorm:"varchar(200); not null;" faker:"word"`
-	BusinessID uint64       `faker:"-"`
-	Business   Business     `gorm:"foreignKey:BusinessID" faker:"-"`
-	Posts      []Post       `gorm:"many2many:post_taxonomy;" faker:"-"`
-	ParentID   uint64       `faker:"-"`
+	ID          uint64       `gorm:"primaryKey" faker:"-"`
+	Title       string       `gorm:"varchar(100); not null;" faker:"word"`
+	Type        TaxonomyType `gorm:"varchar(100); not null; index;" faker:"oneof: tag, category"`
+	Domain      PostType     `gorm:"varchar(100); not null; index;" faker:"oneof: post, page, product"`
+	Slug        string       `gorm:"varchar(200); not null; index:idx_slug,priority:2" faker:"-"`
+	BusinessID  uint64       `gorm:"index:idx_slug,priority:1" faker:"-"`
+	Business    Business     `gorm:"foreignKey:BusinessID" faker:"-"`
+	Posts       []Post       `gorm:"many2many:post_taxonomy;" faker:"-"`
+	ParentID    uint64       `faker:"-"`
+	Description string       `gorm:"varchar(500);" faker:"sentence"`
 	Base
 }
 
 type TaxonomyType string
 
 const (
-	Category TaxonomyType = "category"
-	Tag      TaxonomyType = "tag"
+	TaxonomyTypeTag      TaxonomyType = "tag"
+	TaxonomyTypeCategory TaxonomyType = "category"
 )
+
+func (u *Taxonomy) GenerateSlug() string {
+	return fmt.Sprintf("%s-%d", slug.Make(u.Title), u.BusinessID)
+}
