@@ -196,3 +196,65 @@ func RandomStringBytes(n int) string {
 	}
 	return string(b)
 }
+
+func DeleteFoldersInDirectory(dir string) error {
+	// Read the contents of the directory
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return fmt.Errorf("failed to read directory: %w", err)
+	}
+
+	// Iterate through the entries
+	for _, entry := range entries {
+		// Skip non-directories
+		if !entry.IsDir() {
+			continue
+		}
+
+		// Build the path to the subdirectory
+		subdir := filepath.Join(dir, entry.Name())
+
+		// Remove the subdirectory and its contents (files and subdirectories)
+		err = deleteAllContents(subdir)
+		if err != nil {
+			return fmt.Errorf("failed to delete subdirectory '%s': %w", subdir, err)
+		}
+	}
+
+	return nil
+}
+
+func deleteAllContents(path string) error {
+	// Read the contents of the directory
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		return fmt.Errorf("failed to read directory: %w", err)
+	}
+
+	// Iterate through the entries and remove them
+	for _, entry := range entries {
+		entryPath := filepath.Join(path, entry.Name())
+
+		if entry.IsDir() {
+			// Recursively delete the subdirectory and its contents
+			err = deleteAllContents(entryPath)
+			if err != nil {
+				return fmt.Errorf("failed to delete subdirectory '%s': %w", entryPath, err)
+			}
+		} else {
+			// Remove the file
+			err = os.Remove(entryPath)
+			if err != nil {
+				return fmt.Errorf("failed to delete file '%s': %w", entryPath, err)
+			}
+		}
+	}
+
+	// Remove the now-empty directory
+	err = os.Remove(path)
+	if err != nil {
+		return fmt.Errorf("failed to remove empty directory '%s': %w", path, err)
+	}
+
+	return nil
+}

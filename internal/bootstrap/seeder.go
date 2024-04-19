@@ -5,6 +5,7 @@ import (
 	"flag"
 	"github.com/rs/zerolog"
 	"go-fiber-starter/internal/bootstrap/database"
+	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/config"
 	"go.uber.org/fx"
 	"os"
@@ -20,10 +21,11 @@ func Seeder(lifecycle fx.Lifecycle, cfg *config.Config, database *database.Datab
 				seeder := flag.Bool("seed", false, "seed the databases")
 				migrate := flag.Bool("migrate", false, "migrate the databases")
 				drop := flag.Bool("drop-all-tables", false, "drop all tables in the databases")
+				deleteFilesInStorage := flag.Bool("delete-files-in-storage", false, "generating necessary data")
 				generateNecessaryData := flag.Bool("generate-necessary-data", false, "generating necessary data")
 				flag.Parse()
 
-				if *migrate || *seeder || *drop || *generateNecessaryData {
+				if *migrate || *seeder || *drop || *generateNecessaryData || *deleteFilesInStorage {
 					// read flag -migrate to migrate the database
 					if *migrate {
 						database.MigrateModels()
@@ -39,6 +41,15 @@ func Seeder(lifecycle fx.Lifecycle, cfg *config.Config, database *database.Datab
 					// read flag -drop-all-tables to drop all tables in the database
 					if *drop {
 						database.DropTables()
+					}
+
+					if *deleteFilesInStorage {
+						if err := utils.DeleteFoldersInDirectory(cfg.Middleware.FileSystem.Root); err != nil {
+							return err
+						}
+						if err := utils.DeleteFoldersInDirectory(cfg.Middleware.FileSystem.PrivateRoot); err != nil {
+							return err
+						}
 					}
 
 					database.ShutdownDatabase()

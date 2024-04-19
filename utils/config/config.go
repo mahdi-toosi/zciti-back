@@ -84,11 +84,12 @@ type middleware = struct {
 	}
 
 	FileSystem struct {
-		Enable bool
-		Browse bool
-		MaxAge int `toml:"max_age"`
-		Index  string
-		Root   string
+		Enable      bool
+		Browse      bool
+		MaxAge      int `toml:"max_age"`
+		Index       string
+		Root        string
+		PrivateRoot string `toml:"private_root"`
 	}
 
 	Jwt Jwt
