@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"github.com/gofiber/fiber/v2/middleware/helmet"
 	"net/http"
 	"time"
 
@@ -31,6 +32,8 @@ func NewMiddleware(app *fiber.App, cfg *config.Config) *Middleware {
 // Register registers all the middleware functions
 func (m *Middleware) Register() {
 	// Add Extra Middlewares
+
+	m.App.Use(helmet.New(helmet.Config{}))
 
 	m.App.Use(func(c *fiber.Ctx) error {
 		c.Response().Header.Set("Access-Control-Allow-Origin", "*")
