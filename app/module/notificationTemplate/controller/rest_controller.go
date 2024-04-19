@@ -30,6 +30,7 @@ type controller struct {
 // @Summary      Get all notificationTemplates
 // @Tags         NotificationTemplates
 // @Security     Bearer
+// @Param        businessID path int true "Business ID"
 // @Router       /business/:businessID/notificationTemplates [get]
 func (_i *controller) Index(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")
@@ -61,6 +62,7 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 // @Summary      Get NotificationTemplate keywords
 // @Tags         NotificationTemplates
 // @Security     Bearer
+// @Param        businessID path int true "Business ID"
 // @Router       /business/:businessID/notificationTemplates/keywords [get]
 func (_i *controller) Keywords(c *fiber.Ctx) error {
 	var keywords = map[string]string{
@@ -78,6 +80,7 @@ func (_i *controller) Keywords(c *fiber.Ctx) error {
 // @Summary      Create NotificationTemplate
 // @Tags         NotificationTemplates
 // @Param 		 NotificationTemplate body request.NotificationTemplate true "NotificationTemplate details"
+// @Param        businessID path int true "Business ID"
 // @Router       /business/:businessID/notificationTemplates [post]
 func (_i *controller) Store(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")
@@ -105,6 +108,7 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 // @Tags         NotificationTemplates
 // @Param 		 NotificationTemplate body request.NotificationTemplate true "NotificationTemplate details"
 // @Param        id path int true "NotificationTemplate ID"
+// @Param        businessID path int true "Business ID"
 // @Router       /business/:businessID/notificationTemplates/:id [put]
 func (_i *controller) Update(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")
@@ -135,6 +139,7 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 // @Tags         NotificationTemplates
 // @Security     Bearer
 // @Param        id path int true "NotificationTemplate ID"
+// @Param        businessID path int true "Business ID"
 // @Router       /business/:businessID/notificationTemplates/:id [delete]
 func (_i *controller) Delete(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")

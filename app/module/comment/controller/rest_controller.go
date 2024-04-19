@@ -33,6 +33,7 @@ type controller struct {
 // @Summary      Get all comments
 // @Tags         Comments
 // @Security     Bearer
+// @Param        businessID path int true "Business ID"
 // @Router       /posts/:postID/comments [get]
 func (_i *controller) Index(c *fiber.Ctx) error {
 	postID, err := utils.GetIntInParams(c, "postID")
@@ -64,6 +65,7 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 //// @Tags         Comments
 //// @Security     Bearer
 //// @Param        id path int true "Comment ID"
+// @Param        businessID path int true "Business ID"
 //// @Router       /posts/:postID/comments/:id [get]
 // func (_i *controller) Show(c *fiber.Ctx) error {
 //	id, err := utils.GetIntInParams(c, "id")
@@ -83,6 +85,7 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 // @Summary      Create comment
 // @Tags         Comments
 // @Param 		 comment body request.Comment true "Comment details"
+// @Param        businessID path int true "Business ID"
 // @Router       /posts/:postID/comments [post]
 func (_i *controller) Store(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")
@@ -120,6 +123,7 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 // @Tags         Comments
 // @Param 		 comment body request.Comment true "Comment details"
 // @Param        id path int true "Comment ID"
+// @Param        businessID path int true "Business ID"
 // @Router       /posts/:postID/comments/:id [put]
 func (_i *controller) Update(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")
@@ -170,6 +174,7 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 // @Tags         Comments
 // @Param 		 comment body request.UpdateCommentStatus true "Comment details"
 // @Param        id path int true "Comment ID"
+// @Param        businessID path int true "Business ID"
 // @Router       /posts/:postID/comments/:id/status [put]
 func (_i *controller) UpdateStatus(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")
@@ -216,6 +221,7 @@ func (_i *controller) UpdateStatus(c *fiber.Ctx) error {
 //// @Tags         Comments
 //// @Security     Bearer
 //// @Param        id path int true "Comment ID"
+// @Param        businessID path int true "Business ID"
 //// @Router       /posts/:postID/comments/:id [delete]
 // func (_i *controller) Delete(c *fiber.Ctx) error {
 //	id, err := utils.GetIntInParams(c, "id")

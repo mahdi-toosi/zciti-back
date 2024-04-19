@@ -7,8 +7,8 @@ import (
 
 type NotificationTemplate struct {
 	ID         uint64
-	Title      string   `example:"title" validate:"min=2,max=255"`
-	Content    string   `example:"some content some content some content" validate:"min=2"`
+	Title      string   `example:"title" validate:"required,min=2,max=255"`
+	Content    string   `example:"some content some content some content" validate:"required,min=2"`
 	Tag        []string `example:"['tag']" validate:"dive"`
 	BusinessID uint64
 }

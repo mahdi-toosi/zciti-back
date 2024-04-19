@@ -10,7 +10,7 @@ type Notification struct {
 	ID         uint64
 	ReceiverID uint64    `example:"1" validate:"required,number,min=1"`
 	Type       []string  `example:"Sms" validate:"required,dive"`
-	BusinessID uint64    `example:"1" validate:"required,min=1"`
+	BusinessID uint64    `example:"1" validate:"min=1"`
 	SentAt     time.Time `example:"2023-10-20T15:47:33.084Z" validate:"datetime"`
 	TemplateID uint64    `example:"1" validate:"required,min=1"`
 }

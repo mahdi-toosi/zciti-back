@@ -31,6 +31,7 @@ type controller struct {
 // @Summary      Get all notifications
 // @Tags         Notifications
 // @Security     Bearer
+// @Param        businessID path int true "Business ID"
 // @Router       /business/:businessID/notifications [get]
 func (_i *controller) Index(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")
@@ -62,6 +63,7 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 // @Tags         Notifications
 // @Security     Bearer
 // @Param        id path int true "Notification ID"
+// @Param        businessID path int true "Business ID"
 // @Router       /business/:businessID/notifications/:id [get]
 func (_i *controller) Show(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")
@@ -85,6 +87,7 @@ func (_i *controller) Show(c *fiber.Ctx) error {
 // @Summary      Create notification
 // @Tags         Notifications
 // @Param 		 notification body request.Notification true "Notification details"
+// @Param        businessID path int true "Business ID"
 // @Router       /business/:businessID/notifications [post]
 func (_i *controller) Store(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")
@@ -111,6 +114,7 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 // @Tags         Notifications
 // @Param 		 notification body request.Notification true "Notification details"
 // @Param        id path int true "Notification ID"
+// @Param        businessID path int true "Business ID"
 // @Router       /business/:businessID/notifications/:id [put]
 func (_i *controller) Update(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")
@@ -141,6 +145,7 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 // @Tags         Notifications
 // @Security     Bearer
 // @Param        id path int true "Notification ID"
+// @Param        businessID path int true "Business ID"
 // @Router       /business/:businessID/notifications/:id [delete]
 func (_i *controller) Delete(c *fiber.Ctx) error {
 	id, err := strconv.ParseUint(c.Params("id"), 10, 64)

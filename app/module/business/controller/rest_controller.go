@@ -131,7 +131,6 @@ func (_i *controller) Users(c *fiber.Ctx) error {
 	var req request.Users
 	req.Pagination = paginate
 	req.BusinessID = businessID
-	req.Keyword = c.Query("Keyword")
 
 	users, paging, err := _i.service.Users(req)
 	if err != nil {

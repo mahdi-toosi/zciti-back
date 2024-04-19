@@ -32,6 +32,7 @@ type controller struct {
 // @Summary      Get all assets
 // @Tags         Assets
 // @Security     Bearer
+// @Param        businessID path int true "Business ID"
 // @Router       /business/:businessID/assets [get]
 func (_i *controller) Index(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")
@@ -66,6 +67,7 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 // @Summary      Create asset
 // @Tags         Assets
 // @Param 		 asset body request.Asset true "Asset details"
+// @Param        businessID path int true "Business ID"
 // @Router       /business/:businessID/assets [post]
 func (_i *controller) Store(c *fiber.Ctx) error {
 	asset, err := c.FormFile("Asset")
@@ -105,6 +107,7 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 // @Tags         Assets
 // @Security     Bearer
 // @Param        id path int true "Asset ID"
+// @Param        businessID path int true "Business ID"
 // @Router       /business/:businessID/assets/:id [delete]
 func (_i *controller) Delete(c *fiber.Ctx) error {
 	id, err := uuid.Parse(c.Params("id"))
