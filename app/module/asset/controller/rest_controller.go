@@ -9,7 +9,6 @@ import (
 	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
 	"go-fiber-starter/utils/response"
-	"golang.org/x/exp/slices"
 	"path/filepath"
 	"strings"
 )
@@ -82,10 +81,6 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 	}
 
 	req.Ext = strings.TrimPrefix(filepath.Ext(req.Asset.Filename), ".")
-	validExtensions := []string{"doc", "docx", "pdf", "png", "jpg", "jpeg"}
-	if !slices.Contains(validExtensions, req.Ext) {
-		return fiber.ErrBadRequest
-	}
 
 	user, err := utils.GetAuthenticatedUser(c)
 	if err != nil {

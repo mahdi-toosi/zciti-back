@@ -7,10 +7,11 @@ import (
 
 type User struct {
 	ID          uint64
-	FirstName   string                 `example:"mahdi" validate:"required,min=2,max=255"`
-	LastName    string                 `example:"lastname" validate:"required,min=2,max=255"`
-	Mobile      uint64                 `example:"9380338494" validate:"required,number"`
-	Permissions schema.UserPermissions `example:"user"`
+	FirstName   string `example:"mahdi" validate:"required,min=2,max=255"`
+	LastName    string `example:"lastname" validate:"required,min=2,max=255"`
+	Mobile      uint64 `example:"9380338494" validate:"required,number"`
+	Password    string
+	Permissions schema.UserPermissions `example:"{1:['operator']}"`
 }
 
 type Users struct {

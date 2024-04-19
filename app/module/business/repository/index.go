@@ -113,7 +113,7 @@ func (_i *repo) DeleteUser(businessID uint64, userID uint64) (err error) {
 }
 
 func (_i *repo) GetOne(id uint64) (business *schema.Business, err error) {
-	if err := _i.DB.Main.First(&business, id).Error; err != nil {
+	if err := _i.DB.Main.Preload("Owner").First(&business, id).Error; err != nil {
 		return nil, err
 	}
 

@@ -9,15 +9,15 @@ import (
 
 type Asset struct {
 	ID           uuid.UUID
-	Asset        multipart.FileHeader `example:"file" validate:"required,file"`
-	Title        string
-	Path         string
-	Ext          string
-	AlsoOptimize bool
-	Size         uint64
-	IsPrivate    bool `example:"true" validate:"boolean"`
-	UserID       uint64
-	BusinessID   uint64
+	Asset        multipart.FileHeader `example:"file" validate:"required,validate_file=.pdf:10 .doc:10 .docx:10 .jpeg:1 .jpg:1 .png:1"`
+	Title        string               `example:"title" validate:"omitempty,min=2,max=255"`
+	Path         string               ``
+	Ext          string               ``
+	AlsoOptimize bool                 `example:"title" validate:"omitempty,boolean"`
+	Size         uint64               ``
+	IsPrivate    bool                 `example:"true" validate:"boolean"`
+	UserID       uint64               ``
+	BusinessID   uint64               ``
 }
 
 type UpdateAsset struct {

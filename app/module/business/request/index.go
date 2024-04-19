@@ -10,6 +10,7 @@ type Business struct {
 	Title       string              `example:"title" validate:"required,min=2,max=255"`
 	Type        schema.BusinessType `example:"type" validate:"required,min=2,max=255"`
 	Description string              `example:"business" validate:"max=500"`
+	Meta        schema.BusinessMeta `example:"{ShebaNumber:0,AssetsSize:1}"`
 	OwnerID     uint64              `example:"1" validate:"required,number"`
 }
 
@@ -27,9 +28,10 @@ type Users struct {
 func (req *Business) ToDomain() *schema.Business {
 	return &schema.Business{
 		ID:          req.ID,
-		Title:       req.Title,
 		Type:        req.Type,
-		Description: req.Description,
+		Meta:        req.Meta,
+		Title:       req.Title,
 		OwnerID:     req.OwnerID,
+		Description: req.Description,
 	}
 }

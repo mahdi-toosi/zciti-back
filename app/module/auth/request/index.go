@@ -2,7 +2,7 @@ package request
 
 type Login struct {
 	Mobile   uint64 `example:"9380338494" validate:"required,number"`
-	Password string `example:"123456" validate:"required,min=6,max=255"`
+	Password string `example:"123456" validate:"required,min=6,max=100"`
 }
 
 type Register struct {

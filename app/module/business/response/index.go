@@ -13,6 +13,7 @@ type Business struct {
 	Description string              `json:",omitempty"`
 	OwnerID     uint64              `json:",omitempty"`
 	Owner       response.User       `json:",omitempty"`
+	Meta        schema.BusinessMeta `json:",omitempty"`
 }
 
 type BusinessTypesOption struct {
@@ -26,15 +27,16 @@ func FromDomain(business *schema.Business) (res *Business) {
 	}
 
 	return &Business{
-		ID:    business.ID,
-		Type:  business.Type,
-		Title: business.Title,
+		ID:          business.ID,
+		Type:        business.Type,
+		Meta:        business.Meta,
+		Title:       business.Title,
+		OwnerID:     business.OwnerID,
+		Description: business.Description,
+		TypeDisplay: schema.TypeDisplayProxy[business.Type],
 		Owner: response.User{
 			ID:       business.Owner.ID,
 			FullName: business.Owner.FullName(),
 		},
-		OwnerID:     business.OwnerID,
-		Description: business.Description,
-		TypeDisplay: schema.TypeDisplayProxy[business.Type],
 	}
 }

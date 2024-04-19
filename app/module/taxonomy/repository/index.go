@@ -26,7 +26,7 @@ type repo struct {
 }
 
 func (_i *repo) GetAll(req request.Taxonomies) (taxonomies []*schema.Taxonomy, paging paginator.Pagination, err error) {
-	query := _i.DB.Main.Debug().Model(&schema.Taxonomy{}).Where("business_id = ?", req.BusinessID)
+	query := _i.DB.Main.Model(&schema.Taxonomy{}).Where("business_id = ?", req.BusinessID)
 
 	if req.Keyword != "" {
 		query.Where("title Like ?", "%"+req.Keyword+"%")

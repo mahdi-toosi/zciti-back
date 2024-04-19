@@ -10,28 +10,28 @@ import (
 
 type User struct {
 	ID              uint64          `gorm:"primaryKey" faker:"-"`
-	FirstName       string          `gorm:"varchar(250);" faker:"first_name"`
-	LastName        string          `gorm:"varchar(250);" faker:"last_name"`
+	FirstName       string          `gorm:"varchar(255);" faker:"first_name"`
+	LastName        string          `gorm:"varchar(255);" faker:"last_name"`
 	Mobile          uint64          `gorm:"not null;uniqueIndex"`
 	MobileConfirmed bool            `gorm:"default:false"`
 	Permissions     UserPermissions `gorm:"type:json;not null"`
-	Password        string          `gorm:"varchar(250);not null"`
+	Password        string          `gorm:"varchar(255);not null"`
 	Businesses      []*Business     `gorm:"many2many:business_users;" faker:"-"`
 	Base
 }
 
 type UserPermissions map[uint64] /* businessID*/ []UserRole
 
-func (rm *UserPermissions) Scan(value any) error {
+func (up UserPermissions) Scan(value any) error {
 	byteValue, ok := value.([]byte)
 	if !ok {
 		return fmt.Errorf("failed to unmarshal UserPermissions with value %v", value)
 	}
-	return json.Unmarshal(byteValue, rm)
+	return json.Unmarshal(byteValue, &up)
 }
 
-func (rm UserPermissions) Value() (driver.Value, error) {
-	return json.Marshal(rm)
+func (up UserPermissions) Value() (driver.Value, error) {
+	return json.Marshal(up)
 }
 
 func (u *User) ComparePassword(password string) bool {

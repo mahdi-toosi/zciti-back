@@ -6,7 +6,7 @@ import (
 
 type Asset struct {
 	ID         uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
-	Title      string    `gorm:"varchar(250);"`
+	Title      string    `gorm:"varchar(255);"`
 	Path       string
 	Ext        string
 	IsPrivate  bool

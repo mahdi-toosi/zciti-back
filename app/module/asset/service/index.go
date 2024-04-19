@@ -59,9 +59,9 @@ func (_i *service) Store(c *fiber.Ctx, req request.Asset) (err error) {
 	}
 
 	accountAssetLimit := middleware.Accounts[business.Account].AssetsSizeLimit
-	business.AssetsSize += uint64(req.Asset.Size)
+	business.Meta.AssetsSize += uint64(req.Asset.Size)
 
-	if business.AssetsSize > accountAssetLimit {
+	if business.Meta.AssetsSize > accountAssetLimit {
 		return fiber.ErrForbidden
 	}
 
@@ -90,7 +90,7 @@ func (_i *service) Store(c *fiber.Ctx, req request.Asset) (err error) {
 		if err != nil {
 			return err
 		}
-		business.AssetsSize += uint64(resultSize)
+		business.Meta.AssetsSize += uint64(resultSize)
 	}
 
 	err = _i.BusinessRepo.Update(business.ID, business)
@@ -126,7 +126,7 @@ func (_i *service) Destroy(user schema.User, id uuid.UUID) error {
 		return err
 	}
 
-	business.AssetsSize -= asset.Size
+	business.Meta.AssetsSize -= asset.Size
 	err = _i.BusinessRepo.Update(business.ID, business)
 	if err != nil {
 		return err
