@@ -5,16 +5,16 @@ rebuild:
 	make seed
 
 drop:
-	go run cmd/example/main.go --drop-all-tables
+	go run cmd/example/seeder.go --drop-all-tables
 
 migrate:
-	go run cmd/example/main.go --migrate
+	go run cmd/example/seeder.go --migrate
 
 generateNecessaryData:
-	go run cmd/example/main.go --generate-necessary-data
+	go run cmd/example/seeder.go --generate-necessary-data
 
 seed:
-	go run cmd/example/main.go --seed
+	go run cmd/example/seeder.go --seed
 
 swag:
 	swag init -g ./cmd/example/main.go --outputTypes "json"

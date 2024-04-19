@@ -2,7 +2,6 @@ package bootstrap
 
 import (
 	"context"
-	"flag"
 	"os"
 	"runtime"
 	"time"
@@ -82,34 +81,34 @@ func Start(lifecycle fx.Lifecycle, cfg *config.Config, fiber *fiber.App, router 
 				redis.ConnectRedis()
 				database.ConnectDatabase()
 
-				seeder := flag.Bool("seed", false, "seed the databases")
-				migrate := flag.Bool("migrate", false, "migrate the databases")
-				drop := flag.Bool("drop-all-tables", false, "drop all tables in the databases")
-				generateNecessaryData := flag.Bool("generate-necessary-data", false, "generating necessary data")
-				flag.Parse()
-
-				if *migrate || *seeder || *drop || *generateNecessaryData {
-					// read flag -migrate to migrate the database
-					if *migrate {
-						database.MigrateModels()
-					}
-					// read flag -generate-necessary-data to generate necessary data in the database
-					if *generateNecessaryData {
-						database.GenerateNecessaryData()
-					}
-					// read flag -seed to seed the database
-					if *seeder {
-						database.SeedModels()
-					}
-					// read flag -drop-all-tables to drop all tables in the database
-					if *drop {
-						database.DropTables()
-					}
-
-					_ = fiber.Shutdown()
-					database.ShutdownDatabase()
-					os.Exit(0)
-				}
+				//seeder := flag.Bool("seed", false, "seed the databases")
+				//migrate := flag.Bool("migrate", false, "migrate the databases")
+				//drop := flag.Bool("drop-all-tables", false, "drop all tables in the databases")
+				//generateNecessaryData := flag.Bool("generate-necessary-data", false, "generating necessary data")
+				//flag.Parse()
+				//
+				//if *migrate || *seeder || *drop || *generateNecessaryData {
+				//	// read flag -migrate to migrate the database
+				//	if *migrate {
+				//		database.MigrateModels()
+				//	}
+				//	// read flag -generate-necessary-data to generate necessary data in the database
+				//	if *generateNecessaryData {
+				//		database.GenerateNecessaryData()
+				//	}
+				//	// read flag -seed to seed the database
+				//	if *seeder {
+				//		database.SeedModels()
+				//	}
+				//	// read flag -drop-all-tables to drop all tables in the database
+				//	if *drop {
+				//		database.DropTables()
+				//	}
+				//
+				//	_ = fiber.Shutdown()
+				//	database.ShutdownDatabase()
+				//	os.Exit(0)
+				//}
 
 				return nil
 			},
