@@ -32,7 +32,7 @@ type controller struct {
 // @Tags         Post
 // @Security     Bearer
 // @Param        businessID path int true "Business ID"
-// @Router       business/:businessID/posts [get]
+// @Router       /business/:businessID/posts [get]
 func (_i *controller) Index(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")
 	if err != nil {

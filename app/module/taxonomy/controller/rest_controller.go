@@ -31,7 +31,7 @@ type controller struct {
 // @Tags         Taxonomies
 // @Security     Bearer
 // @Param        businessID path int true "Business ID"
-// @Router       business/:businessID/taxonomies [get]
+// @Router       /business/:businessID/taxonomies [get]
 func (_i *controller) Index(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")
 	if err != nil {
@@ -74,7 +74,7 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 // @Security     Bearer
 // @Param        id path int true "Taxonomy ID"
 // @Param        businessID path int true "Business ID"
-// @Router       business/:businessID/taxonomies/:id [get]
+// @Router       /business/:businessID/taxonomies/:id [get]
 func (_i *controller) Show(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")
 	if err != nil {
@@ -98,7 +98,7 @@ func (_i *controller) Show(c *fiber.Ctx) error {
 // @Tags         Taxonomies
 // @Param 		 taxonomy body request.Taxonomy true "Taxonomy details"
 // @Param        businessID path int true "Business ID"
-// @Router       business/:businessID/taxonomies [post]
+// @Router       /business/:businessID/taxonomies [post]
 func (_i *controller) Store(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")
 	if err != nil {
@@ -125,7 +125,7 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 // @Param 		 taxonomy body request.Taxonomy true "Taxonomy details"
 // @Param        id path int true "Taxonomy ID"
 // @Param        businessID path int true "Business ID"
-// @Router       business/:businessID/taxonomies/:id [put]
+// @Router       /business/:businessID/taxonomies/:id [put]
 func (_i *controller) Update(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")
 	if err != nil {
@@ -156,7 +156,7 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 // @Security     Bearer
 // @Param        id path int true "Taxonomy ID"
 // @Param        businessID path int true "Business ID"
-// @Router       business/:businessID/taxonomies/:id [delete]
+// @Router       /business/:businessID/taxonomies/:id [delete]
 func (_i *controller) Delete(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")
 	if err != nil {
