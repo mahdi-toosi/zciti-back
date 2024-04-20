@@ -20,7 +20,7 @@ type Taxonomies struct {
 	BusinessID uint64
 	Keyword    string
 	Domain     schema.PostType     `example:"post" validate:"omitempty,oneof=post page product"`
-	Type       schema.TaxonomyType `example:"post" validate:"omitempty,oneof=category tag"`
+	Type       schema.TaxonomyType `example:"tag" validate:"omitempty,oneof=category tag"`
 	Pagination *paginator.Pagination
 }
 

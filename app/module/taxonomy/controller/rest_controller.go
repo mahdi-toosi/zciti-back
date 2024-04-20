@@ -53,10 +53,6 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 		req.Domain = schema.PostType(c.Query("Domain"))
 	}
 
-	if err := response.ParseAndValidate(c, req); err != nil {
-		return err
-	}
-
 	taxonomies, paging, err := _i.service.Index(*req)
 	if err != nil {
 		return err
