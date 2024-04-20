@@ -22,12 +22,12 @@ type User struct {
 
 type UserPermissions map[uint64] /* businessID*/ []UserRole
 
-func (up UserPermissions) Scan(value any) error {
+func (up *UserPermissions) Scan(value any) error {
 	byteValue, ok := value.([]byte)
 	if !ok {
 		return fmt.Errorf("failed to unmarshal UserPermissions with value %v", value)
 	}
-	return json.Unmarshal(byteValue, &up)
+	return json.Unmarshal(byteValue, up)
 }
 
 func (up UserPermissions) Value() (driver.Value, error) {

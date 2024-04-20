@@ -46,12 +46,12 @@ type BusinessMeta struct {
 	AssetsSize  uint64
 }
 
-func (bm BusinessMeta) Scan(value any) error {
+func (bm *BusinessMeta) Scan(value any) error {
 	byteValue, ok := value.([]byte)
 	if !ok {
 		return fmt.Errorf("failed to unmarshal BusinessMeta with value %v", value)
 	}
-	return json.Unmarshal(byteValue, &bm)
+	return json.Unmarshal(byteValue, bm)
 }
 
 func (bm BusinessMeta) Value() (driver.Value, error) {
