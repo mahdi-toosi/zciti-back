@@ -26,6 +26,10 @@ func Seeder(lifecycle fx.Lifecycle, cfg *config.Config, database *database.Datab
 				flag.Parse()
 
 				if *migrate || *seeder || *drop || *generateNecessaryData || *deleteFilesInStorage {
+					// read flag -drop-all-tables to drop all tables in the database
+					if *drop {
+						database.DropTables()
+					}
 					// read flag -migrate to migrate the database
 					if *migrate {
 						database.MigrateModels()
@@ -37,10 +41,6 @@ func Seeder(lifecycle fx.Lifecycle, cfg *config.Config, database *database.Datab
 					// read flag -seed to seed the database
 					if *seeder {
 						database.SeedModels()
-					}
-					// read flag -drop-all-tables to drop all tables in the database
-					if *drop {
-						database.DropTables()
 					}
 
 					if *deleteFilesInStorage {

@@ -37,8 +37,6 @@ func (_db *Database) ConnectDatabase() {
 		_db.Log.Info().Msg("Connected the *Main* database successfully!")
 	}
 
-	_ = mainDB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"").Error
-
 	_db.Main = mainDB
 
 	chatDB, err := gorm.Open(postgres.Open(_db.Cfg.DB.Chat.Url), &gorm.Config{})
@@ -75,7 +73,12 @@ func (_db *Database) ShutdownDatabase() {
 	}
 }
 
+func (_db *Database) setUUIDExtension() {
+	_ = _db.Main.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"").Error
+}
+
 func (_db *Database) MigrateModels() {
+	_db.setUUIDExtension()
 	if err := _db.Main.AutoMigrate(schema.MainDBModels()...); err != nil {
 		_db.Log.Error().Err(err).Msg("An unknown error occurred when to migrate the *Main* database!")
 		panic("An unknown error occurred when to migrate the *Main* database!")
