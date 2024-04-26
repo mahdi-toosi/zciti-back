@@ -10,7 +10,7 @@ import (
 
 type Post struct{}
 
-const PostSeedCount = 60
+const PostSeedCount = 100
 
 func (Post) Seed(db *gorm.DB) error {
 	userIDs, err := utils.GetFakeTableIDs(db, schema.User{})

@@ -14,7 +14,7 @@ type User struct {
 	LastName        string          `gorm:"varchar(255);" faker:"last_name"`
 	Mobile          uint64          `gorm:"not null;uniqueIndex"`
 	MobileConfirmed bool            `gorm:"default:false"`
-	Permissions     UserPermissions `gorm:"type:json;not null"`
+	Permissions     UserPermissions `gorm:"type:jsonb;not null"`
 	Password        string          `gorm:"varchar(255);not null"`
 	Businesses      []*Business     `gorm:"many2many:business_users;" faker:"-"`
 	Base

@@ -13,7 +13,7 @@ type Business struct {
 	OwnerID     uint64          `gorm:"not null" faker:"-"`
 	Owner       User            `gorm:"foreignKey:OwnerID" faker:"-"`
 	Account     BusinessAccount `gorm:"varchar(100);default:default" faker:"-"`
-	Meta        BusinessMeta    `gorm:"type:json" faker:"-"`
+	Meta        BusinessMeta    `gorm:"type:jsonb" faker:"-"`
 	Description string          `gorm:"varchar(500)" faker:"paragraph"`
 	Users       []*User         `gorm:"many2many:business_users;" faker:"-"`
 	Base
@@ -42,8 +42,9 @@ const (
 const ROOT_BUSINESS_ID = 1
 
 type BusinessMeta struct {
-	ShebaNumber string
-	AssetsSize  uint64
+	ShebaNumber    string
+	AssetsSize     uint64
+	BankCardNumber string
 }
 
 func (bm *BusinessMeta) Scan(value any) error {

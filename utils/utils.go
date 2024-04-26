@@ -88,6 +88,22 @@ func GetFakeTableIDs(db *gorm.DB, table any) (ids []uint64, err error) {
 	return
 }
 
+func GetFakeTableIDsWithConditions(db *gorm.DB, table any, conditions map[string][]any) (ids []uint64, err error) {
+	query := db.Model(&table).Select("id")
+
+	for key, value := range conditions {
+		if len(value) > 0 {
+			query = query.Where(key, value)
+		}
+	}
+
+	err = query.Find(&ids).Error
+	if err != nil {
+		log.Err(err)
+	}
+	return
+}
+
 func RandomDateTime() time.Time {
 	year := rand.Intn(2023) //nolint:gosec
 	month := time.Month(rand.Intn(12) + 1)

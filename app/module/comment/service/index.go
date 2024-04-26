@@ -76,7 +76,7 @@ func (_i *service) Store(businessID uint64, postID uint64, req request.Comment, 
 		return err
 	}
 
-	err = _i.PostsRepo.Update(postID, &schema.Post{CommentsCount: post.CommentsCount + 1})
+	err = _i.PostsRepo.UpdateCommentCount(postID, "+ 1")
 	if err != nil {
 		return err
 	}
@@ -106,20 +106,20 @@ func (_i *service) hasPermissionToStore(businessID uint64, postID uint64, author
 		return false, nil, nil
 	}
 
-	if post.CommentsStatus == schema.PostCommentStatusClose {
+	if post.Meta.CommentsStatus == schema.PostCommentStatusClose {
 		return false, nil, post
 	}
 
-	if post.CommentsStatus == schema.PostCommentStatusOpen {
+	if post.Meta.CommentsStatus == schema.PostCommentStatusOpen {
 		return true, nil, post
 	}
 
-	if post.CommentsStatus == schema.PostCommentStatusOnlyBusinessUsers {
+	if post.Meta.CommentsStatus == schema.PostCommentStatusOnlyBusinessUsers {
 		log.Debug().Msgf("%+v", authorID)
 		// TODO => complete it
 	}
 
-	if post.CommentsStatus == schema.PostCommentStatusOnlyBuyers {
+	if post.Meta.CommentsStatus == schema.PostCommentStatusOnlyBuyers {
 		log.Debug().Msgf("%+v", authorID)
 		// TODO => complete it
 	}

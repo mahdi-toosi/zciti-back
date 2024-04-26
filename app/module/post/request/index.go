@@ -6,14 +6,14 @@ import (
 )
 
 type Post struct {
-	ID             uint64
-	AuthorID       uint64                   `example:"1" validate:"number"`
-	BusinessID     uint64                   `example:"1" validate:"number"`
-	Title          string                   `example:"title" validate:"required,min=2,max=255"`
-	Content        string                   `example:"content content content" validate:"required,min=2,max=255"`
-	Status         schema.PostStatus        `example:"draft" validate:"required,oneof=draft published private"`
-	Type           schema.PostType          `example:"page" validate:"required,oneof=product post page"`
-	CommentsStatus schema.PostCommentStatus `example:"open" validate:"required,oneof=open close onlyBuyers onlyCustomers"`
+	ID         uint64
+	AuthorID   uint64            `example:"1" validate:"number"`
+	BusinessID uint64            `example:"1" validate:"number"`
+	Title      string            `example:"title" validate:"required,min=2,max=255"`
+	Content    string            `example:"content content content" validate:"required,min=2,max=4000"`
+	Status     schema.PostStatus `example:"draft" validate:"required,oneof=draft published private"`
+	Type       schema.PostType   `example:"page" validate:"required,oneof=product post page"`
+	Meta       schema.PostMeta
 }
 
 type PostTaxonomies struct {
@@ -30,13 +30,20 @@ type PostsRequest struct {
 
 func (req *Post) ToDomain() *schema.Post {
 	return &schema.Post{
-		ID:             req.ID,
-		Type:           req.Type,
-		Title:          req.Title,
-		Status:         req.Status,
-		Content:        req.Content,
-		AuthorID:       req.AuthorID,
-		BusinessID:     req.BusinessID,
-		CommentsStatus: req.CommentsStatus,
+		ID:         req.ID,
+		Type:       req.Type,
+		Title:      req.Title,
+		Status:     req.Status,
+		Content:    req.Content,
+		AuthorID:   req.AuthorID,
+		BusinessID: req.BusinessID,
+		Meta: schema.PostMeta{
+			UpSellIDs:      req.Meta.UpSellIDs,
+			PurchaseNote:   req.Meta.PurchaseNote,
+			CrossSellIDs:   req.Meta.CrossSellIDs,
+			FeaturedImage:  req.Meta.FeaturedImage,
+			CommentsCount:  req.Meta.CommentsCount,
+			CommentsStatus: req.Meta.CommentsStatus,
+		},
 	}
 }

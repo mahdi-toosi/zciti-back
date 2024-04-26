@@ -8,18 +8,17 @@ import (
 )
 
 type Post struct {
-	ID             uint64                   `json:",omitempty"`
-	Title          string                   `json:",omitempty"`
-	AuthorID       uint64                   `json:",omitempty"`
-	Author         response.User            `json:",omitempty"`
-	Content        string                   `json:",omitempty"`
-	Status         schema.PostStatus        `json:",omitempty"`
-	Type           schema.PostType          `json:",omitempty"`
-	BusinessID     uint64                   `json:",omitempty"`
-	Business       bresponse.Business       `json:",omitempty"`
-	Taxonomies     []tresponse.Taxonomy     `json:",omitempty"`
-	CommentsStatus schema.PostCommentStatus `json:",omitempty"`
-	CommentsCount  uint64                   `json:",omitempty"`
+	ID         uint64               `json:",omitempty"`
+	Title      string               `json:",omitempty"`
+	AuthorID   uint64               `json:",omitempty"`
+	Author     response.User        `json:",omitempty"`
+	Content    string               `json:",omitempty"`
+	Status     schema.PostStatus    `json:",omitempty"`
+	Type       schema.PostType      `json:",omitempty"`
+	BusinessID uint64               `json:",omitempty"`
+	Business   bresponse.Business   `json:",omitempty"`
+	Taxonomies []tresponse.Taxonomy `json:",omitempty"`
+	Meta       schema.PostMeta      `json:",omitempty"`
 }
 
 func FromDomain(post *schema.Post) (res *Post) {
@@ -28,15 +27,14 @@ func FromDomain(post *schema.Post) (res *Post) {
 	}
 
 	p := &Post{
-		ID:             post.ID,
-		Type:           post.Type,
-		Title:          post.Title,
-		Status:         post.Status,
-		Content:        post.Content,
-		CommentsCount:  post.CommentsCount,
-		CommentsStatus: post.CommentsStatus,
-		Author:         response.User{ID: post.Author.ID, FullName: post.Author.FullName()},
-		Business:       bresponse.Business{ID: post.Business.ID, Title: post.Business.Title},
+		ID:       post.ID,
+		Type:     post.Type,
+		Meta:     post.Meta,
+		Title:    post.Title,
+		Status:   post.Status,
+		Content:  post.Content,
+		Author:   response.User{ID: post.Author.ID, FullName: post.Author.FullName()},
+		Business: bresponse.Business{ID: post.Business.ID, Title: post.Business.Title},
 	}
 
 	for _, taxonomy := range post.Taxonomies {
