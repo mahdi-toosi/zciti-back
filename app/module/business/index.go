@@ -27,10 +27,6 @@ func (_i *Router) RegisterRoutes(cfg *config.Config) {
 		router.Post("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PCreate), c.Store)
 		router.Put("/:businessID", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PUpdate), c.Update)
 		router.Delete("/:businessID", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PDelete), c.Delete)
-		// users
-		router.Get("/:businessID/users", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PReadSingle), c.Users)
-		router.Post("/:businessID/users/:userID", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PReadSingle), c.InsertUser)
-		router.Delete("/:businessID/users/:userID", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PDelete), c.DeleteUser)
 	})
 }
 

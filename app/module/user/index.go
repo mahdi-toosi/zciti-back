@@ -27,6 +27,12 @@ func (_i *Router) RegisterRoutes(cfg *config.Config) {
 		router.Put("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DUser, mdl.PUpdate), c.Update)
 		router.Delete("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DUser, mdl.PDelete), c.Delete)
 	})
+
+	_i.App.Route("/v1/business", func(router fiber.Router) {
+		router.Get("/:businessID/users", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PReadSingle), c.BusinessUsers)
+		router.Post("/:businessID/users/:userID", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PReadSingle), c.InsertUser)
+		router.Delete("/:businessID/users/:userID", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PDelete), c.DeleteUser)
+	})
 }
 
 func newRouter(fiber *fiber.App, controller *controller.Controller) *Router {

@@ -14,6 +14,12 @@ type User struct {
 	Permissions schema.UserPermissions `example:"{1:['operator']}"`
 }
 
+type BusinessUsers struct {
+	Pagination *paginator.Pagination
+	BusinessID uint64
+	Keyword    string
+}
+
 type Users struct {
 	Pagination *paginator.Pagination
 	Keyword    string

@@ -13,6 +13,10 @@ type IService interface {
 	Store(req request.User) (err error)
 	Update(id uint64, req request.User) (err error)
 	Destroy(id uint64) error
+
+	Users(req request.BusinessUsers) (users []*response.User, paging paginator.Pagination, err error)
+	InsertUser(businessID uint64, userID uint64) (err error)
+	DeleteUser(businessID uint64, userID uint64) (err error)
 }
 
 func Service(Repo repository.IRepository) IService {
@@ -57,4 +61,35 @@ func (_i *service) Update(id uint64, req request.User) (err error) {
 
 func (_i *service) Destroy(id uint64) error {
 	return _i.Repo.Delete(id)
+}
+
+func (_i *service) Users(req request.BusinessUsers) (users []*response.User, paging paginator.Pagination, err error) {
+	results, paging, err := _i.Repo.GetUsers(req)
+	if err != nil {
+		return
+	}
+
+	for _, result := range results {
+		users = append(users, response.FromDomain(result))
+	}
+
+	return
+}
+
+func (_i *service) InsertUser(businessID uint64, userID uint64) (err error) {
+	err = _i.Repo.InsertUser(businessID, userID)
+	if err != nil {
+		return
+	}
+
+	return nil
+}
+
+func (_i *service) DeleteUser(businessID uint64, userID uint64) (err error) {
+	err = _i.Repo.DeleteUser(businessID, userID)
+	if err != nil {
+		return
+	}
+
+	return nil
 }

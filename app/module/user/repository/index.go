@@ -13,7 +13,12 @@ type IRepository interface {
 	Create(user *schema.User) (err error)
 	Update(id uint64, user *schema.User) (err error)
 	Delete(id uint64) (err error)
+
 	FindUserByMobile(mobile uint64) (user *schema.User, err error)
+
+	GetUsers(req request.BusinessUsers) (users []*schema.User, paging paginator.Pagination, err error)
+	InsertUser(businessID uint64, userID uint64) (err error)
+	DeleteUser(businessID uint64, userID uint64) (err error)
 }
 
 func Repository(DB *database.Database) IRepository {
@@ -82,4 +87,63 @@ func (_i *repo) FindUserByMobile(mobile uint64) (user *schema.User, err error) {
 	}
 
 	return user, nil
+}
+
+func (_i *repo) GetUsers(req request.BusinessUsers) (users []*schema.User, paging paginator.Pagination, err error) {
+	query := _i.DB.Main.
+		Model(&users).
+		Joins("JOIN business_users ON business_users.user_id = users.id").
+		Where("business_users.business_id = ?", req.BusinessID).
+		Order("created_at ASC")
+
+	if err != nil {
+		return
+	}
+
+	if req.Pagination.Page > 0 {
+		var total int64
+		query.Count(&total)
+		req.Pagination.Total = total
+
+		query.Offset(req.Pagination.Offset)
+		query.Limit(req.Pagination.Limit)
+	}
+
+	err = query.Find(&users).Error
+	if err != nil {
+		return
+	}
+
+	paging = *req.Pagination
+
+	return
+}
+
+func (_i *repo) InsertUser(businessID uint64, userID uint64) (err error) {
+	err = _i.DB.Main.
+		Exec(`INSERT INTO business_users 
+    		(user_id, business_id) VALUES (?, ?)`,
+			userID, businessID,
+		).
+		Error
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (_i *repo) DeleteUser(businessID uint64, userID uint64) (err error) {
+	err = _i.DB.Main.
+		Exec(`DELETE FROM business_users 
+       		WHERE user_id = ? AND business_id = ?`,
+			userID, businessID).
+		Error
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -19,12 +19,6 @@ type Businesses struct {
 	Keyword    string
 }
 
-type Users struct {
-	Pagination *paginator.Pagination
-	BusinessID uint64
-	Keyword    string
-}
-
 func (req *Business) ToDomain() *schema.Business {
 	return &schema.Business{
 		ID:          req.ID,
