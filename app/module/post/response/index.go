@@ -11,6 +11,7 @@ type Post struct {
 	ID         uint64               `json:",omitempty"`
 	Title      string               `json:",omitempty"`
 	AuthorID   uint64               `json:",omitempty"`
+	Excerpt    string               `json:",omitempty"`
 	Author     response.User        `json:",omitempty"`
 	Content    string               `json:",omitempty"`
 	Status     schema.PostStatus    `json:",omitempty"`

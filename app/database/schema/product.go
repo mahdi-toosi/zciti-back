@@ -11,10 +11,10 @@ type Product struct {
 	ID          uint64             `gorm:"primaryKey" faker:"-"`
 	PostID      uint64             `gorm:"index" faker:"-"`
 	IsRoot      bool               `faker:"-"`
-	Type        ProductType        `gorm:"varchar(50); not null" faker:"oneof: simple, variant"` //  variant ,grouped, reservable, downloadable
-	Price       float64            `gorm:"not null"`                                             // for variants
-	MinPrice    float64            `gorm:"not null"`                                             // for variants
-	MaxPrice    float64            `gorm:"not null"`                                             // for variants
+	Type        ProductType        `gorm:"varchar(50); not null" faker:"oneof: simple, variant, washingMachine"` //  variant ,grouped, reservable, downloadable
+	Price       float64            `gorm:"not null"`                                                             // for variants
+	MinPrice    float64            `gorm:"not null"`                                                             // for variants
+	MaxPrice    float64            `gorm:"not null"`                                                             // for variants
 	OnSale      bool               ``
 	StockStatus ProductStockStatus `gorm:"varchar(40); not null;" faker:"oneof: inStock, outOfStock, onBackOrder"`
 	TotalSales  float64            ``
@@ -28,12 +28,13 @@ type Product struct {
 type ProductType string
 
 const (
-	ProductTypeSimple       ProductType = "simple"     // A simple product is a standalone physical or digital product that doesn't have any variations. For example, a book or a music download.
-	ProductTypeVariant      ProductType = "variant"    // A variable product is a product that has multiple variations, such as different sizes or colors. Each variation can have its own price, SKU, and stock level. For example, a t-shirt that is available in different sizes and colors.
-	ProductTypeGrouped      ProductType = "grouped"    // A grouped product is a collection of related products that are sold together. For example, a computer bundle that includes a monitor, keyboard, and mouse.
-	ProductTypeVirtual      ProductType = "virtual"    // A virtual product is a non-physical product that doesn't require shipping. For example, a consulting service or an online course.
-	ProductTypeReservable   ProductType = "reservable" // A reservable product is a product that can be reserved by customers. For example, a hotel room that can be booked for a specific date and time.
-	ProductTypeDownloadable ProductType = "downloadable"
+	ProductTypeSimple          ProductType = "simple"     // A simple product is a standalone physical or digital product that doesn't have any variations. For example, a book or a music download.
+	ProductTypeVariant         ProductType = "variant"    // A variable product is a product that has multiple variations, such as different sizes or colors. Each variation can have its own price, SKU, and stock level. For example, a t-shirt that is available in different sizes and colors.
+	ProductTypeGrouped         ProductType = "grouped"    // A grouped product is a collection of related products that are sold together. For example, a computer bundle that includes a monitor, keyboard, and mouse.
+	ProductTypeVirtual         ProductType = "virtual"    // A virtual product is a non-physical product that doesn't require shipping. For example, a consulting service or an online course.
+	ProductTypeReservable      ProductType = "reservable" // A reservable product is a product that can be reserved by customers. For example, a hotel room that can be booked for a specific date and time.
+	ProductTypeDownloadable    ProductType = "downloadable"
+	ProductTypeWashingMachines ProductType = "washingMachine"
 )
 
 type ProductStockStatus string
@@ -65,8 +66,8 @@ type ProductMeta struct {
 	Images            []string         `faker:"-"`
 
 	SalePrice          float64   `validator:"omitempty,number"`
-	SalePriceStartDate time.Time `validator:"omitempty,date"`
-	SalePriceEndDate   time.Time `validator:"omitempty,date"`
+	SalePriceStartDate time.Time `validator:"omitempty,datetime"`
+	SalePriceEndDate   time.Time `validator:"omitempty,datetime"`
 
 	ManageStock   bool
 	StockSku      string `example:"sku-2f3s" validate:"omitempty,min=2,max=40" faker:"word"`

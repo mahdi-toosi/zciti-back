@@ -15,7 +15,7 @@ type Product struct {
 type ProductInPost struct {
 	ID          uint64
 	PostID      uint64                    `example:"1" validate:"number"`
-	Type        schema.ProductType        `example:"simple" validate:"required,oneof=simple variant grouped virtual reservable downloadable"`
+	Type        schema.ProductType        `example:"simple" validate:"required,oneof=simple variant washingMachine"`
 	Price       float64                   `example:"65000" validate:"required,number"`
 	OnSale      bool                      `example:"true"`
 	StockStatus schema.ProductStockStatus `example:"inStock" validate:"required,oneof=inStock outOfStock onBackOrder"`
@@ -29,7 +29,7 @@ type ProductsRequest struct {
 	Pagination *paginator.Pagination
 }
 
-func (req *Product) ToDomain(postID uint64, BusinessID uint64) (products []*schema.Product) {
+func (req *Product) ToDomain(postID uint64, businessID uint64) (products []*schema.Product) {
 	var MinPrice = req.Product.Price
 	var MaxPrice = req.Product.Price
 
@@ -46,7 +46,7 @@ func (req *Product) ToDomain(postID uint64, BusinessID uint64) (products []*sche
 				PostID:     postID,
 				MinPrice:   MinPrice,
 				MaxPrice:   MaxPrice,
-				BusinessID: BusinessID,
+				BusinessID: businessID,
 				ID:         product.ID,
 				Meta:       product.Meta,
 				Type:       product.Type,
@@ -62,7 +62,7 @@ func (req *Product) ToDomain(postID uint64, BusinessID uint64) (products []*sche
 		PostID:     postID,
 		MinPrice:   MinPrice,
 		MaxPrice:   MaxPrice,
-		BusinessID: BusinessID,
+		BusinessID: businessID,
 		ID:         req.Product.ID,
 		Price:      req.Product.Price,
 		Meta:       req.Product.Meta,

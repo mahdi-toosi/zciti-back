@@ -28,8 +28,7 @@ type repo struct {
 
 func (_i *repo) GetAll(req request.ProductsRequest) (products []*schema.Post, paging paginator.Pagination, err error) {
 	query := _i.DB.Main.Model(&schema.Post{}).
-		Where("business_id = ?", req.BusinessID).
-		Where("type = ?", schema.PostTypeProduct)
+		Where(&schema.Post{BusinessID: req.BusinessID, Type: schema.PostTypeProduct})
 
 	if req.Keyword != "" {
 		query.Where("title Like ?", "%"+req.Keyword+"%")
@@ -63,8 +62,7 @@ func (_i *repo) GetOne(businessID uint64, id uint64) (post *schema.Post, err err
 		Preload("Business").
 		Preload("Products").
 		Preload("Taxonomies").
-		Where("business_id = ?", businessID).
-		Where("type = ?", schema.PostTypeProduct).
+		Where(&schema.Post{BusinessID: businessID, Type: schema.PostTypeProduct}).
 		First(&post, id).Error
 	if err != nil {
 		return nil, err
@@ -99,5 +97,5 @@ func (_i *repo) Update(products []*schema.Product) error {
 }
 
 func (_i *repo) Delete(businessID uint64, id uint64) error {
-	return _i.DB.Main.Delete(&schema.Product{}, id).Where("business_id = ?", businessID).Error
+	return _i.DB.Main.Delete(&schema.Product{}, id).Where(&schema.Product{BusinessID: businessID}).Error
 }

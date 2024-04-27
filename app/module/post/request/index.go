@@ -11,6 +11,7 @@ type Post struct {
 	BusinessID uint64            `example:"1" validate:"number"`
 	Title      string            `example:"title" validate:"required,min=2,max=255"`
 	Content    string            `example:"content content content" validate:"required,min=2,max=4000"`
+	Excerpt    string            `example:"content content content" validate:"required,min=2,max=255"`
 	Status     schema.PostStatus `example:"draft" validate:"required,oneof=draft published private"`
 	Type       schema.PostType   `example:"page" validate:"required,oneof=product post page"`
 	Meta       schema.PostMeta
