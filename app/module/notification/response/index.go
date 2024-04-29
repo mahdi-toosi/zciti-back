@@ -19,22 +19,22 @@ type Notification struct {
 	UpdatedAt time.Time
 }
 
-//func FromDomain(notification *schema.Notification) (res *Notification) {
-//	if notification != nil {
+//func FromDomain(item *schema.Notification) (res *Notification) {
+//	if item != nil {
 //		res = &Notification{
-//			ID:         notification.ID,
-//			Type:       notification.Type,
-//			BusinessID: notification.BusinessID,
-//			SentAt:     notification.SentAt,
-//			TemplateID: notification.TemplateID,
-//			//ReceiverID: notification.ReceiverID,
+//			ID:         item.ID,
+//			Type:       item.Type,
+//			BusinessID: item.BusinessID,
+//			SentAt:     item.SentAt,
+//			TemplateID: item.TemplateID,
+//			//ReceiverID: item.ReceiverID,
 //			Receiver: response.User{
-//				ID:       notification.Receiver.ID,
-//				FullName: fmt.Sprint(notification.Receiver.FirstName, " ", notification.Receiver.LastName),
+//				ID:       item.Receiver.ID,
+//				FullName: fmt.Sprint(item.Receiver.FirstName, " ", item.Receiver.LastName),
 //			},
 //
-//			CreatedAt: notification.CreatedAt,
-//			UpdatedAt: notification.UpdatedAt,
+//			CreatedAt: item.CreatedAt,
+//			UpdatedAt: item.UpdatedAt,
 //		}
 //	}
 //

@@ -12,14 +12,14 @@ type Taxonomy struct {
 	ParentID    uint64              `json:",omitempty"`
 }
 
-func FromDomain(taxonomy *schema.Taxonomy) (res *Taxonomy) {
-	if taxonomy != nil {
+func FromDomain(item *schema.Taxonomy) (res *Taxonomy) {
+	if item != nil {
 		res = &Taxonomy{
-			ID:          taxonomy.ID,
-			Type:        taxonomy.Type,
-			Title:       taxonomy.Title,
-			ParentID:    taxonomy.ParentID,
-			Description: taxonomy.Description,
+			ID:          item.ID,
+			Type:        item.Type,
+			Title:       item.Title,
+			ParentID:    item.ParentID,
+			Description: item.Description,
 		}
 	}
 

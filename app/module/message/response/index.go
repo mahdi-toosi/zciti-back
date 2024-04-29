@@ -14,17 +14,17 @@ type Message struct {
 	CreatedAt time.Time `json:",omitempty"`
 }
 
-func FromDomain(message *schema.Message) (res *Message) {
-	if message == nil {
+func FromDomain(item *schema.Message) (res *Message) {
+	if item == nil {
 		return nil
 	}
 
 	return &Message{
-		ID:        message.ID,
-		RoomID:    message.RoomID,
-		FromID:    message.FromID,
-		ToID:      message.ToID,
-		Content:   message.Content,
-		CreatedAt: message.CreatedAt,
+		ID:        item.ID,
+		RoomID:    item.RoomID,
+		FromID:    item.FromID,
+		ToID:      item.ToID,
+		Content:   item.Content,
+		CreatedAt: item.CreatedAt,
 	}
 }

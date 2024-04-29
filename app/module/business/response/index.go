@@ -21,22 +21,22 @@ type BusinessTypesOption struct {
 	Value schema.BusinessType
 }
 
-func FromDomain(business *schema.Business) (res *Business) {
-	if business == nil {
+func FromDomain(item *schema.Business) (res *Business) {
+	if item == nil {
 		return res
 	}
 
 	return &Business{
-		ID:          business.ID,
-		Type:        business.Type,
-		Meta:        business.Meta,
-		Title:       business.Title,
-		OwnerID:     business.OwnerID,
-		Description: business.Description,
-		TypeDisplay: schema.TypeDisplayProxy[business.Type],
+		ID:          item.ID,
+		Type:        item.Type,
+		Meta:        item.Meta,
+		Title:       item.Title,
+		OwnerID:     item.OwnerID,
+		Description: item.Description,
+		TypeDisplay: schema.TypeDisplayProxy[item.Type],
 		Owner: response.User{
-			ID:       business.Owner.ID,
-			FullName: business.Owner.FullName(),
+			ID:       item.Owner.ID,
+			FullName: item.Owner.FullName(),
 		},
 	}
 }

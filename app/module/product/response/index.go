@@ -23,25 +23,25 @@ type ProductInPost struct {
 	Attributes  []schema.ProductAttribute `json:",omitempty"`
 }
 
-func FromDomain(post *schema.Post, products []schema.Product) (res *Product) {
-	if post == nil {
+func FromDomain(item *schema.Post, products []schema.Product) (res *Product) {
+	if item == nil {
 		return res
 	}
 
 	p := &Product{
 		Post: presponse.Post{
-			ID:       post.ID,
-			Type:     post.Type,
-			Meta:     post.Meta,
-			Title:    post.Title,
-			Status:   post.Status,
-			Content:  post.Content,
-			Business: bresponse.Business{ID: post.Business.ID, Title: post.Business.Title},
+			ID:       item.ID,
+			Type:     item.Type,
+			Meta:     item.Meta,
+			Title:    item.Title,
+			Status:   item.Status,
+			Content:  item.Content,
+			Business: bresponse.Business{ID: item.Business.ID, Title: item.Business.Title},
 		},
 		Variants: []ProductInPost{},
 	}
 
-	for _, taxonomy := range post.Taxonomies {
+	for _, taxonomy := range item.Taxonomies {
 		p.Post.Taxonomies = append(p.Post.Taxonomies, tresponse.Taxonomy{
 			ID:       taxonomy.ID,
 			Type:     taxonomy.Type,

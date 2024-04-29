@@ -22,16 +22,16 @@ type MessageRoomToken struct {
 	Status          string
 }
 
-func FromDomain(messageRoom *schema.MessageRoom, token *string) (res *MessageRoom) {
-	if messageRoom == nil {
+func FromDomain(item *schema.MessageRoom, token *string) (res *MessageRoom) {
+	if item == nil {
 		return nil
 	}
 
 	return &MessageRoom{
 		Token:      token,
-		RoomID:     messageRoom.ID,
-		UserID:     messageRoom.UserID,
-		Status:     messageRoom.Status,
-		BusinessID: messageRoom.BusinessID,
+		RoomID:     item.ID,
+		UserID:     item.UserID,
+		Status:     item.Status,
+		BusinessID: item.BusinessID,
 	}
 }

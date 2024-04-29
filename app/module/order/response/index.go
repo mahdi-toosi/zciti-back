@@ -18,23 +18,23 @@ type Order struct {
 	PaymentMethod schema.OrderPaymentMethod `json:",omitempty"`
 }
 
-func FromDomain(order *schema.Order) (res *Order) {
-	if order == nil {
+func FromDomain(item *schema.Order) (res *Order) {
+	if item == nil {
 		return nil
 	}
 
 	return &Order{
-		ID:            order.ID,
-		Meta:          order.Meta,
-		Status:        order.Status,
-		ParentID:      order.ParentID,
-		TotalAmt:      order.TotalAmt,
-		CreatedAt:     order.CreatedAt,
-		UpdatedAt:     order.UpdatedAt,
-		PaymentMethod: order.PaymentMethod,
+		ID:            item.ID,
+		Meta:          item.Meta,
+		Status:        item.Status,
+		ParentID:      item.ParentID,
+		TotalAmt:      item.TotalAmt,
+		CreatedAt:     item.CreatedAt,
+		UpdatedAt:     item.UpdatedAt,
+		PaymentMethod: item.PaymentMethod,
 		User: response.User{
-			ID:       order.User.ID,
-			FullName: order.User.FullName(),
+			ID:       item.User.ID,
+			FullName: item.User.FullName(),
 		},
 	}
 }

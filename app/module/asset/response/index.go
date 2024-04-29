@@ -26,22 +26,22 @@ type Assets struct {
 	Meta       paginator.Pagination `json:",omitempty"`
 }
 
-func FromDomain(asset *schema.Asset, domain string) (res *Asset) {
-	if asset == nil {
+func FromDomain(item *schema.Asset, domain string) (res *Asset) {
+	if item == nil {
 		return res
 	}
 
 	a := &Asset{
-		ID:            asset.ID,
-		Ext:           asset.Ext,
-		Path:          asset.Path,
-		Size:          asset.Size,
-		Title:         asset.Title,
-		UserID:        asset.UserID,
-		IsPrivate:     asset.IsPrivate,
-		BusinessID:    asset.BusinessID,
-		BusinessTitle: asset.Business.Title,
-		UserFullName:  asset.User.FullName(),
+		ID:            item.ID,
+		Ext:           item.Ext,
+		Path:          item.Path,
+		Size:          item.Size,
+		Title:         item.Title,
+		UserID:        item.UserID,
+		IsPrivate:     item.IsPrivate,
+		BusinessID:    item.BusinessID,
+		BusinessTitle: item.Business.Title,
+		UserFullName:  item.User.FullName(),
 	}
 
 	if strings.Contains(a.Path, "/private/") {

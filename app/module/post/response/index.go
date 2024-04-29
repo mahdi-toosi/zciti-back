@@ -22,23 +22,23 @@ type Post struct {
 	Meta       schema.PostMeta      `json:",omitempty"`
 }
 
-func FromDomain(post *schema.Post) (res *Post) {
-	if post == nil {
+func FromDomain(item *schema.Post) (res *Post) {
+	if item == nil {
 		return res
 	}
 
 	p := &Post{
-		ID:       post.ID,
-		Type:     post.Type,
-		Meta:     post.Meta,
-		Title:    post.Title,
-		Status:   post.Status,
-		Content:  post.Content,
-		Author:   response.User{ID: post.Author.ID, FullName: post.Author.FullName()},
-		Business: bresponse.Business{ID: post.Business.ID, Title: post.Business.Title},
+		ID:       item.ID,
+		Type:     item.Type,
+		Meta:     item.Meta,
+		Title:    item.Title,
+		Status:   item.Status,
+		Content:  item.Content,
+		Author:   response.User{ID: item.Author.ID, FullName: item.Author.FullName()},
+		Business: bresponse.Business{ID: item.Business.ID, Title: item.Business.Title},
 	}
 
-	for _, taxonomy := range post.Taxonomies {
+	for _, taxonomy := range item.Taxonomies {
 		p.Taxonomies = append(p.Taxonomies, tresponse.Taxonomy{
 			ID:       taxonomy.ID,
 			Type:     taxonomy.Type,

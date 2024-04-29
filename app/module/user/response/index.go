@@ -14,14 +14,14 @@ type User struct {
 	Permissions     schema.UserPermissions `json:",omitempty"`
 }
 
-func FromDomain(user *schema.User) (res *User) {
-	if user != nil {
+func FromDomain(item *schema.User) (res *User) {
+	if item != nil {
 		res = &User{
-			ID:              user.ID,
-			FullName:        user.FullName(),
-			Mobile:          user.Mobile,
-			MobileConfirmed: user.MobileConfirmed,
-			Permissions:     user.Permissions,
+			ID:              item.ID,
+			FullName:        item.FullName(),
+			Mobile:          item.Mobile,
+			MobileConfirmed: item.MobileConfirmed,
+			Permissions:     item.Permissions,
 		}
 	}
 

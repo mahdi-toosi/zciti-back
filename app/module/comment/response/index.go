@@ -16,19 +16,19 @@ type Comment struct {
 	CreatedAt       time.Time `json:",omitempty"`
 }
 
-func FromDomain(comment map[string]interface{}) (res *Comment) {
-	if comment != nil {
+func FromDomain(item map[string]interface{}) (res *Comment) {
+	if item != nil {
 		res = &Comment{
-			ID:              uint64(comment["id"].(int64)),
-			Content:         comment["content"].(string),
-			Status:          comment["status"].(string),
-			CreatedAt:       comment["created_at"].(time.Time),
-			IsBusinessOwner: comment["is_business_owner"].(bool),
-			AuthorID:        uint64(comment["author_id"].(int64)),
-			AuthorFullName:  comment["author_full_name"].(string),
+			ID:              uint64(item["id"].(int64)),
+			Content:         item["content"].(string),
+			Status:          item["status"].(string),
+			CreatedAt:       item["created_at"].(time.Time),
+			IsBusinessOwner: item["is_business_owner"].(bool),
+			AuthorID:        uint64(item["author_id"].(int64)),
+			AuthorFullName:  item["author_full_name"].(string),
 		}
 
-		if rec, ok := comment["parent_id"].(int64); ok {
+		if rec, ok := item["parent_id"].(int64); ok {
 			res.ParentID = uint64(rec)
 		}
 	}

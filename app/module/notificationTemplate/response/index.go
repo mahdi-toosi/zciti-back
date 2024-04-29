@@ -12,14 +12,14 @@ type NotificationTemplate struct {
 	BusinessID uint64
 }
 
-func FromDomain(nt *schema.NotificationTemplate) (res *NotificationTemplate) {
-	if nt != nil {
+func FromDomain(item *schema.NotificationTemplate) (res *NotificationTemplate) {
+	if item != nil {
 		res = &NotificationTemplate{
-			ID:         nt.ID,
-			Tag:        nt.Tag,
-			Title:      nt.Title,
-			Content:    nt.Content,
-			BusinessID: nt.BusinessID,
+			ID:         item.ID,
+			Tag:        item.Tag,
+			Title:      item.Title,
+			Content:    item.Content,
+			BusinessID: item.BusinessID,
 		}
 	}
 
