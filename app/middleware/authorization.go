@@ -78,6 +78,7 @@ var Permissions = map[schema.UserRole]map[Domain]map[Permission]bool{
 		DUser:                 {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DFile:                 {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DPost:                 {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
+		DOrder:                {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DProduct:              {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DComment:              {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DMessage:              {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
@@ -99,6 +100,7 @@ type Domain int
 const (
 	DPost Domain = iota
 	DUser
+	DOrder
 	DFile
 	DProduct
 	DComment

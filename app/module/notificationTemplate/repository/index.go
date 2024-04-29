@@ -26,7 +26,8 @@ type repo struct {
 }
 
 func (_i *repo) GetAll(req ntrequest.Index) (notificationTemplates []*schema.NotificationTemplate, paging paginator.Pagination, err error) {
-	query := _i.DB.Main.Model(&schema.NotificationTemplate{})
+	query := _i.DB.Main.Model(&schema.NotificationTemplate{}).
+		Where(&schema.NotificationTemplate{BusinessID: req.BusinessID})
 
 	if req.Pagination.Page > 0 {
 		var total int64

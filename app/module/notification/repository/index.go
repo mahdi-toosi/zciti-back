@@ -29,7 +29,7 @@ type repo struct {
 func (_i *repo) GetAll(req request.Notifications) (notifications []*response.Notification, paging paginator.Pagination, err error) {
 	query := _i.DB.Main.
 		Model(&schema.Notification{}).
-		Where("business_id = ?", req.BusinessID).
+		Where(&schema.Notification{BusinessID: req.BusinessID}).
 		Select("notifications.*, " +
 			"users.first_name || ' ' || users.last_name as receiver_full_name, " +
 			"businesses.title as business_title").
@@ -56,7 +56,9 @@ func (_i *repo) GetAll(req request.Notifications) (notifications []*response.Not
 }
 
 func (_i *repo) GetOne(businessID uint64, id uint64) (notification *response.Notification, err error) {
-	if err := _i.DB.Main.First(&notification, id).Where("business_id = ?", businessID).Error; err != nil {
+	if err := _i.DB.Main.First(&notification, id).
+		Where(&schema.Notification{BusinessID: businessID}).
+		Error; err != nil {
 		return nil, err
 	}
 

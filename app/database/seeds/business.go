@@ -44,6 +44,9 @@ func (Business) Seed(db *gorm.DB) error {
 	query := "INSERT INTO business_users (business_id, user_id) VALUES  (%d, %d)"
 	for b := 0; b < len(businessIDs); b++ {
 		for u := 0; u < len(userIDs); u++ {
+			if userIDs[u] == 1 {
+				continue
+			}
 			db.Exec(fmt.Sprintf(query, businessIDs[b], userIDs[u]))
 		}
 	}

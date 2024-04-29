@@ -10,6 +10,7 @@ func MainDBModels() []any {
 		Asset{},
 		Post{},
 		Product{},
+		Order{},
 		Taxonomy{},
 		Comment{},
 		NotificationTemplate{},

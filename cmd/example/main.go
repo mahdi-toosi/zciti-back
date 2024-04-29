@@ -9,6 +9,7 @@ import (
 	"go-fiber-starter/app/module/messageRoom"
 	"go-fiber-starter/app/module/notification"
 	"go-fiber-starter/app/module/notificationTemplate"
+	"go-fiber-starter/app/module/order"
 	"go-fiber-starter/app/module/post"
 	"go-fiber-starter/app/module/product"
 	"go-fiber-starter/app/module/taxonomy"
@@ -65,6 +66,7 @@ func main() {
 		user.Module,
 		auth.Module,
 		asset.Module,
+		order.Module,
 		message.Module,
 		comment.Module,
 		product.Module,

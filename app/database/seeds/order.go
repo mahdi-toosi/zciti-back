@@ -8,31 +8,29 @@ import (
 	"gorm.io/gorm"
 )
 
-type Product struct{}
+type Order struct{}
 
-const ProductSeedCount = 60
+const OrderSeedCount = 100
 
-func (Product) Seed(db *gorm.DB) error {
+func (Order) Seed(db *gorm.DB) error {
 	businessIDs, err := utils.GetFakeTableIDs(db, schema.Business{})
 	if err != nil {
 		return err
 	}
-
-	postIDs, err := utils.GetFakeTableIDsWithConditions(db, schema.Post{}, map[string][]any{"type": {"product"}}) // "productVariant"
+	userIDs, err := utils.GetFakeTableIDs(db, schema.User{})
 	if err != nil {
 		return err
 	}
 
-	for _, postID := range postIDs {
-		fakeData := &schema.Product{}
+	for i := 0; i <= OrderSeedCount; i++ {
+		fakeData := &schema.Order{}
 		err := faker.FakeData(&fakeData)
 		if err != nil {
 			log.Error().Err(err).Msg("fail to generate fake data")
 			return err
 		}
 
-		fakeData.IsRoot = true
-		fakeData.PostID = postID
+		fakeData.UserID = utils.RandomFromArray(userIDs)
 		fakeData.BusinessID = utils.RandomFromArray(businessIDs)
 
 		if err := db.Create(&fakeData).Error; err != nil {
@@ -40,14 +38,14 @@ func (Product) Seed(db *gorm.DB) error {
 		}
 	}
 
-	log.Info().Msgf("%d products created", ProductSeedCount*2)
+	log.Info().Msgf("%d orders created", OrderSeedCount)
 
 	return nil
 }
 
-func (Product) Count(db *gorm.DB) (int, error) {
+func (Order) Count(db *gorm.DB) (int, error) {
 	var count int64
-	if err := db.Model(schema.Product{}).Count(&count).Error; err != nil {
+	if err := db.Model(schema.Order{}).Count(&count).Error; err != nil {
 		return 0, err
 	}
 
