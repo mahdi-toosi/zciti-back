@@ -22,10 +22,15 @@ func (_i *Router) RegisterRoutes(cfg *config.Config) {
 	// define routes
 	_i.App.Route("/v1/business/:businessID/taxonomies", func(router fiber.Router) {
 		router.Get("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DTaxonomy, mdl.PReadAll), c.Index)
+		router.Get("/search", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DTaxonomy, mdl.PReadAll), c.Search)
 		router.Get("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DTaxonomy, mdl.PReadSingle), c.Show)
 		router.Post("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DTaxonomy, mdl.PCreate), c.Store)
 		router.Put("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DTaxonomy, mdl.PUpdate), c.Update)
 		router.Delete("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DTaxonomy, mdl.PDelete), c.Delete)
+	})
+
+	_i.App.Route("/v1/user/business/:businessID/taxonomies", func(router fiber.Router) {
+		router.Get("/", mdl.ForUser, c.Index)
 	})
 }
 

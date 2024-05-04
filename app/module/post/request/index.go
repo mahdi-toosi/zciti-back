@@ -9,9 +9,9 @@ type Post struct {
 	ID         uint64
 	AuthorID   uint64            `example:"1" validate:"number"`
 	BusinessID uint64            `example:"1" validate:"number"`
-	Title      string            `example:"title" validate:"required,min=2,max=255"`
-	Content    string            `example:"content content content" validate:"required,min=2,max=4000"`
-	Excerpt    string            `example:"content content content" validate:"required,min=2,max=255"`
+	Title      string            `example:"title" validate:"omitempty,min=2,max=255"`
+	Content    string            `example:"content content content" validate:"omitempty,min=2,max=4000"`
+	Excerpt    string            `example:"content content content" validate:"omitempty,min=2,max=255"`
 	Status     schema.PostStatus `example:"draft" validate:"required,oneof=draft published private"`
 	Type       schema.PostType   `example:"page" validate:"required,oneof=product post page"`
 	Meta       schema.PostMeta
@@ -36,6 +36,7 @@ func (req *Post) ToDomain() *schema.Post {
 		Title:      req.Title,
 		Status:     req.Status,
 		Content:    req.Content,
+		Excerpt:    req.Excerpt,
 		AuthorID:   req.AuthorID,
 		BusinessID: req.BusinessID,
 		Meta: schema.PostMeta{

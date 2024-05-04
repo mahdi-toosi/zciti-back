@@ -56,8 +56,9 @@ func (_i *repo) GetAll(req request.Notifications) (notifications []*response.Not
 }
 
 func (_i *repo) GetOne(businessID uint64, id uint64) (notification *response.Notification, err error) {
-	if err := _i.DB.Main.First(&notification, id).
+	if err := _i.DB.Main.
 		Where(&schema.Notification{BusinessID: businessID}).
+		First(&notification, id).
 		Error; err != nil {
 		return nil, err
 	}

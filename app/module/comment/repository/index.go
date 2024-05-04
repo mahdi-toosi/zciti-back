@@ -34,7 +34,7 @@ func (_i *repo) GetAll(postID uint64, req request.Comments) (comments []map[stri
 
 	err = _i.DB.Main.Raw(`
 		WITH roots AS (
-			SELECT id FROM comments WHERE parent_id IS NULL AND post_id = ? offset ? limit ?
+			SELECT id FROM comments WHERE parent_id = 0 AND post_id = ? AND deleted_at IS NULL offset ? limit ?
 		),
 			 recursive AS (
 				 WITH RECURSIVE comment_tree(id, parent_id, content, author_id, status, is_business_owner, created_at, depth) AS (

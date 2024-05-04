@@ -47,7 +47,7 @@ func (Taxonomy) Seed(db *gorm.DB) error {
 		return err
 	}
 
-	query := "INSERT INTO post_taxonomy (taxonomy_id, post_id) VALUES  (%d, %d)"
+	query := "INSERT INTO posts_taxonomies (taxonomy_id, post_id) VALUES  (%d, %d)"
 	for u := 0; u < len(postsIDs); u++ {
 		for b := 0; b < int(utils.Random(int(utils.Random(0, len(taxonomiesIDs))), len(taxonomiesIDs))); b++ {
 			err = db.Exec(fmt.Sprintf(query, taxonomiesIDs[b], postsIDs[u])).Error
@@ -55,6 +55,35 @@ func (Taxonomy) Seed(db *gorm.DB) error {
 				log.Error().Err(err)
 				return err
 			}
+		}
+	}
+
+	attributeIDs, err := utils.GetFakeTableIDsWithConditions(db, schema.Taxonomy{},
+		map[string][]any{
+			"domain": {schema.PostTypeProduct},
+			"type":   {schema.TaxonomyTypeProductAttributes},
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	productIDs, err := utils.GetFakeTableIDsWithConditions(
+		db,
+		schema.Product{},
+		map[string][]any{"variant_type": {schema.ProductVariantTypeWashingMachines}},
+	)
+	if err != nil {
+		return err
+	}
+
+	query = "INSERT INTO products_taxonomies (product_id, taxonomy_id) VALUES  (%d, %d)"
+	for b := 0; b < len(productIDs); b++ {
+		for u := 0; u < len(attributeIDs); u++ {
+			if attributeIDs[u] == 1 {
+				continue
+			}
+			db.Exec(fmt.Sprintf(query, productIDs[b], attributeIDs[u]))
 		}
 	}
 

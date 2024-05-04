@@ -37,7 +37,15 @@ func GenerateNecessaryData(db *gorm.DB) error {
 		return err
 	}
 
+	if err := GenerateUniWashOperator(db); err != nil {
+		return err
+	}
+
 	if err := GenerateRootBusiness(db); err != nil {
+		return err
+	}
+
+	if err := GenerateUniWashBusiness(db); err != nil {
 		return err
 	}
 

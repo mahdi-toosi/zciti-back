@@ -23,8 +23,8 @@ type BusinessType string
 
 const (
 	BTypeROOT          BusinessType = "ROOT"
-	BTypeBakery        BusinessType = "Bakery"
-	BTypeGymManager    BusinessType = "GymManager"
+	BTypeBakery        BusinessType = "bakery"
+	BTypeGymManager    BusinessType = "gymManager"
 	BTypeWMReservation BusinessType = "WMReservation" // Washing Machine Reservation
 )
 

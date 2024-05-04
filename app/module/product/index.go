@@ -27,10 +27,17 @@ func (_i *Router) RegisterRoutes(cfg *config.Config) {
 		router.Get("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PReadAll), c.Index)
 		router.Get("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PReadSingle), c.Show)
 		router.Post("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PCreate), c.Store)
+		router.Post("/:id/product-variant", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PCreate), c.StoreVariant)
+		router.Post("/:id/product-attribute", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PCreate), c.StoreAttribute)
 		router.Post("/:id/delete-taxonomies", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PCreate), pc.DeleteTaxonomies)
 		router.Post("/:id/insert-taxonomies", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PCreate), pc.InsertTaxonomies)
+		router.Put("/:id/product-variant", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PCreate), c.StoreVariant)
 		router.Put("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PUpdate), c.Update)
 		router.Delete("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PDelete), c.Delete)
+	})
+
+	_i.App.Route("/v1/user/business/:businessID/products", func(router fiber.Router) {
+		router.Get("/", mdl.ForUser, c.Index)
 	})
 }
 

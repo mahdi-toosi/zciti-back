@@ -8,7 +8,8 @@ import (
 )
 
 type IService interface {
-	Index(req request.Taxonomies) (taxonomies []*response.Taxonomy, paging paginator.Pagination, err error)
+	Index(req request.Taxonomies, forUser bool) (taxonomies []*response.Taxonomy, paging paginator.Pagination, err error)
+	Search(req request.Taxonomies, forUser bool) (taxonomies []*response.Taxonomy, paging paginator.Pagination, err error)
 	Show(BusinessID uint64, id uint64) (taxonomy *response.Taxonomy, err error)
 	Store(req request.Taxonomy) (err error)
 	Update(id uint64, req request.Taxonomy) (err error)
@@ -25,26 +26,38 @@ type service struct {
 	Repo repository.IRepository
 }
 
-func (_i *service) Index(req request.Taxonomies) (taxonomies []*response.Taxonomy, paging paginator.Pagination, err error) {
+func (_i *service) Index(req request.Taxonomies, forUser bool) (taxonomies []*response.Taxonomy, paging paginator.Pagination, err error) {
 	results, paging, err := _i.Repo.GetAll(req)
 	if err != nil {
 		return
 	}
 
 	for _, result := range results {
-		taxonomies = append(taxonomies, response.FromDomain(result))
+		taxonomies = append(taxonomies, response.FromDomain(result, forUser))
 	}
 
 	return
 }
 
+func (_i *service) Search(req request.Taxonomies, forUser bool) (taxonomies []*response.Taxonomy, paging paginator.Pagination, err error) {
+	results, paging, err := _i.Repo.Search(req)
+	if err != nil {
+		return
+	}
+
+	for _, result := range results {
+		taxonomies = append(taxonomies, response.FromDomain(result, forUser))
+	}
+
+	return
+}
 func (_i *service) Show(businessID uint64, id uint64) (taxonomy *response.Taxonomy, err error) {
 	result, err := _i.Repo.GetOne(businessID, id)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.FromDomain(result), nil
+	return response.FromDomain(result, false), nil
 }
 
 func (_i *service) Store(req request.Taxonomy) (err error) {
@@ -56,5 +69,5 @@ func (_i *service) Update(id uint64, req request.Taxonomy) (err error) {
 }
 
 func (_i *service) Destroy(businessID uint64, id uint64) error {
-	return _i.Repo.Delete(businessID, id)
+	return _i.Repo.Delete(businessID, &id)
 }

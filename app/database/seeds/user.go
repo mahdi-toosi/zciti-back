@@ -13,6 +13,7 @@ type User struct{}
 
 const UserSeedCount = 30
 const AdminMobile = 9380338494
+const UniWashOperatorMobile = 9180338494
 
 func (User) Seed(db *gorm.DB) error {
 	pass := helpers.Hash([]byte("123456"))
@@ -27,7 +28,7 @@ func (User) Seed(db *gorm.DB) error {
 
 		fakeData.Password = pass
 		fakeData.Permissions = schema.UserPermissions{}
-		fakeData.Mobile = uint64(9180338500 + i)
+		fakeData.Mobile = uint64(9180238500 + i)
 		if err := db.Create(fakeData).Error; err != nil {
 			log.Error().Err(err)
 		}
@@ -74,4 +75,30 @@ func GenerateAdmin(db *gorm.DB) error {
 	}
 
 	return db.Create(admin).Error
+}
+
+func GenerateUniWashOperator(db *gorm.DB) error {
+	err := db.First(&schema.User{}, "mobile = ?", UniWashOperatorMobile).Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+	if err == nil {
+		return nil
+	}
+
+	pass := helpers.Hash([]byte("123456"))
+
+	// create operator
+	operator := &schema.User{}
+
+	operator.Password = pass
+	operator.LastName = "operator"
+	operator.FirstName = "esmaiil"
+	operator.Mobile = UniWashOperatorMobile
+	operator.MobileConfirmed = true
+	operator.Permissions = schema.UserPermissions{
+		2: []schema.UserRole{schema.URBusinessOwner},
+	}
+
+	return db.Create(operator).Error
 }

@@ -97,12 +97,14 @@ func (_i *repo) UpdateCommentCount(id uint64, num string) (err error) {
 }
 
 func (_i *repo) Delete(businessID uint64, id uint64) error {
-	return _i.DB.Main.Delete(&schema.Post{}, id).Where("business_id = ?", businessID).Error
+	return _i.DB.Main.
+		Where(&schema.Post{BusinessID: businessID}).
+		Delete(&schema.Post{}, id).Error
 }
 
 func (_i *repo) DeleteTaxonomies(req request.PostTaxonomies) error {
 	return _i.DB.Main.Exec(
-		"DELETE FROM post_taxonomy WHERE post_id = ? AND taxonomy_id IN (?)",
+		"DELETE FROM posts_taxonomies WHERE post_id = ? AND taxonomy_id IN (?)",
 		req.PostID,
 		req.IDs,
 	).Error
@@ -110,7 +112,7 @@ func (_i *repo) DeleteTaxonomies(req request.PostTaxonomies) error {
 
 func (_i *repo) InsertTaxonomies(req request.PostTaxonomies) error {
 	return _i.DB.Main.Exec(
-		"INSERT INTO post_taxonomy (post_id, taxonomy_id) VALUES (?, ?)",
+		"INSERT INTO posts_taxonomies (post_id, taxonomy_id) VALUES (?, ?)",
 		req.PostID,
 		req.IDs,
 	).Error

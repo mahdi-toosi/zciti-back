@@ -11,6 +11,7 @@ type Asset struct {
 	Ext        string
 	IsPrivate  bool
 	Size       uint64
+	AltText    string `gorm:"varchar(255);"`
 	UserID     uint64
 	User       User `gorm:"foreignKey:UserID"`
 	BusinessID uint64

@@ -13,6 +13,8 @@ type IRestController interface {
 	Index(c *fiber.Ctx) error
 	Show(c *fiber.Ctx) error
 	Store(c *fiber.Ctx) error
+	StoreVariant(c *fiber.Ctx) error
+	StoreAttribute(c *fiber.Ctx) error
 	Update(c *fiber.Ctx) error
 	Delete(c *fiber.Ctx) error
 }
@@ -46,7 +48,7 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	req.BusinessID = businessID
 	req.Keyword = c.Query("keyword")
 
-	products, paging, err := _i.service.Index(req)
+	products, paging, err := _i.service.Index(req, utils.IsForUser(c))
 	if err != nil {
 		return err
 	}
@@ -114,6 +116,72 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(p)
+}
+
+// StoreVariant
+// @Summary      Create product
+// @Tags         Product
+// @Param 		 product body request.ProductInPost true "Product details"
+// @Security     Bearer
+// @Param        businessID path int true "Business ID"
+// @Router       /business/:businessID/products/:id/product-variant [product]
+func (_i *controller) StoreVariant(c *fiber.Ctx) error {
+	businessID, err := utils.GetIntInParams(c, "businessID")
+	if err != nil {
+		return err
+	}
+	postID, err := utils.GetIntInParams(c, "id")
+	if err != nil {
+		return err
+	}
+
+	req := new(request.ProductInPost)
+	if err := response.ParseAndValidate(c, req); err != nil {
+		return err
+	}
+
+	req.PostID = postID
+	req.BusinessID = businessID
+
+	p, err := _i.service.StoreVariant(*req)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(p)
+}
+
+// StoreAttribute
+// @Summary      Create product
+// @Tags         Product
+// @Param 		 product body request.ProductInPost true "Product details"
+// @Security     Bearer
+// @Param        businessID path int true "Business ID"
+// @Param        id path int true "Product ID"
+// @Router       /business/:businessID/products/:id/product-attribute [product]
+func (_i *controller) StoreAttribute(c *fiber.Ctx) error {
+	businessID, err := utils.GetIntInParams(c, "businessID")
+	if err != nil {
+		return err
+	}
+	productID, err := utils.GetIntInParams(c, "id")
+	if err != nil {
+		return err
+	}
+
+	req := new(request.StoreProductAttribute)
+	req.ProductID = productID
+	req.BusinessID = businessID
+
+	if err := response.ParseAndValidate(c, req); err != nil {
+		return err
+	}
+
+	if err := _i.service.StoreAttribute(*req); err != nil {
+		return err
+	}
+
+	return c.JSON("success")
 }
 
 // Update

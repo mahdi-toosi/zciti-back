@@ -20,6 +20,11 @@ func AdminPermission(c *fiber.Ctx) error {
 		JSON(fiber.Map{"status": "error", "message": "you don't have permission", "data": nil})
 }
 
+func ForUser(c *fiber.Ctx) error {
+	c.Locals("forUser", true)
+	return c.Next()
+}
+
 func BusinessPermission(domain Domain, permission Permission) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		user, err := utils.GetAuthenticatedUser(c)
@@ -88,7 +93,30 @@ var Permissions = map[schema.UserRole]map[Domain]map[Permission]bool{
 		DNotification:         {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DNotificationTemplate: {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 	},
-	schema.URUser: {},
+	schema.URBusinessOwner: {
+		DUser:                 {PReadAll: true, PReadSingle: true, PDelete: true},
+		DFile:                 {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
+		DPost:                 {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
+		DOrder:                {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true},
+		DProduct:              {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
+		DComment:              {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
+		DMessage:              {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
+		DTaxonomy:             {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
+		DBusiness:             {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true},
+		DMessageRoom:          {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
+		DNotification:         {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
+		DNotificationTemplate: {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
+	},
+	schema.URUser: {
+		DUser:         {PCreate: true},
+		DTaxonomy:     {PReadAll: true},
+		DBusiness:     {PReadSingle: true},
+		DPost:         {PReadSingle: true},
+		DOrder:        {PReadSingle: true, PCreate: true},
+		DProduct:      {PReadAll: true, PReadSingle: true},
+		DComment:      {PCreate: true, PReadAll: true, PUpdate: true, PDelete: true},
+		DNotification: {PReadAll: true, PReadSingle: true},
+	},
 }
 
 // end define Permissions

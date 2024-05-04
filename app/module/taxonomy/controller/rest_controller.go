@@ -12,6 +12,7 @@ import (
 
 type IRestController interface {
 	Index(c *fiber.Ctx) error
+	Search(c *fiber.Ctx) error
 	Show(c *fiber.Ctx) error
 	Store(c *fiber.Ctx) error
 	Update(c *fiber.Ctx) error
@@ -32,6 +33,7 @@ type controller struct {
 // @Security     Bearer
 // @Param        businessID path int true "Business ID"
 // @Router       /business/:businessID/taxonomies [get]
+// @Router       /user/business/:businessID/taxonomies [get]
 func (_i *controller) Index(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")
 	if err != nil {
@@ -53,7 +55,49 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 		req.Domain = schema.PostType(c.Query("Domain"))
 	}
 
-	taxonomies, paging, err := _i.service.Index(*req)
+	taxonomies, paging, err := _i.service.Index(*req, utils.IsForUser(c))
+	if err != nil {
+		return err
+	}
+
+	return response.Resp(c, response.Response{
+		Data: taxonomies,
+		Meta: paging,
+	})
+}
+
+// Search
+// @Summary      Get all taxonomies
+// @Tags         Taxonomies
+// @Security     Bearer
+// @Param        businessID path int true "Business ID"
+// @Router       /business/:businessID/taxonomies [get]
+// @Router       /user/business/:businessID/taxonomies/search [get]
+func (_i *controller) Search(c *fiber.Ctx) error {
+	businessID, err := utils.GetIntInParams(c, "businessID")
+	if err != nil {
+		return err
+	}
+	parentID, _ := utils.GetIntInQueries(c, "ParentID")
+	paginate, err := paginator.Paginate(c)
+	if err != nil {
+		return err
+	}
+
+	req := new(request.Taxonomies)
+	req.ParentID = parentID
+	req.Pagination = paginate
+	req.BusinessID = businessID
+	req.Keyword = c.Query("Keyword")
+
+	if c.Query("Type") != "" {
+		req.Type = schema.TaxonomyType(c.Query("Type"))
+	}
+	if c.Query("Domain") != "" {
+		req.Domain = schema.PostType(c.Query("Domain"))
+	}
+
+	taxonomies, paging, err := _i.service.Search(*req, utils.IsForUser(c))
 	if err != nil {
 		return err
 	}

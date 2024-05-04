@@ -39,6 +39,14 @@ func InlineCondition(condition bool, ifResult any, elseResult any) any {
 	return elseResult
 }
 
+func IsForUser(c *fiber.Ctx) bool {
+	val, ok := c.Locals("forUser").(bool)
+	if !ok {
+		return false
+	}
+	return val
+}
+
 func GetIntInParams(c *fiber.Ctx, key string) (uint64, error) {
 	return strconv.ParseUint(c.Params(key), 10, 64)
 }

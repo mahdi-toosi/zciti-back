@@ -51,8 +51,8 @@ func (_i *repo) GetAll(req request.Orders) (orders []*schema.Order, paging pagin
 
 func (_i *repo) GetOne(businessID uint64, id uint64) (order *schema.Order, err error) {
 	if err := _i.DB.Main.
-		First(&order, id).
 		Where(&schema.Order{BusinessID: businessID}).
+		First(&order, id).
 		Error; err != nil {
 		return nil, err
 	}

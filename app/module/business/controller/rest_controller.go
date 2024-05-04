@@ -85,6 +85,10 @@ func (_i *controller) Show(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+	// TODO remove it
+	if businessID == 1 {
+		return fiber.ErrForbidden
+	}
 
 	business, err := _i.service.Show(businessID)
 	if err != nil {

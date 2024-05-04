@@ -21,7 +21,7 @@ type Post struct {
 	BusinessID uint64     `gorm:"index:idx_slug;" faker:"-"`
 	Business   Business   `gorm:"foreignKey:BusinessID" faker:"-"`
 	Products   []Product  `gorm:"foreignKey:PostID" faker:"-"`
-	Taxonomies []Taxonomy `gorm:"many2many:post_taxonomy;" faker:"-"`
+	Taxonomies []Taxonomy `gorm:"many2many:posts_taxonomies;" faker:"-"`
 	Meta       PostMeta   `gorm:"type:jsonb"`
 	Base
 }

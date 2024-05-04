@@ -67,5 +67,7 @@ func (_i *repo) Update(id uint64, notificationTemplate *schema.NotificationTempl
 }
 
 func (_i *repo) Delete(businessID uint64, id uint64) error {
-	return _i.DB.Main.Delete(&schema.NotificationTemplate{}, id).Where("business_id = ?", businessID).Error
+	return _i.DB.Main.
+		Where(&schema.NotificationTemplate{BusinessID: businessID}).
+		Delete(&schema.NotificationTemplate{}, id).Error
 }

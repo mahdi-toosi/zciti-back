@@ -78,16 +78,40 @@ func GenerateRootBusiness(db *gorm.DB) error {
 		return nil
 	}
 
-	business := schema.Business{OwnerID: 1, Title: title, Type: schema.BTypeROOT}
-	if err = db.Create(&business).Error; err != nil {
-		return err
-	}
-
 	admin := schema.User{}
 	if err = db.First(&admin, "mobile = ?", AdminMobile).Error; err != nil {
 		return err
 	}
 
+	business := schema.Business{OwnerID: admin.ID, Title: title, Type: schema.BTypeROOT}
+	if err = db.Create(&business).Error; err != nil {
+		return err
+	}
+
 	query := "INSERT INTO business_users (business_id, user_id) VALUES  (%d, %d)"
 	return db.Exec(fmt.Sprintf(query, business.ID, admin.ID)).Error
+}
+
+func GenerateUniWashBusiness(db *gorm.DB) error {
+	const title = "uni wash"
+	err := db.First(&schema.Business{}, "title = ? AND type = ?", title, schema.BTypeWMReservation).Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+	if err == nil {
+		return nil
+	}
+
+	operator := schema.User{}
+	if err = db.First(&operator, "mobile = ?", UniWashOperatorMobile).Error; err != nil {
+		return err
+	}
+
+	business := schema.Business{OwnerID: operator.ID, Title: title, Type: schema.BTypeWMReservation}
+	if err = db.Create(&business).Error; err != nil {
+		return err
+	}
+
+	query := "INSERT INTO business_users (business_id, user_id) VALUES  (%d, %d)"
+	return db.Exec(fmt.Sprintf(query, business.ID, operator.ID)).Error
 }

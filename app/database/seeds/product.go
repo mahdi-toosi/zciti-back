@@ -18,7 +18,7 @@ func (Product) Seed(db *gorm.DB) error {
 		return err
 	}
 
-	postIDs, err := utils.GetFakeTableIDsWithConditions(db, schema.Post{}, map[string][]any{"type": {"product"}}) // "productVariant"
+	postIDs, err := utils.GetFakeTableIDsWithConditions(db, schema.Post{}, map[string][]any{"type": {schema.PostTypeProduct}}) // "productVariant"
 	if err != nil {
 		return err
 	}
@@ -32,7 +32,26 @@ func (Product) Seed(db *gorm.DB) error {
 		}
 
 		fakeData.IsRoot = true
+		fakeData.Type = schema.ProductTypeVariant
+		fakeData.VariantType = nil
 		fakeData.PostID = postID
+		fakeData.BusinessID = utils.RandomFromArray(businessIDs)
+
+		if err := db.Create(&fakeData).Error; err != nil {
+			log.Error().Err(err)
+		}
+	}
+
+	for _, postID := range postIDs {
+		fakeData := &schema.Product{}
+		err := faker.FakeData(&fakeData)
+		if err != nil {
+			log.Error().Err(err).Msg("fail to generate fake data")
+			return err
+		}
+
+		fakeData.PostID = postID
+		fakeData.Type = schema.ProductTypeVariant
 		fakeData.BusinessID = utils.RandomFromArray(businessIDs)
 
 		if err := db.Create(&fakeData).Error; err != nil {
