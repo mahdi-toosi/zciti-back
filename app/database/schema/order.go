@@ -16,7 +16,7 @@ type Order struct {
 	User          User               `gorm:"foreignKey:UserID" faker:"-"`
 	BusinessID    uint64             `gorm:"index" faker:"-"`
 	Business      Business           `gorm:"foreignKey:BusinessID" faker:"-"`
-	ParentID      uint64             `gorm:"index" faker:"-"`
+	ParentID      *uint64            `faker:"-"`
 	//OrderItems    []OrderItem   `faker:"-"`
 	//Transactions  []Transaction `faker:"-"`
 	Base
@@ -25,21 +25,21 @@ type Order struct {
 type OrderStatus string
 
 const (
-	onHold     OrderStatus = "onHold"     // The order is awaiting payment or stock availability.
-	failed     OrderStatus = "failed"     // The payment for the order has failed or been declined.
-	pending    OrderStatus = "pending"    // The order has been placed, but no payment has been made yet.
-	refunded   OrderStatus = "refunded"   // The order has been refunded to the customer.
-	completed  OrderStatus = "completed"  // The order has been paid for and fulfilled.
-	cancelled  OrderStatus = "cancelled"  // The order has been cancelled by the customer or the administrator.
-	processing OrderStatus = "processing" // Payment has been received, and the order is being processed.
+	OrderStatusOnHold     OrderStatus = "onHold"     // The order is awaiting payment or stock availability.
+	OrderStatusFailed     OrderStatus = "failed"     // The payment for the order has failed or been declined.
+	OrderStatusPending    OrderStatus = "pending"    // The order has been placed, but no payment has been made yet.
+	OrderStatusRefunded   OrderStatus = "refunded"   // The order has been refunded to the customer.
+	OrderStatusCompleted  OrderStatus = "completed"  // The order has been paid for and fulfilled.
+	OrderStatusCancelled  OrderStatus = "cancelled"  // The order has been cancelled by the customer or the administrator.
+	OrderStatusProcessing OrderStatus = "processing" // Payment has been received, and the order is being processed.
 )
 
 type OrderPaymentMethod string
 
 const (
-	PaymentMethodCash           OrderPaymentMethod = "cash"
-	PaymentMethodOnline         OrderPaymentMethod = "online"
-	PaymentMethodCashOnDelivery OrderPaymentMethod = "cashOnDelivery"
+	OrderPaymentMethodCash           OrderPaymentMethod = "cash"
+	OrderPaymentMethodOnline         OrderPaymentMethod = "online"
+	OrderPaymentMethodCashOnDelivery OrderPaymentMethod = "cashOnDelivery"
 )
 
 type OrderMeta struct {

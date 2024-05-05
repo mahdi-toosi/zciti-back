@@ -6,10 +6,10 @@ import (
 )
 
 type OrderItem struct {
-	ID        uint64
-	Quantity  int    `example:"1" validate:"number,min=1"`
-	ProductID uint64 `example:"1" validate:"number,min=1"`
-	OrderID   uint64 `example:"1" validate:"number,min=1"`
+	ID       uint64
+	Quantity int    `example:"1" validate:"number,min=1"`
+	PostID   uint64 `example:"1" validate:"number,min=1"`
+	OrderID  uint64 `example:"1" validate:"number,min=1"`
 }
 
 type OrderItems struct {
@@ -18,9 +18,9 @@ type OrderItems struct {
 
 func (req *OrderItem) ToDomain() *schema.OrderItem {
 	return &schema.OrderItem{
-		ID:        req.ID,
-		OrderID:   req.OrderID,
-		Quantity:  req.Quantity,
-		ProductID: req.ProductID,
+		ID:       req.ID,
+		PostID:   req.PostID,
+		OrderID:  req.OrderID,
+		Quantity: req.Quantity,
 	}
 }

@@ -15,6 +15,7 @@ type IRestController interface {
 	Index(c *fiber.Ctx) error
 	Show(c *fiber.Ctx) error
 	Store(c *fiber.Ctx) error
+	StoreUniWash(c *fiber.Ctx) error
 	Update(c *fiber.Ctx) error
 	Delete(c *fiber.Ctx) error
 }
@@ -100,7 +101,39 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 	}
 
 	req.BusinessID = businessID
-	err = _i.service.Store(*req)
+	_, err = _i.service.Store(*req)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON("success")
+}
+
+// StoreUniWash order
+// @Summary      Create order
+// @Tags         Orders
+// @Param 		 order body request.Order true "Order details"
+// @Param        businessID path int true "Business ID"
+// @Router       /business/:businessID/orders [post]
+func (_i *controller) StoreUniWash(c *fiber.Ctx) error {
+	businessID, err := utils.GetIntInParams(c, "businessID")
+	if err != nil {
+		return err
+	}
+
+	user, err := utils.GetAuthenticatedUser(c)
+	if err != nil {
+		return err
+	}
+
+	req := new(request.StoreUniWash)
+	if err := response.ParseAndValidate(c, req); err != nil {
+		return err
+	}
+
+	req.UserID = user.ID
+	req.BusinessID = businessID
+	err = _i.service.StoreUniWash(*req)
 	if err != nil {
 		return err
 	}

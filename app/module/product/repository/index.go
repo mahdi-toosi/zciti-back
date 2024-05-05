@@ -34,6 +34,12 @@ func (_i *repo) GetAll(req request.ProductsRequest) (products []*schema.Post, pa
 	query := _i.DB.Main.Model(&schema.Post{}).
 		Where(&schema.Post{BusinessID: req.BusinessID, Type: schema.PostTypeProduct})
 
+	if req.CategoryID != "" {
+		query = query.
+			Joins("JOIN posts_taxonomies ON posts_taxonomies.post_id = posts.id").
+			Where("posts_taxonomies.taxonomy_id = ?", req.CategoryID)
+	}
+
 	if req.Keyword != "" {
 		query.Where("title Like ?", "%"+req.Keyword+"%")
 	}
@@ -49,7 +55,6 @@ func (_i *repo) GetAll(req request.ProductsRequest) (products []*schema.Post, pa
 
 	err = query.
 		Preload("Products").
-		Preload("Taxonomies").
 		Order("created_at desc").Find(&products).Error
 	if err != nil {
 		return

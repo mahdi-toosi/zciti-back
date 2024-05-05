@@ -71,6 +71,21 @@ type ProductMetaSelectedAttribute struct {
 	UseInVariants     bool
 }
 
+type ProductMetaReservationInfoData struct {
+	To   string // "13:22:00"
+	From string // "13:22:00"
+}
+
+type ProductMetaReservation struct {
+	Quantity int
+	Duration time.Duration
+
+	EndTime   string // "13:22:00"
+	StartTime string // "13:22:00"
+
+	Info map[time.Weekday] /* week day num*/ []ProductMetaReservationInfoData
+}
+
 type ProductMeta struct {
 	SKU                string                         `example:"sku-2f3s" validate:"omitempty,min=2,max=40" faker:"word"` // The stock keeping unit (SKU) of the product. This is a unique identifier for the product that is used for inventory management.
 	PurchaseNote       string                         `validator:"omitempty,min=2,max=500"`                               // A note that is displayed to the customer after purchasing the product.
@@ -92,6 +107,8 @@ type ProductMeta struct {
 	ManageStock   bool
 	StockSku      string `example:"sku-2f3s" validate:"omitempty,min=2,max=40" faker:"word"`
 	StockQuantity uint64 `validate:"omitempty,number"` // The number of units of the product that are currently in stock.
+
+	Reservation ProductMetaReservation `json:",omitempty" faker:"-"`
 }
 
 func (pm *ProductMeta) Scan(value any) error {

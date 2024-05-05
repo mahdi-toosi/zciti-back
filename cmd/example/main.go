@@ -10,9 +10,11 @@ import (
 	"go-fiber-starter/app/module/notification"
 	"go-fiber-starter/app/module/notificationTemplate"
 	"go-fiber-starter/app/module/order"
+	"go-fiber-starter/app/module/orderItem"
 	"go-fiber-starter/app/module/post"
 	"go-fiber-starter/app/module/product"
 	"go-fiber-starter/app/module/taxonomy"
+	"go-fiber-starter/app/module/uniWash"
 	"go-fiber-starter/app/module/user"
 
 	"github.com/efectn/fx-zerolog"
@@ -70,8 +72,10 @@ func main() {
 		message.Module,
 		comment.Module,
 		product.Module,
+		uniWash.Module,
 		taxonomy.Module,
 		business.Module,
+		orderItem.Module,
 		messageRoom.Module,
 		notification.Module,
 		notificationtemplate.Module,

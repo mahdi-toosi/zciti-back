@@ -35,7 +35,7 @@ func (_i *repo) GetAll(req request.Taxonomies) (taxonomies []*schema.Taxonomy, p
 	if req.Pagination.Page > 0 {
 		var total int64
 		err := _i.DB.Main.Model(&schema.Taxonomy{}).
-			Where(&schema.Taxonomy{BusinessID: req.BusinessID, ParentID: nil}).
+			Where(&schema.Taxonomy{BusinessID: req.BusinessID, Type: req.Type, ParentID: nil}).
 			Count(&total).Error
 		if err != nil {
 			return nil, paginator.Pagination{}, err
@@ -66,9 +66,9 @@ func (_i *repo) GetAll(req request.Taxonomies) (taxonomies []*schema.Taxonomy, p
 
 	query := _i.DB.Main.Raw(q, req.BusinessID, req.Type, req.Pagination.Offset, req.Pagination.Limit)
 
-	if req.Keyword != "" {
-		query.Where("title Like ?", "%"+req.Keyword+"%")
-	}
+	//if req.Keyword != "" {
+	//	query.Where("title Like ?", "%"+req.Keyword+"%")
+	//}
 
 	err = query.Scan(&taxonomies).Error
 	if err != nil {
@@ -81,12 +81,13 @@ func (_i *repo) GetAll(req request.Taxonomies) (taxonomies []*schema.Taxonomy, p
 }
 
 func (_i *repo) Search(req request.Taxonomies) (taxonomies []*schema.Taxonomy, paging paginator.Pagination, err error) {
-	query := _i.DB.Main.Model(schema.Taxonomy{}).
+	query := _i.DB.Main.Debug().Model(schema.Taxonomy{}).
 		Where(schema.Taxonomy{BusinessID: req.BusinessID})
 
+	// TODO what if we doesnt want to add parent_id in wheres ?!!!!!!!
 	if req.ParentID == 0 {
 		query.Where("parent_id IS NULL")
-	} else {
+	} else if req.ParentID > 0 {
 		query.Where("parent_id = ?", req.ParentID)
 	}
 

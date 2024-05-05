@@ -30,7 +30,7 @@ func (_i *Router) RegisterRoutes(cfg *config.Config) {
 	})
 
 	_i.App.Route("/v1/user/business/:businessID/taxonomies", func(router fiber.Router) {
-		router.Get("/", mdl.ForUser, c.Index)
+		router.Get("/", mdl.ForUser, c.Search)
 	})
 }
 

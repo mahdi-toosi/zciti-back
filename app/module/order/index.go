@@ -24,6 +24,7 @@ func (_i *Router) RegisterRoutes(cfg *config.Config) {
 		router.Get("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DOrder, mdl.PReadAll), c.Index)
 		router.Get("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DOrder, mdl.PReadSingle), c.Show)
 		router.Post("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DOrder, mdl.PCreate), c.Store)
+		router.Post("/reserve-uni-wash", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DOrder, mdl.PCreate), c.StoreUniWash)
 		router.Put("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DOrder, mdl.PUpdate), c.Update)
 		router.Delete("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DOrder, mdl.PDelete), c.Delete)
 	})

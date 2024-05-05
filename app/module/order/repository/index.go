@@ -10,7 +10,7 @@ import (
 type IRepository interface {
 	GetAll(req request.Orders) (orders []*schema.Order, paging paginator.Pagination, err error)
 	GetOne(businessID uint64, id uint64) (order *schema.Order, err error)
-	Create(order *schema.Order) (err error)
+	Create(order *schema.Order) (orderID *uint64, err error)
 	Update(id uint64, order *schema.Order) (err error)
 	Delete(id uint64) (err error)
 }
@@ -60,8 +60,11 @@ func (_i *repo) GetOne(businessID uint64, id uint64) (order *schema.Order, err e
 	return order, nil
 }
 
-func (_i *repo) Create(order *schema.Order) (err error) {
-	return _i.DB.Main.Create(order).Error
+func (_i *repo) Create(order *schema.Order) (orderID *uint64, err error) {
+	if err = _i.DB.Main.Create(&order).Error; err != nil {
+		return nil, err
+	}
+	return &order.ID, nil
 }
 
 func (_i *repo) Update(id uint64, order *schema.Order) (err error) {

@@ -34,6 +34,7 @@ type ProductInPost struct {
 type ProductsRequest struct {
 	BusinessID uint64
 	Keyword    string
+	CategoryID string
 	Pagination *paginator.Pagination
 }
 

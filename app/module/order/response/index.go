@@ -8,7 +8,7 @@ import (
 
 type Order struct {
 	ID            uint64
-	ParentID      uint64                    `json:",omitempty"`
+	ParentID      *uint64                   `json:",omitempty"`
 	TotalAmt      float64                   `json:",omitempty"`
 	CreatedAt     time.Time                 `json:",omitempty"`
 	UpdatedAt     time.Time                 `json:",omitempty"`

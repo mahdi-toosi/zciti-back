@@ -11,6 +11,8 @@ func MainDBModels() []any {
 		Post{},
 		Product{},
 		Order{},
+		OrderItem{},
+		Reservation{},
 		Taxonomy{},
 		Comment{},
 		NotificationTemplate{},

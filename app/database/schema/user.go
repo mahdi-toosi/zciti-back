@@ -9,9 +9,10 @@ import (
 )
 
 type User struct {
-	ID              uint64          `gorm:"primaryKey" faker:"-"`
-	FirstName       string          `gorm:"varchar(255);" faker:"first_name"`
-	LastName        string          `gorm:"varchar(255);" faker:"last_name"`
+	ID        uint64 `gorm:"primaryKey" faker:"-"`
+	FirstName string `gorm:"varchar(255);" faker:"first_name"`
+	LastName  string `gorm:"varchar(255);" faker:"last_name"`
+	//FullName  string `gorm:"->;type:GENERATED ALWAYS AS (concat(firstname,' ',lastname));default:(-);"`
 	Mobile          uint64          `gorm:"not null;uniqueIndex"`
 	MobileConfirmed bool            `gorm:"default:false"`
 	Permissions     UserPermissions `gorm:"type:jsonb;not null"`

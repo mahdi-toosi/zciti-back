@@ -4,6 +4,7 @@ import (
 	"go-fiber-starter/app/database/schema"
 	presponse "go-fiber-starter/app/module/post/response"
 	tresponse "go-fiber-starter/app/module/taxonomy/response"
+	"go-fiber-starter/app/module/uniWash/service"
 )
 
 type Product struct {
@@ -61,9 +62,10 @@ func FromDomain(item *schema.Post, products []schema.Product, isForUser bool) (r
 					StockStatus: product.StockStatus,
 					Attributes:  filterAttributes(product.Taxonomies),
 				}
+				continue
 			}
 
-			p.Variants = append(p.Variants, ProductInPost{
+			g := ProductInPost{
 				ID:          product.ID,
 				Type:        product.Type,
 				Meta:        product.Meta,
@@ -72,7 +74,9 @@ func FromDomain(item *schema.Post, products []schema.Product, isForUser bool) (r
 				StockStatus: product.StockStatus,
 				VariantType: product.VariantType,
 				Attributes:  filterAttributes(product.Taxonomies),
-			})
+			}
+			g.Meta.Reservation = service.DefaultSetting
+			p.Variants = append(p.Variants, g)
 		}
 
 		return p

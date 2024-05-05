@@ -47,6 +47,7 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	req.Pagination = paginate
 	req.BusinessID = businessID
 	req.Keyword = c.Query("keyword")
+	req.CategoryID = c.Query("CategoryID")
 
 	products, paging, err := _i.service.Index(req, utils.IsForUser(c))
 	if err != nil {
