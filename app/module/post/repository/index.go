@@ -111,9 +111,12 @@ func (_i *repo) DeleteTaxonomies(req request.PostTaxonomies) error {
 }
 
 func (_i *repo) InsertTaxonomies(req request.PostTaxonomies) error {
-	return _i.DB.Main.Exec(
-		"INSERT INTO posts_taxonomies (post_id, taxonomy_id) VALUES (?, ?)",
-		req.PostID,
-		req.IDs,
-	).Error
+	for _, taxonomyID := range req.IDs {
+		_i.DB.Main.Exec(
+			"INSERT INTO posts_taxonomies (post_id, taxonomy_id) VALUES (?, ?)",
+			req.PostID,
+			taxonomyID,
+		)
+	}
+	return nil
 }

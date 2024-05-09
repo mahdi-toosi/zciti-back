@@ -53,9 +53,11 @@ func (_i *repo) GetAll(req request.Taxonomies) (taxonomies []*schema.Taxonomy, p
 				 WITH RECURSIVE taxonomy_tree(id, parent_id, title, type, domain, slug, description, created_at, depth) AS (
 					 SELECT c.id, c.parent_id, c.title, c.type, c.domain, c.slug, c.description, c.created_at, 1
 					 	FROM taxonomies c JOIN roots ON roots.id = c.id
+						WHERE deleted_at IS NULL
 					 UNION ALL
 					 SELECT c.id, c.parent_id, c.title, c.type, c.domain, c.slug, c.description, c.created_at, p.depth + 1
 					 	FROM taxonomies c JOIN taxonomy_tree p ON c.parent_id = p.id
+						WHERE deleted_at IS NULL
 				 )
 				 SELECT * FROM taxonomy_tree
 			 )

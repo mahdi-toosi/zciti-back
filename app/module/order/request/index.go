@@ -3,30 +3,7 @@ package request
 import (
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/utils/paginator"
-	"time"
 )
-
-type StoreUniWash struct {
-	Date       string
-	UserID     uint64
-	PostID     uint64
-	EndTime    string
-	StartTime  string
-	ProductID  uint64
-	BusinessID uint64
-}
-
-func (s StoreUniWash) GetStartDateTime() time.Time {
-	loc, _ := time.LoadLocation("Asia/Tehran")
-	startTime, _ := time.ParseInLocation(time.DateTime, s.Date+" "+s.StartTime, loc)
-	return startTime.UTC()
-}
-
-func (s StoreUniWash) GetEndDateTime() time.Time {
-	loc, _ := time.LoadLocation("Asia/Tehran")
-	endTime, _ := time.ParseInLocation(time.DateTime, s.Date+" "+s.EndTime, loc)
-	return endTime.UTC()
-}
 
 type Order struct {
 	ID            uint64
@@ -39,6 +16,7 @@ type Order struct {
 
 type Orders struct {
 	BusinessID uint64
+	UserID     uint64
 	Pagination *paginator.Pagination
 }
 

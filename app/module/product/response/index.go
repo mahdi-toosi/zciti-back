@@ -4,7 +4,7 @@ import (
 	"go-fiber-starter/app/database/schema"
 	presponse "go-fiber-starter/app/module/post/response"
 	tresponse "go-fiber-starter/app/module/taxonomy/response"
-	"go-fiber-starter/app/module/uniWash/service"
+	"go-fiber-starter/app/module/uniwash/service"
 )
 
 type Product struct {
@@ -60,7 +60,7 @@ func FromDomain(item *schema.Post, products []schema.Product, isForUser bool) (r
 					Price:       product.Price,
 					OnSale:      product.OnSale,
 					StockStatus: product.StockStatus,
-					Attributes:  filterAttributes(product.Taxonomies),
+					//Attributes:  filterAttributes(product.Taxonomies),
 				}
 				continue
 			}
@@ -73,7 +73,7 @@ func FromDomain(item *schema.Post, products []schema.Product, isForUser bool) (r
 				OnSale:      product.OnSale,
 				StockStatus: product.StockStatus,
 				VariantType: product.VariantType,
-				Attributes:  filterAttributes(product.Taxonomies),
+				//Attributes:  filterAttributes(product.Taxonomies),
 			}
 			g.Meta.Reservation = service.DefaultSetting
 			p.Variants = append(p.Variants, g)
@@ -114,7 +114,7 @@ func FromDomain(item *schema.Post, products []schema.Product, isForUser bool) (r
 				Price:       product.Price,
 				OnSale:      product.OnSale,
 				StockStatus: product.StockStatus,
-				Attributes:  filterAttributes(product.Taxonomies),
+				//Attributes:  filterAttributes(product.Taxonomies),
 			}
 			continue
 		}
@@ -127,7 +127,7 @@ func FromDomain(item *schema.Post, products []schema.Product, isForUser bool) (r
 			OnSale:      product.OnSale,
 			VariantType: product.VariantType,
 			StockStatus: product.StockStatus,
-			Attributes:  filterAttributes(product.Taxonomies),
+			//Attributes:  filterAttributes(product.Taxonomies),
 		})
 	}
 

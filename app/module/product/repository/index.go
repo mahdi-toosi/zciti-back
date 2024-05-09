@@ -11,6 +11,7 @@ import (
 type IRepository interface {
 	GetAll(req request.ProductsRequest) (products []*schema.Post, paging paginator.Pagination, err error)
 	GetOne(businessID uint64, id uint64) (post *schema.Post, err error)
+	GetOneVariant(businessID uint64, id uint64) (product *schema.Product, err error)
 	Create(product *schema.Product) (err error)
 	Creates(product []*schema.Product) (err error)
 	Update(product *schema.Product) (err error)
@@ -20,10 +21,8 @@ type IRepository interface {
 	Delete(businessID uint64, id uint64) error
 }
 
-func Repository(DB *database.Database) IRepository {
-	return &repo{
-		DB,
-	}
+func Repository(db *database.Database) IRepository {
+	return &repo{db}
 }
 
 type repo struct {
@@ -54,6 +53,7 @@ func (_i *repo) GetAll(req request.ProductsRequest) (products []*schema.Post, pa
 	}
 
 	err = query.
+		Preload("Taxonomies").
 		Preload("Products").
 		Order("created_at desc").Find(&products).Error
 	if err != nil {
@@ -68,15 +68,23 @@ func (_i *repo) GetAll(req request.ProductsRequest) (products []*schema.Post, pa
 func (_i *repo) GetOne(businessID uint64, id uint64) (post *schema.Post, err error) {
 	if err = _i.DB.Main.
 		Preload("Taxonomies").
-		Preload("Products.Taxonomies", func(db *gorm.DB) *gorm.DB {
-			return db.Select("id, title, parent_id") // select only the id and title fields of the attributes
-		}).
+		Preload("Products").
 		Where(&schema.Post{BusinessID: businessID, Type: schema.PostTypeProduct}).
 		First(&post, id).Error; err != nil {
 		return nil, err
 	}
 
 	return post, nil
+}
+
+func (_i *repo) GetOneVariant(businessID uint64, id uint64) (product *schema.Product, err error) {
+	if err = _i.DB.Main.
+		Where(&schema.Product{BusinessID: businessID}).
+		First(&product, id).Error; err != nil {
+		return nil, err
+	}
+
+	return product, nil
 }
 
 func (_i *repo) Creates(product []*schema.Product) (err error) {

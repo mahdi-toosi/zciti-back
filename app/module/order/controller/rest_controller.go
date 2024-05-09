@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"go-fiber-starter/app/module/order/request"
 	"go-fiber-starter/app/module/order/service"
+	urequest "go-fiber-starter/app/module/uniwash/request"
 	"go-fiber-starter/utils/paginator"
 	"go-fiber-starter/utils/response"
 )
@@ -126,7 +127,7 @@ func (_i *controller) StoreUniWash(c *fiber.Ctx) error {
 		return err
 	}
 
-	req := new(request.StoreUniWash)
+	req := new(urequest.StoreUniWash)
 	if err := response.ParseAndValidate(c, req); err != nil {
 		return err
 	}

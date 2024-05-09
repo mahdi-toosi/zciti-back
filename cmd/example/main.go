@@ -5,8 +5,6 @@ import (
 	"go-fiber-starter/app/module/auth"
 	"go-fiber-starter/app/module/business"
 	"go-fiber-starter/app/module/comment"
-	"go-fiber-starter/app/module/message"
-	"go-fiber-starter/app/module/messageRoom"
 	"go-fiber-starter/app/module/notification"
 	"go-fiber-starter/app/module/notificationTemplate"
 	"go-fiber-starter/app/module/order"
@@ -14,7 +12,7 @@ import (
 	"go-fiber-starter/app/module/post"
 	"go-fiber-starter/app/module/product"
 	"go-fiber-starter/app/module/taxonomy"
-	"go-fiber-starter/app/module/uniWash"
+	"go-fiber-starter/app/module/uniwash"
 	"go-fiber-starter/app/module/user"
 
 	"github.com/efectn/fx-zerolog"
@@ -54,8 +52,8 @@ func main() {
 		fx.Provide(bootstrap.NewFiber),
 		// database
 		fx.Provide(database.NewDatabase),
-		// redis
-		fx.Provide(bootstrap.NewRedis),
+		//// redis
+		//fx.Provide(bootstrap.NewRedis),
 		// middleware
 		fx.Provide(middleware.NewMiddleware),
 		// router
@@ -69,14 +67,14 @@ func main() {
 		auth.Module,
 		asset.Module,
 		order.Module,
-		message.Module,
+		//message.Module,
 		comment.Module,
 		product.Module,
-		uniWash.Module,
+		uniwash.Module,
 		taxonomy.Module,
 		business.Module,
 		orderItem.Module,
-		messageRoom.Module,
+		//messageRoom.Module,
 		notification.Module,
 		notificationtemplate.Module,
 		// End provide modules

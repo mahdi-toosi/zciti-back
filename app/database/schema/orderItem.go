@@ -35,10 +35,12 @@ const (
 )
 
 type OrderItemMeta struct {
-	TaxAmt        uint64
-	ProductID     uint64
-	ProductTitle  string
-	ReservationID uint64
+	TaxAmt             uint64
+	ProductID          uint64
+	ProductTitle       string
+	ProductDetail      string // attributes
+	ProductType        ProductType
+	ProductVariantType ProductVariantType
 }
 
 func (oim *OrderItemMeta) Scan(value any) error {

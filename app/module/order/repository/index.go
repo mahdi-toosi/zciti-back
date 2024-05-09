@@ -15,10 +15,8 @@ type IRepository interface {
 	Delete(id uint64) (err error)
 }
 
-func Repository(DB *database.Database) IRepository {
-	return &repo{
-		DB,
-	}
+func Repository(db *database.Database) IRepository {
+	return &repo{db}
 }
 
 type repo struct {
@@ -27,8 +25,15 @@ type repo struct {
 
 func (_i *repo) GetAll(req request.Orders) (orders []*schema.Order, paging paginator.Pagination, err error) {
 	query := _i.DB.Main.
-		Model(&schema.Order{}).
-		Where(&schema.Order{BusinessID: req.BusinessID})
+		Model(&schema.Order{})
+
+	if req.BusinessID > 0 {
+		query.Where(&schema.Order{BusinessID: req.BusinessID})
+	}
+
+	if req.UserID > 0 {
+		query.Where(&schema.Order{UserID: req.UserID})
+	}
 
 	if req.Pagination.Page > 0 {
 		var total int64
@@ -39,7 +44,11 @@ func (_i *repo) GetAll(req request.Orders) (orders []*schema.Order, paging pagin
 		query.Limit(req.Pagination.Limit)
 	}
 
-	err = query.Preload("User").Order("created_at asc").Find(&orders).Error
+	if req.BusinessID > 0 {
+		query.Preload("User")
+	}
+
+	err = query.Preload("OrderItems").Order("created_at asc").Find(&orders).Error
 	if err != nil {
 		return
 	}

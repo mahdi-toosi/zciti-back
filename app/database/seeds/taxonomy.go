@@ -71,7 +71,7 @@ func (Taxonomy) Seed(db *gorm.DB) error {
 	productIDs, err := utils.GetFakeTableIDsWithConditions(
 		db,
 		schema.Product{},
-		map[string][]any{"variant_type": {schema.ProductVariantTypeWashingMachines}},
+		map[string][]any{"variant_type": {schema.ProductVariantTypeWashingMachine}},
 	)
 	if err != nil {
 		return err

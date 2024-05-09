@@ -117,7 +117,6 @@ func (_i *service) Update(id uint64, req request.Product) (err error) {
 			return err
 		}
 	}
-
 	return _i.Repo.Updates(updateList)
 }
 

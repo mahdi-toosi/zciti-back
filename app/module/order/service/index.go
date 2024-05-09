@@ -7,7 +7,8 @@ import (
 	"go-fiber-starter/app/module/order/response"
 	oirepository "go-fiber-starter/app/module/orderItem/repository"
 	prepository "go-fiber-starter/app/module/product/repository"
-	uniService "go-fiber-starter/app/module/uniWash/service"
+	urequest "go-fiber-starter/app/module/uniwash/request"
+	uniService "go-fiber-starter/app/module/uniwash/service"
 	"go-fiber-starter/utils/paginator"
 )
 
@@ -15,7 +16,7 @@ type IService interface {
 	Index(req request.Orders) (orders []*response.Order, paging paginator.Pagination, err error)
 	Show(businessID uint64, id uint64) (order *response.Order, err error)
 	Store(req request.Order) (orderID *uint64, err error)
-	StoreUniWash(req request.StoreUniWash) (err error)
+	StoreUniWash(req urequest.StoreUniWash) (err error)
 	Update(id uint64, req request.Order) (err error)
 	Destroy(id uint64) error
 }
@@ -63,7 +64,7 @@ func (_i *service) Store(req request.Order) (orderID *uint64, err error) {
 	return orderID, nil
 }
 
-func (_i *service) StoreUniWash(req request.StoreUniWash) (err error) {
+func (_i *service) StoreUniWash(req urequest.StoreUniWash) (err error) {
 	if err = _i.UniService.ValidateReservation(req); err != nil {
 		return err
 	}
@@ -116,8 +117,11 @@ func (_i *service) StoreUniWash(req request.StoreUniWash) (err error) {
 		Subtotal:      product.Price,
 		Type:          schema.OrderItemTypeReservation,
 		Meta: schema.OrderItemMeta{
-			ProductID:    post.ID,
-			ProductTitle: post.Title,
+			ProductID:          product.ID,
+			ProductTitle:       post.Title,
+			ProductType:        product.Type,
+			ProductDetail:      product.Meta.Detail,
+			ProductVariantType: *product.VariantType,
 			//ProductImage:  post.Image,
 		},
 	}); err != nil {

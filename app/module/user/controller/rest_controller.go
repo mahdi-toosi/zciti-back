@@ -3,6 +3,8 @@ package controller
 import (
 	"github.com/gofiber/fiber/v2"
 	bService "go-fiber-starter/app/module/business/service"
+	orequest "go-fiber-starter/app/module/order/request"
+	oService "go-fiber-starter/app/module/order/service"
 	"go-fiber-starter/app/module/user/request"
 	"go-fiber-starter/app/module/user/service"
 	"go-fiber-starter/utils"
@@ -17,18 +19,22 @@ type IRestController interface {
 	Store(c *fiber.Ctx) error
 	Update(c *fiber.Ctx) error
 	Delete(c *fiber.Ctx) error
+
 	BusinessUsers(c *fiber.Ctx) error
 	InsertUser(c *fiber.Ctx) error
 	DeleteUser(c *fiber.Ctx) error
+
+	Orders(c *fiber.Ctx) error
 }
 
-func RestController(s service.IService, b bService.IService) IRestController {
-	return &controller{s, b}
+func RestController(s service.IService, b bService.IService, o oService.IService) IRestController {
+	return &controller{s, b, o}
 }
 
 type controller struct {
 	service  service.IService
 	bService bService.IService
+	oService oService.IService
 }
 
 // Index
@@ -148,7 +154,7 @@ func (_i *controller) Delete(c *fiber.Ctx) error {
 
 // BusinessUsers
 // @Summary      Get one business users
-// @Tags         Businesses
+// @Tags         Users
 // @Security     Bearer
 // @Param        id path int true "Business ID"
 // @Router       /businesses/:businessID/users [get]
@@ -194,7 +200,7 @@ func (_i *controller) BusinessUsers(c *fiber.Ctx) error {
 
 // InsertUser
 // @Summary      Insert one business user
-// @Tags         Businesses
+// @Tags         Users
 // @Security     Bearer
 // @Param        businessId path int true "Business ID" ,userId path int true "User ID"
 // @Router       /businesses/:businessID/users/:userID [post]
@@ -235,7 +241,7 @@ func (_i *controller) InsertUser(c *fiber.Ctx) error {
 
 // DeleteUser
 // @Summary      Delete one business user
-// @Tags         Businesses
+// @Tags         Users
 // @Security     Bearer
 // @Param        businessId path int true "Business ID" ,userId path int true "User ID"
 // @Router       /businesses/:businessID/users/:userID [delete]
@@ -271,5 +277,36 @@ func (_i *controller) DeleteUser(c *fiber.Ctx) error {
 
 	return response.Resp(c, response.Response{
 		Messages: response.Messages{"success"},
+	})
+}
+
+// Orders
+// @Summary      Get all orders
+// @Tags         Users
+// @Security     Bearer
+// @Param        businessID path int true "Business ID"
+// @Router       /user/orders [get]
+func (_i *controller) Orders(c *fiber.Ctx) error {
+	user, err := utils.GetAuthenticatedUser(c)
+	if err != nil {
+		return err
+	}
+	paginate, err := paginator.Paginate(c)
+	if err != nil {
+		return err
+	}
+
+	var req orequest.Orders
+	req.UserID = user.ID
+	req.Pagination = paginate
+
+	orders, paging, err := _i.oService.Index(req)
+	if err != nil {
+		return err
+	}
+
+	return response.Resp(c, response.Response{
+		Data: orders,
+		Meta: paging,
 	})
 }

@@ -42,10 +42,10 @@ const (
 type ProductVariantType string
 
 const (
-	ProductVariantTypeSimple          ProductVariantType = "simple"
-	ProductVariantTypeReservable      ProductVariantType = "reservable"
-	ProductVariantTypeDownloadable    ProductVariantType = "downloadable"
-	ProductVariantTypeWashingMachines ProductVariantType = "washingMachine"
+	ProductVariantTypeSimple         ProductVariantType = "simple"
+	ProductVariantTypeReservable     ProductVariantType = "reservable"
+	ProductVariantTypeDownloadable   ProductVariantType = "downloadable"
+	ProductVariantTypeWashingMachine ProductVariantType = "washingMachine"
 )
 
 type ProductStockStatus string
@@ -77,36 +77,39 @@ type ProductMetaReservationInfoData struct {
 }
 
 type ProductMetaReservation struct {
-	Quantity int
-	Duration time.Duration
+	Quantity int           `json:",omitempty" example:"1"`
+	Duration time.Duration `json:",omitempty" example:"1"`
 
-	EndTime   string // "13:22:00"
-	StartTime string // "13:22:00"
+	EndTime   string `json:",omitempty" example:"1"` // "13:22:00"
+	StartTime string `json:",omitempty" example:"1"` // "13:22:00"
 
-	Info map[time.Weekday] /* week day num*/ []ProductMetaReservationInfoData
+	Info map[time.Weekday] /* week day num*/ []ProductMetaReservationInfoData `json:",omitempty" example:"1"`
 }
 
 type ProductMeta struct {
-	SKU                string                         `example:"sku-2f3s" validate:"omitempty,min=2,max=40" faker:"word"` // The stock keeping unit (SKU) of the product. This is a unique identifier for the product that is used for inventory management.
-	PurchaseNote       string                         `validator:"omitempty,min=2,max=500"`                               // A note that is displayed to the customer after purchasing the product.
-	Weight             float64                        `validator:"omitempty,number"`
-	Width              float64                        `validator:"omitempty,number"`
-	Height             float64                        `validator:"omitempty,number"`
-	Length             float64                        `validator:"omitempty,number"`
-	ProviderPrice      float64                        `validator:"omitempty,number"`
-	CouldReserveUntil  time.Time                      `validator:"omitempty,datetime"` // millisecond from now
-	TaxStatus          ProductTaxStatus               `validator:"omitempty,oneof: none taxable shipping" faker:"oneof: none, taxable, shipping"`
-	Images             []string                       `faker:"-"`
-	AttributesMap      map[uint64]uint64              `faker:"-"`
-	SelectedAttributes []ProductMetaSelectedAttribute `faker:"-"`
+	Detail               string                         `json:",omitempty" example:"Detail" validate:"omitempty,min=2,max=500" faker:"word"`  // The stock keeping unit (SKU) of the product. This is a unique identifier for the product that is used for inventory management.
+	SKU                  string                         `json:",omitempty" example:"sku-2f3s" validate:"omitempty,min=2,max=40" faker:"word"` // The stock keeping unit (SKU) of the product. This is a unique identifier for the product that is used for inventory management.
+	UniWashMobileNumber  string                         `json:",omitempty" example:"09909999999"  faker:"-"`                                  //validate:"omitempty,min=10,max=10"                                // The stock keeping unit (SKU) of the product. This is a unique identifier for the product that is used for inventory management.
+	UniWashMachineStatus UniWashCommand                 `json:",omitempty" faker:"-"`
+	PurchaseNote         string                         `json:",omitempty" validator:"omitempty,min=2,max=500"` // A note that is displayed to the customer after purchasing the product.
+	Weight               float64                        `json:",omitempty" validator:"omitempty,number"`
+	Width                float64                        `json:",omitempty" validator:"omitempty,number"`
+	Height               float64                        `json:",omitempty" validator:"omitempty,number"`
+	Length               float64                        `json:",omitempty" validator:"omitempty,number"`
+	ProviderPrice        float64                        `json:",omitempty" validator:"omitempty,number"`
+	CouldReserveUntil    time.Time                      `json:",omitempty" validator:"omitempty,datetime"` // millisecond from now
+	TaxStatus            ProductTaxStatus               `json:",omitempty" validator:"omitempty,oneof: none taxable shipping" faker:"oneof: none, taxable, shipping"`
+	Images               []string                       `json:",omitempty" faker:"-"`
+	AttributesMap        map[uint64]uint64              `json:",omitempty" faker:"-"`
+	SelectedAttributes   []ProductMetaSelectedAttribute `json:",omitempty" faker:"-"`
 
-	SalePrice          float64   `validator:"omitempty,number"`
-	SalePriceStartDate time.Time `validator:"omitempty,datetime"`
-	SalePriceEndDate   time.Time `validator:"omitempty,datetime"`
+	SalePrice          float64   `json:",omitempty" validator:"omitempty,number"`
+	SalePriceStartDate time.Time `json:",omitempty" validator:"omitempty,datetime"`
+	SalePriceEndDate   time.Time `json:",omitempty" validator:"omitempty,datetime"`
 
-	ManageStock   bool
-	StockSku      string `example:"sku-2f3s" validate:"omitempty,min=2,max=40" faker:"word"`
-	StockQuantity uint64 `validate:"omitempty,number"` // The number of units of the product that are currently in stock.
+	ManageStock   bool   `json:",omitempty"`
+	StockSku      string `json:",omitempty" example:"sku-2f3s" validate:"omitempty,min=2,max=40" faker:"word"`
+	StockQuantity uint64 `json:",omitempty" validate:"omitempty,number"` // The number of units of the product that are currently in stock.
 
 	Reservation ProductMetaReservation `json:",omitempty" faker:"-"`
 }

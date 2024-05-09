@@ -17,7 +17,7 @@ type Order struct {
 	BusinessID    uint64             `gorm:"index" faker:"-"`
 	Business      Business           `gorm:"foreignKey:BusinessID" faker:"-"`
 	ParentID      *uint64            `faker:"-"`
-	//OrderItems    []OrderItem   `faker:"-"`
+	OrderItems    []OrderItem        `faker:"-"`
 	//Transactions  []Transaction `faker:"-"`
 	Base
 }
