@@ -60,20 +60,22 @@ func GetAuthenticatedUser(c *fiber.Ctx) (schema.User, error) {
 	if ok {
 		return user, nil
 	}
-	return schema.User{}, errors.New("user doesn't exist")
+	return schema.User{}, errors.New("ابتدا وارد حساب کاربری خود شوید و دوباره تلاش کنید")
 }
 
 func ValidateMobileNumber(number string) error {
 	// Define the regular expression pattern for a mobile number
-	pattern := `9(1[0-9]|3[1-9]|2[1-9])-?[0-9]{3}-?[0-9]{4}`
-
+	pattern := `^9\d{9}$`
 	// Compile the regex pattern
 	regex := regexp.MustCompile(pattern)
 
 	// Match the number against the regex pattern
 	valid := regex.MatchString(number)
 	if !valid {
-		return errors.New("تلفن همراه معتبر نمی باشد")
+		return &fiber.Error{
+			Code:    fiber.StatusBadRequest,
+			Message: "تلفن همراه معتبر نمی باشد",
+		}
 	}
 
 	return nil

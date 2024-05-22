@@ -17,10 +17,11 @@ migrate:
 generateNecessaryData:
 	go run cmd/example/seeder.go --generate-necessary-data
 
-
-
 seed:
 	go run cmd/example/seeder.go --seed
 
 swag:
 	swag init -g ./cmd/example/main.go --outputTypes "json"
+
+release:
+	go build -mod=vendor -o ./tmp/main ./cmd/example/main.go

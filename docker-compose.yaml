@@ -5,8 +5,22 @@ networks:
     driver: bridge
 
 services:
+  web:
+    build: .
+    ports:
+      - "4000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      - mainDb
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health-check" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
   mainDb:
-    image: bitnami/postgresql:latest
+    image: bitnami/postgresql:16.2.0
     environment:
       POSTGRESQL_DATABASE: zciti_main_dev
       POSTGRESQL_USERNAME: postgres
@@ -15,25 +29,29 @@ services:
       - app
     ports:
       - "5432:5432"
-  chatDb:
-    image: bitnami/postgresql:latest
-    environment:
-      POSTGRESQL_DATABASE: zciti_chat_dev
-      POSTGRESQL_USERNAME: postgres
-      POSTGRESQL_PASSWORD: postgres
-    networks:
-      - app
-    ports:
-      - "5433:5432"
-  redis:
-    image: bitnami/redis:latest
-    environment:
-      REDIS_PASSWORD: redis
-      REDIS_DATABASE: 1
-    networks:
-      - app
-    ports:
-      - "6489:6379"
+    volumes:
+      - postgres-db:/var/lib/postgresql/data
+volumes:
+    postgres-db:
+#  chatDb:
+#    image: bitnami/postgresql:16.2.0
+#    environment:
+#      POSTGRESQL_DATABASE: zciti_chat_dev
+#      POSTGRESQL_USERNAME: postgres
+#      POSTGRESQL_PASSWORD: postgres
+#    networks:
+#      - app
+#    ports:
+#      - "5433:5432"
+#  redis:
+#    image: bitnami/redis:latest
+#    environment:
+#      REDIS_PASSWORD: redis
+#      REDIS_DATABASE: 1
+#    networks:
+#      - app
+#    ports:
+#      - "6489:6379"
 #  example:
 #    build:
 #      context: .
