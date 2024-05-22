@@ -39,15 +39,14 @@ func BusinessPermission(domain Domain, permission Permission) fiber.Handler {
 
 		businessID, err := utils.GetIntInParams(c, "businessID")
 		if err != nil {
-			return errors.New("there is no businessID param in this endpoint")
+			return errors.New("مسیر وارد شده صحیح نیست")
 		}
 
 		if hasPermission(user.Permissions, businessID, domain, permission) {
 			return c.Next()
 		}
-
 		return c.Status(fiber.StatusForbidden).
-			JSON(fiber.Map{"status": "error", "message": "you don't have permission", "data": nil})
+			JSON(fiber.Map{"status": "error", "message": "شما دسترسی لازم را ندارید", "data": nil})
 	}
 }
 
@@ -108,8 +107,7 @@ var Permissions = map[schema.UserRole]map[Domain]map[Permission]bool{
 		DNotificationTemplate: {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 	},
 	schema.URUser: {
-		DUser:         {PCreate: true},
-		DTaxonomy:     {PReadAll: true},
+				DTaxonomy:     {PReadAll: true},
 		DBusiness:     {PReadSingle: true},
 		DPost:         {PReadSingle: true},
 		DOrder:        {PReadSingle: true, PCreate: true},
