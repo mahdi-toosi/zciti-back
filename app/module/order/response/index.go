@@ -38,6 +38,7 @@ func FromDomain(item *schema.Order) (res *Order) {
 		PaymentMethod: item.PaymentMethod,
 		User: response.User{
 			ID:       item.User.ID,
+			Mobile:   item.User.Mobile,
 			FullName: item.User.FullName(),
 		},
 	}

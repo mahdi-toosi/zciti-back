@@ -34,8 +34,11 @@ func (_i *Router) RegisterRoutes(cfg *config.Config) {
 		router.Delete("/:businessID/users/:userID", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PDelete), c.DeleteUser)
 	})
 
-	_i.App.Route("/v1/user", func(router fiber.Router) {
-		router.Get("/orders", mdl.Protected(cfg), mdl.ForUser, c.Orders)
+	// TODO move it to orders module
+	_i.App.Route("/v1/user/orders", func(router fiber.Router) {
+		router.Get("/", mdl.Protected(cfg), c.Orders)
+		router.Post("/", mdl.Protected(cfg), c.OrderStore)
+		router.Get("/status", mdl.Protected(cfg), c.OrderStatus)
 	})
 }
 

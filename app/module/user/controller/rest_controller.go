@@ -25,6 +25,8 @@ type IRestController interface {
 	DeleteUser(c *fiber.Ctx) error
 
 	Orders(c *fiber.Ctx) error
+	OrderStore(c *fiber.Ctx) error
+	OrderStatus(c *fiber.Ctx) error
 }
 
 func RestController(s service.IService, b bService.IService, o oService.IService) IRestController {
@@ -308,5 +310,61 @@ func (_i *controller) Orders(c *fiber.Ctx) error {
 	return response.Resp(c, response.Response{
 		Data: orders,
 		Meta: paging,
+	})
+}
+
+// OrderStatus
+// @Summary      Get all orders
+// @Tags         Users
+// @Security     Bearer
+// @Param        businessID path int true "Business ID"
+// @Router       /user/orders/status [get]
+func (_i *controller) OrderStatus(c *fiber.Ctx) error {
+	userID, err := utils.GetIntInQueries(c, "UserID")
+	if err != nil {
+		return err
+	}
+	orderID, err := utils.GetIntInQueries(c, "OrderID")
+	if err != nil {
+		return err
+	}
+	authority := c.Query("Authority")
+
+	status, err := _i.oService.Status(userID, orderID, authority)
+	if err != nil {
+		return err
+	}
+
+	return response.Resp(c, response.Response{
+		Data: status,
+	})
+}
+
+// OrderStore
+// @Summary      Create order
+// @Tags         Orders
+// @Param 		 order body request.Order true "Order details"
+// @Param        businessID path int true "Business ID"
+// @Router       /business/:businessID/orders [post]
+// @Router       /user/orders [post]
+func (_i *controller) OrderStore(c *fiber.Ctx) error {
+	user, err := utils.GetAuthenticatedUser(c)
+	if err != nil {
+		return err
+	}
+
+	req := new(orequest.Order)
+	req.UserID = user.ID
+	if err := response.ParseAndValidate(c, req); err != nil {
+		return err
+	}
+
+	orderID, paymentURL, err := _i.oService.Store(*req)
+	if err != nil {
+		return err
+	}
+
+	return response.Resp(c, response.Response{
+		Data: map[string]any{"paymentUrl": paymentURL, "orderID": orderID},
 	})
 }

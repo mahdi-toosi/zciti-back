@@ -14,8 +14,8 @@ import (
 type IRestController interface {
 	Index(c *fiber.Ctx) error
 	Show(c *fiber.Ctx) error
-	Store(c *fiber.Ctx) error
-	Update(c *fiber.Ctx) error
+	//Store(c *fiber.Ctx) error
+	//Update(c *fiber.Ctx) error
 	Delete(c *fiber.Ctx) error
 }
 
@@ -74,52 +74,52 @@ func (_i *controller) Show(c *fiber.Ctx) error {
 	return c.JSON(orderItem)
 }
 
-// Store orderItem
-// @Summary      Create orderItem
-// @Tags         OrderItems
-// @Param 		 orderItem body request.OrderItem true "OrderItem details"
-// @Param        businessID path int true "Business ID"
-// @Router       /business/:businessID/orderItems [post]
-func (_i *controller) Store(c *fiber.Ctx) error {
-	req := new(request.OrderItem)
-	if err := response.ParseAndValidate(c, req); err != nil {
-		return err
-	}
+//// Store orderItem
+//// @Summary      Create orderItem
+//// @Tags         OrderItems
+//// @Param 		 orderItem body request.OrderItem true "OrderItem details"
+//// @Param        businessID path int true "Business ID"
+//// @Router       /business/:businessID/orderItems [post]
+//func (_i *controller) Store(c *fiber.Ctx) error {
+//	req := new(request.OrderItem)
+//	if err := response.ParseAndValidate(c, req); err != nil {
+//		return err
+//	}
+//
+//	err := _i.service.Store(*req)
+//	if err != nil {
+//		return err
+//	}
+//
+//	return c.JSON("success")
+//}
 
-	err := _i.service.Store(*req)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON("success")
-}
-
-// Update orderItem
-// @Summary      update orderItem
-// @Security     Bearer
-// @Tags         OrderItems
-// @Param 		 orderItem body request.OrderItem true "OrderItem details"
-// @Param        id path int true "OrderItem ID"
-// @Param        businessID path int true "Business ID"
-// @Router       /business/:businessID/orderItems/:id [put]
-func (_i *controller) Update(c *fiber.Ctx) error {
-	id, err := utils.GetIntInParams(c, "id")
-	if err != nil {
-		return err
-	}
-
-	req := new(request.OrderItem)
-	if err := response.ParseAndValidate(c, req); err != nil {
-		return err
-	}
-
-	err = _i.service.Update(id, *req)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON("success")
-}
+//// Update orderItem
+//// @Summary      update orderItem
+//// @Security     Bearer
+//// @Tags         OrderItems
+//// @Param 		 orderItem body request.OrderItem true "OrderItem details"
+//// @Param        id path int true "OrderItem ID"
+//// @Param        businessID path int true "Business ID"
+//// @Router       /business/:businessID/orderItems/:id [put]
+//func (_i *controller) Update(c *fiber.Ctx) error {
+//	id, err := utils.GetIntInParams(c, "id")
+//	if err != nil {
+//		return err
+//	}
+//
+//	req := new(request.OrderItem)
+//	if err := response.ParseAndValidate(c, req); err != nil {
+//		return err
+//	}
+//
+//	err = _i.service.Update(id, *req)
+//	if err != nil {
+//		return err
+//	}
+//
+//	return c.JSON("success")
+//}
 
 // Delete orderItem
 // @Summary      delete orderItem

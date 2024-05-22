@@ -17,6 +17,7 @@ type IService interface {
 	StoreAttribute(req request.StoreProductAttribute) error
 	Update(id uint64, req request.Product) (err error)
 	Delete(businessID uint64, id uint64) error
+	DeleteVariant(businessID uint64, productID uint64, variantID uint64) error
 }
 
 func Service(repo repository.IRepository, pService postService.IService) IService {
@@ -31,7 +32,7 @@ type service struct {
 }
 
 func (_i *service) Index(req request.ProductsRequest, isForUser bool) (products []*response.Product, paging paginator.Pagination, err error) {
-	results, paging, err := _i.Repo.GetAll(req)
+	results, paging, err := _i.Repo.GetAll(req, isForUser)
 	if err != nil {
 		return
 	}
@@ -122,4 +123,8 @@ func (_i *service) Update(id uint64, req request.Product) (err error) {
 
 func (_i *service) Delete(businessID uint64, id uint64) error {
 	return _i.Repo.Delete(businessID, id)
+}
+
+func (_i *service) DeleteVariant(businessID uint64, productID uint64, variantID uint64) error {
+	return _i.Repo.DeleteVariant(businessID, productID, variantID)
 }

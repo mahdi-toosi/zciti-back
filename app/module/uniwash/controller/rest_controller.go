@@ -1,17 +1,20 @@
 package controller
 
 import (
-	"github.com/gofiber/fiber/v2"
 	"go-fiber-starter/app/module/uniwash/request"
 	"go-fiber-starter/app/module/uniwash/service"
 	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
 	"go-fiber-starter/utils/response"
+	"time"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type IRestController interface {
 	SendCommand(c *fiber.Ctx) error
 	IndexReservedMachines(c *fiber.Ctx) error
+	CheckLastCommandStatus(c *fiber.Ctx) error
 }
 
 func RestController(s service.IService) IRestController {
@@ -77,8 +80,26 @@ func (_i *controller) IndexReservedMachines(c *fiber.Ctx) error {
 	req := new(request.ReservedMachinesRequest)
 	req.Pagination = paginate
 	req.BusinessID = businessID
+
+	if c.Query("Date") != "" {
+		loc, _ := time.LoadLocation("Asia/Tehran")
+		date, err := time.ParseInLocation(time.DateOnly, c.Query("Date"), loc)
+		if err != nil {
+			return err
+		}
+		req.Date = date
+	}
+
+	req.With = c.Query("With")
 	if utils.IsForUser(c) {
 		req.UserID = user.ID
+	}
+	if c.Query("ProductID") != "" {
+		pID, err := utils.GetIntInQueries(c, "ProductID")
+		if err != nil {
+			return err
+		}
+		req.ProductID = pID
 	}
 
 	reservations, paging, err := _i.service.IndexReservedMachines(*req)
@@ -89,5 +110,31 @@ func (_i *controller) IndexReservedMachines(c *fiber.Ctx) error {
 	return response.Resp(c, response.Response{
 		Data: reservations,
 		Meta: paging,
+	})
+}
+
+// CheckLastCommandStatus
+// @Summary      Reservations list
+// @Tags         UniWash
+// @Param        businessID path int true "Business ID"
+// @Param        reservationID path int true "Reservation ID"
+// @Router       /user/business/:businessID/uni-wash//check-last-command-status/:reservationID [get]
+func (_i *controller) CheckLastCommandStatus(c *fiber.Ctx) error {
+	businessID, err := utils.GetIntInParams(c, "businessID")
+	if err != nil {
+		return err
+	}
+	reservationID, err := utils.GetIntInParams(c, "reservationID")
+	if err != nil {
+		return err
+	}
+
+	status, err := _i.service.CheckLastCommandStatus(businessID, reservationID)
+	if err != nil {
+		return err
+	}
+
+	return response.Resp(c, response.Response{
+		Data: status,
 	})
 }

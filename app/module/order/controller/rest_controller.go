@@ -7,7 +7,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"go-fiber-starter/app/module/order/request"
 	"go-fiber-starter/app/module/order/service"
-	urequest "go-fiber-starter/app/module/uniwash/request"
 	"go-fiber-starter/utils/paginator"
 	"go-fiber-starter/utils/response"
 )
@@ -16,7 +15,7 @@ type IRestController interface {
 	Index(c *fiber.Ctx) error
 	Show(c *fiber.Ctx) error
 	Store(c *fiber.Ctx) error
-	StoreUniWash(c *fiber.Ctx) error
+	//StoreUniWash(c *fiber.Ctx) error
 	Update(c *fiber.Ctx) error
 	Delete(c *fiber.Ctx) error
 }
@@ -35,6 +34,7 @@ type controller struct {
 // @Security     Bearer
 // @Param        businessID path int true "Business ID"
 // @Router       /business/:businessID/orders [get]
+// @Router       /user/business/:businessID/orders [get]
 func (_i *controller) Index(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")
 	if err != nil {
@@ -96,51 +96,59 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	req := new(request.Order)
-	if err := response.ParseAndValidate(c, req); err != nil {
-		return err
-	}
-
-	req.BusinessID = businessID
-	_, err = _i.service.Store(*req)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON("success")
-}
-
-// StoreUniWash order
-// @Summary      Create order
-// @Tags         Orders
-// @Param 		 order body request.Order true "Order details"
-// @Param        businessID path int true "Business ID"
-// @Router       /business/:businessID/orders [post]
-func (_i *controller) StoreUniWash(c *fiber.Ctx) error {
-	businessID, err := utils.GetIntInParams(c, "businessID")
-	if err != nil {
-		return err
-	}
-
 	user, err := utils.GetAuthenticatedUser(c)
 	if err != nil {
 		return err
 	}
 
-	req := new(urequest.StoreUniWash)
+	req := new(request.Order)
+	req.UserID = user.ID
+	req.BusinessID = businessID
 	if err := response.ParseAndValidate(c, req); err != nil {
 		return err
 	}
 
-	req.UserID = user.ID
-	req.BusinessID = businessID
-	err = _i.service.StoreUniWash(*req)
+	paymentURL, orderID, err := _i.service.Store(*req)
 	if err != nil {
 		return err
 	}
 
-	return c.JSON("success")
+	return response.Resp(c, response.Response{
+		Data: map[string]any{"paymentUrl": paymentURL, "orderID": orderID},
+	})
 }
+
+//// StoreUniWash order
+//// @Summary      Create order
+//// @Tags         Orders
+//// @Param 		 order body request.Order true "Order details"
+//// @Param        businessID path int true "Business ID"
+//// @Router       /business/:businessID/orders [post]
+//func (_i *controller) StoreUniWash(c *fiber.Ctx) error {
+//	businessID, err := utils.GetIntInParams(c, "businessID")
+//	if err != nil {
+//		return err
+//	}
+//
+//	user, err := utils.GetAuthenticatedUser(c)
+//	if err != nil {
+//		return err
+//	}
+//
+//	req := new(urequest.StoreUniWash)
+//	if err := response.ParseAndValidate(c, req); err != nil {
+//		return err
+//	}
+//
+//	req.UserID = user.ID
+//	req.BusinessID = businessID
+//	err = _i.service.StoreUniWash(*req)
+//	if err != nil {
+//		return err
+//	}
+//
+//	return c.JSON("success")
+//}
 
 // Update order
 // @Summary      update order

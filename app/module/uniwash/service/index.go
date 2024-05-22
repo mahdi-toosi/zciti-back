@@ -1,23 +1,27 @@
 package service
 
 import (
-	MessageWay "github.com/MessageWay/MessageWayGolang"
-	"github.com/gofiber/fiber/v2"
 	"go-fiber-starter/app/database/schema"
+	oirequest "go-fiber-starter/app/module/orderItem/request"
 	prepository "go-fiber-starter/app/module/product/repository"
 	"go-fiber-starter/app/module/uniwash/repository"
 	"go-fiber-starter/app/module/uniwash/request"
 	"go-fiber-starter/app/module/uniwash/response"
 	"go-fiber-starter/utils/paginator"
 	"time"
+
+	MessageWay "github.com/MessageWay/MessageWayGolang"
+	"github.com/gofiber/fiber/v2"
 )
 
 type IService interface {
-	Reserve(req request.StoreUniWash) (reservationID *uint64, err error)
-	IsReservable(req request.StoreUniWash) error
-	ValidateReservation(req request.StoreUniWash) error
+	ValidateReservation(req oirequest.OrderItem) error
+	IsReservable(req oirequest.OrderItem, businessID uint64) error
+	ReserveReservation(req oirequest.OrderItem, userID uint64, businessID uint64) (reservationID *uint64, err error)
+	Reserve(reservationID uint64) error
 	SendCommand(req request.SendCommand, isForUser bool) error
 	IndexReservedMachines(req request.ReservedMachinesRequest) (reserved []*response.Reservation, paging paginator.Pagination, err error)
+	CheckLastCommandStatus(businessID uint64, reservationID uint64) (status *MessageWay.StatusResponse, err error)
 }
 
 func Service(repo repository.IRepository, productRepo prepository.IRepository, messageWay *MessageWay.App) IService {
@@ -30,31 +34,36 @@ type service struct {
 	ProductRepo prepository.IRepository
 }
 
-func (_i *service) Reserve(req request.StoreUniWash) (reservationID *uint64, err error) {
-	reservationID, err = _i.Repo.Reserve(req)
+func (_i *service) ReserveReservation(req oirequest.OrderItem, userID uint64, businessID uint64) (reservationID *uint64, err error) {
+	reservationID, err = _i.Repo.ReserveReservation(req, userID, businessID)
 	if err != nil {
 		return nil, err
 	}
 	return reservationID, nil
 }
 
-func (_i *service) IsReservable(req request.StoreUniWash) (err error) {
-	if err = _i.Repo.IsReservable(req); err != nil {
+func (_i *service) IsReservable(req oirequest.OrderItem, businessID uint64) (err error) {
+	if err = _i.Repo.IsReservable(req, businessID); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (_i *service) ValidateReservation(req request.StoreUniWash) error {
+func (_i *service) ValidateReservation(req oirequest.OrderItem) error {
 	invalidErr := &fiber.Error{
 		Code:    fiber.StatusBadRequest,
-		Message: "invalid reservation",
+		Message: "در این بازه زمانی شما اجازه رزرو ندارید",
 	}
 
 	parsedDate, err := time.Parse(time.DateOnly, req.Date)
 	if err != nil {
 		return invalidErr
 	}
+
+	if req.GetStartDateTime().Before(time.Now()) {
+		return invalidErr
+	}
+
 	day := DefaultSetting.Info[parsedDate.Weekday()]
 	for _, hours := range day {
 		if hours.From == req.StartTime && hours.To == req.EndTime {
@@ -78,11 +87,17 @@ func (_i *service) SendCommand(req request.SendCommand, isForUser bool) (err err
 		}
 		// TODO talk about this condition with esmaiil and hosein
 		// check the 10 min before start time is after now
-		if !time.Now().After(reservation.StartTime.Add(-10*time.Minute)) ||
-			!time.Now().Before(reservation.EndTime.Add(-10*time.Minute)) {
+		if !time.Now().After(reservation.StartTime.Add(-10 * time.Minute)) {
 			return &fiber.Error{
 				Code:    fiber.StatusBadRequest,
 				Message: "در بازه زمانی که رزرو کرده اید، دوباره تلاش کنید",
+			}
+		}
+
+		if !time.Now().Before(reservation.StartTime.Add(10 * time.Minute)) {
+			return &fiber.Error{
+				Code:    fiber.StatusBadRequest,
+				Message: "شما تا نهایاتا 10 دقیقه پس از شروع زمان فرصت داشتید به دستگاه فرمان بدهید.",
 			}
 		}
 
@@ -130,7 +145,6 @@ func (_i *service) SendCommand(req request.SendCommand, isForUser bool) (err err
 }
 
 func (_i *service) IndexReservedMachines(req request.ReservedMachinesRequest) (reserved []*response.Reservation, paging paginator.Pagination, err error) {
-
 	results, paging, err := _i.Repo.IndexReservedMachines(req)
 	if err != nil {
 		return
@@ -143,11 +157,26 @@ func (_i *service) IndexReservedMachines(req request.ReservedMachinesRequest) (r
 	return
 }
 
-// TODO fill the correct command
+func (_i *service) Reserve(reservationID uint64) (err error) {
+	if err := _i.Repo.Reserve(reservationID); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (_i *service) CheckLastCommandStatus(businessID uint64, reservationID uint64) (status *MessageWay.StatusResponse, err error) {
+	reservation, err := _i.Repo.GetSingleReservation(businessID, reservationID)
+	if err != nil {
+		return nil, err
+	}
+
+	return _i.MessageWay.GetStatus(MessageWay.StatusRequest{ReferenceID: reservation.Meta.UniWashLastCommandReferenceID})
+}
+
 var commandProxy = map[schema.UniWashCommand]string{
-	schema.UniWashCommandON:        "7",
-	schema.UniWashCommandOFF:       "2",
-	schema.UniWashCommandMoreWater: "3",
+	schema.UniWashCommandON:        "on",
+	schema.UniWashCommandOFF:       "off",
+	schema.UniWashCommandMoreWater: "7",
 }
 
 var DefaultSetting = schema.ProductMetaReservation{
@@ -157,95 +186,130 @@ var DefaultSetting = schema.ProductMetaReservation{
 	Duration:  (90 * time.Minute) / time.Millisecond,
 	Info: map[time.Weekday][]schema.ProductMetaReservationInfoData{
 		0: { // sunday
-			{From: "07:00:00", To: "08:30:00"},
-			{From: "08:30:00", To: "10:00:00"},
-			{From: "10:00:00", To: "11:30:00"},
-			{From: "11:30:00", To: "13:00:00"},
-			{From: "13:00:00", To: "14:30:00"},
-			{From: "14:30:00", To: "16:00:00"},
-			{From: "16:00:00", To: "17:30:00"},
-			{From: "17:30:00", To: "19:00:00"},
-			{From: "19:00:00", To: "20:30:00"},
-			{From: "20:30:00", To: "22:00:00"},
-			{From: "22:00:00", To: "23:30:00"},
+			{From: "00:00:00", To: "01:30:00"},
+			{From: "01:30:00", To: "03:00:00"},
+			{From: "03:00:00", To: "04:30:00"},
+			{From: "04:30:00", To: "06:00:00"},
+			{From: "06:00:00", To: "07:30:00"},
+			{From: "07:30:00", To: "09:00:00"},
+			{From: "09:00:00", To: "10:30:00"},
+			{From: "10:30:00", To: "12:00:00"},
+			{From: "12:00:00", To: "13:30:00"},
+			{From: "13:30:00", To: "15:00:00"},
+			{From: "15:00:00", To: "16:30:00"},
+			{From: "16:30:00", To: "18:00:00"},
+			{From: "18:00:00", To: "19:30:00"},
+			{From: "19:30:00", To: "21:00:00"},
+			{From: "21:00:00", To: "22:30:00"},
+			{From: "22:30:00", To: "23:59:59"},
 		},
 		1: { // monday
-			{From: "07:00:00", To: "08:30:00"},
-			{From: "08:30:00", To: "10:00:00"},
-			{From: "10:00:00", To: "11:30:00"},
-			{From: "11:30:00", To: "13:00:00"},
-			{From: "13:00:00", To: "14:30:00"},
-			{From: "14:30:00", To: "16:00:00"},
-			{From: "16:00:00", To: "17:30:00"},
-			{From: "17:30:00", To: "19:00:00"},
-			{From: "19:00:00", To: "20:30:00"},
-			{From: "20:30:00", To: "22:00:00"},
-			{From: "22:00:00", To: "23:30:00"},
+			{From: "00:00:00", To: "01:30:00"},
+			{From: "01:30:00", To: "03:00:00"},
+			{From: "03:00:00", To: "04:30:00"},
+			{From: "04:30:00", To: "06:00:00"},
+			{From: "06:00:00", To: "07:30:00"},
+			{From: "07:30:00", To: "09:00:00"},
+			{From: "09:00:00", To: "10:30:00"},
+			{From: "10:30:00", To: "12:00:00"},
+			{From: "12:00:00", To: "13:30:00"},
+			{From: "13:30:00", To: "15:00:00"},
+			{From: "15:00:00", To: "16:30:00"},
+			{From: "16:30:00", To: "18:00:00"},
+			{From: "18:00:00", To: "19:30:00"},
+			{From: "19:30:00", To: "21:00:00"},
+			{From: "21:00:00", To: "22:30:00"},
+			{From: "22:30:00", To: "23:59:59"},
 		},
 		2: { // tuesday
-			{From: "07:00:00", To: "08:30:00"},
-			{From: "08:30:00", To: "10:00:00"},
-			{From: "10:00:00", To: "11:30:00"},
-			{From: "11:30:00", To: "13:00:00"},
-			{From: "13:00:00", To: "14:30:00"},
-			{From: "14:30:00", To: "16:00:00"},
-			{From: "16:00:00", To: "17:30:00"},
-			{From: "17:30:00", To: "19:00:00"},
-			{From: "19:00:00", To: "20:30:00"},
-			{From: "20:30:00", To: "22:00:00"},
-			{From: "22:00:00", To: "23:30:00"},
+			{From: "00:00:00", To: "01:30:00"},
+			{From: "01:30:00", To: "03:00:00"},
+			{From: "03:00:00", To: "04:30:00"},
+			{From: "04:30:00", To: "06:00:00"},
+			{From: "06:00:00", To: "07:30:00"},
+			{From: "07:30:00", To: "09:00:00"},
+			{From: "09:00:00", To: "10:30:00"},
+			{From: "10:30:00", To: "12:00:00"},
+			{From: "12:00:00", To: "13:30:00"},
+			{From: "13:30:00", To: "15:00:00"},
+			{From: "15:00:00", To: "16:30:00"},
+			{From: "16:30:00", To: "18:00:00"},
+			{From: "18:00:00", To: "19:30:00"},
+			{From: "19:30:00", To: "21:00:00"},
+			{From: "21:00:00", To: "22:30:00"},
+			{From: "22:30:00", To: "23:59:59"},
 		},
 		3: { // wednesday
-			{From: "07:00:00", To: "08:30:00"},
-			{From: "08:30:00", To: "10:00:00"},
-			{From: "10:00:00", To: "11:30:00"},
-			{From: "11:30:00", To: "13:00:00"},
-			{From: "13:00:00", To: "14:30:00"},
-			{From: "14:30:00", To: "16:00:00"},
-			{From: "16:00:00", To: "17:30:00"},
-			{From: "17:30:00", To: "19:00:00"},
-			{From: "19:00:00", To: "20:30:00"},
-			{From: "20:30:00", To: "22:00:00"},
-			{From: "22:00:00", To: "23:30:00"},
+			{From: "00:00:00", To: "01:30:00"},
+			{From: "01:30:00", To: "03:00:00"},
+			{From: "03:00:00", To: "04:30:00"},
+			{From: "04:30:00", To: "06:00:00"},
+			{From: "06:00:00", To: "07:30:00"},
+			{From: "07:30:00", To: "09:00:00"},
+			{From: "09:00:00", To: "10:30:00"},
+			{From: "10:30:00", To: "12:00:00"},
+			{From: "12:00:00", To: "13:30:00"},
+			{From: "13:30:00", To: "15:00:00"},
+			{From: "15:00:00", To: "16:30:00"},
+			{From: "16:30:00", To: "18:00:00"},
+			{From: "18:00:00", To: "19:30:00"},
+			{From: "19:30:00", To: "21:00:00"},
+			{From: "21:00:00", To: "22:30:00"},
+			{From: "22:30:00", To: "23:59:59"},
 		},
 		4: { // thursday
-			{From: "07:00:00", To: "08:30:00"},
-			{From: "08:30:00", To: "10:00:00"},
-			{From: "10:00:00", To: "11:30:00"},
-			{From: "11:30:00", To: "13:00:00"},
-			{From: "13:00:00", To: "14:30:00"},
-			{From: "14:30:00", To: "16:00:00"},
-			{From: "16:00:00", To: "17:30:00"},
-			{From: "17:30:00", To: "19:00:00"},
-			{From: "19:00:00", To: "20:30:00"},
-			{From: "20:30:00", To: "22:00:00"},
-			{From: "22:00:00", To: "23:30:00"},
+			{From: "00:00:00", To: "01:30:00"},
+			{From: "01:30:00", To: "03:00:00"},
+			{From: "03:00:00", To: "04:30:00"},
+			{From: "04:30:00", To: "06:00:00"},
+			{From: "06:00:00", To: "07:30:00"},
+			{From: "07:30:00", To: "09:00:00"},
+			{From: "09:00:00", To: "10:30:00"},
+			{From: "10:30:00", To: "12:00:00"},
+			{From: "12:00:00", To: "13:30:00"},
+			{From: "13:30:00", To: "15:00:00"},
+			{From: "15:00:00", To: "16:30:00"},
+			{From: "16:30:00", To: "18:00:00"},
+			{From: "18:00:00", To: "19:30:00"},
+			{From: "19:30:00", To: "21:00:00"},
+			{From: "21:00:00", To: "22:30:00"},
+			{From: "22:30:00", To: "23:59:59"},
 		},
 		5: { // friday
-			{From: "07:00:00", To: "08:30:00"},
-			{From: "08:30:00", To: "10:00:00"},
-			{From: "10:00:00", To: "11:30:00"},
-			{From: "11:30:00", To: "13:00:00"},
-			{From: "13:00:00", To: "14:30:00"},
-			{From: "14:30:00", To: "16:00:00"},
-			{From: "16:00:00", To: "17:30:00"},
-			{From: "17:30:00", To: "19:00:00"},
-			{From: "19:00:00", To: "20:30:00"},
-			{From: "20:30:00", To: "22:00:00"},
-			{From: "22:00:00", To: "23:30:00"},
+			{From: "00:00:00", To: "01:30:00"},
+			{From: "01:30:00", To: "03:00:00"},
+			{From: "03:00:00", To: "04:30:00"},
+			{From: "04:30:00", To: "06:00:00"},
+			{From: "06:00:00", To: "07:30:00"},
+			{From: "07:30:00", To: "09:00:00"},
+			{From: "09:00:00", To: "10:30:00"},
+			{From: "10:30:00", To: "12:00:00"},
+			{From: "12:00:00", To: "13:30:00"},
+			{From: "13:30:00", To: "15:00:00"},
+			{From: "15:00:00", To: "16:30:00"},
+			{From: "16:30:00", To: "18:00:00"},
+			{From: "18:00:00", To: "19:30:00"},
+			{From: "19:30:00", To: "21:00:00"},
+			{From: "21:00:00", To: "22:30:00"},
+			{From: "22:30:00", To: "23:59:59"},
 		},
 		6: { // saturday
-			{From: "07:00:00", To: "08:30:00"},
-			{From: "08:30:00", To: "10:00:00"},
-			{From: "10:00:00", To: "11:30:00"},
-			{From: "11:30:00", To: "13:00:00"},
-			{From: "13:00:00", To: "14:30:00"},
-			{From: "14:30:00", To: "16:00:00"},
-			{From: "16:00:00", To: "17:30:00"},
-			{From: "17:30:00", To: "19:00:00"},
-			{From: "19:00:00", To: "20:30:00"},
-			{From: "20:30:00", To: "22:00:00"},
-			{From: "22:00:00", To: "23:30:00"},
+			{From: "00:00:00", To: "01:30:00"},
+			{From: "01:30:00", To: "03:00:00"},
+			{From: "03:00:00", To: "04:30:00"},
+			{From: "04:30:00", To: "06:00:00"},
+			{From: "06:00:00", To: "07:30:00"},
+			{From: "07:30:00", To: "09:00:00"},
+			{From: "09:00:00", To: "10:30:00"},
+			{From: "10:30:00", To: "12:00:00"},
+			{From: "12:00:00", To: "13:30:00"},
+			{From: "13:30:00", To: "15:00:00"},
+			{From: "15:00:00", To: "16:30:00"},
+			{From: "16:30:00", To: "18:00:00"},
+			{From: "18:00:00", To: "19:30:00"},
+			{From: "19:30:00", To: "21:00:00"},
+			{From: "21:00:00", To: "22:30:00"},
+			{From: "22:30:00", To: "23:59:59"},
 		},
 	},
 }

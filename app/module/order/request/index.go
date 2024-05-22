@@ -2,16 +2,18 @@ package request
 
 import (
 	"go-fiber-starter/app/database/schema"
+	"go-fiber-starter/app/module/orderItem/request"
 	"go-fiber-starter/utils/paginator"
 )
 
 type Order struct {
 	ID            uint64
-	Status        schema.OrderStatus        `example:"pending" validate:"omitempty,oneOf=pending processing onHold completed cancelled refunded failed"`
-	PaymentMethod schema.OrderPaymentMethod `example:"page" validate:"required,oneof=product post page"`
+	Status        schema.OrderStatus        `example:"pending" validate:"omitempty,oneof=pending processing onHold completed cancelled refunded failed"`
+	PaymentMethod schema.OrderPaymentMethod `example:"online" validate:"required,oneof=cash online cashOnDelivery"`
 	UserNote      string                    `example:"note note" validate:"omitempty,min=2,max=255" json:",omitempty" faker:""`
 	BusinessID    uint64                    `example:"1" validate:"min=1"`
 	UserID        uint64                    `example:"1" validate:"min=1"`
+	OrderItems    []request.OrderItem
 }
 
 type Orders struct {
@@ -20,8 +22,8 @@ type Orders struct {
 	Pagination *paginator.Pagination
 }
 
-func (req *Order) ToDomain() *schema.Order {
-	return &schema.Order{
+func (req *Order) ToDomain(totalAmt *float64, authority *string) *schema.Order {
+	o := &schema.Order{
 		ID:            req.ID,
 		Status:        req.Status,
 		UserID:        req.UserID,
@@ -31,4 +33,14 @@ func (req *Order) ToDomain() *schema.Order {
 			UserNote: req.UserNote,
 		},
 	}
+
+	if totalAmt != nil {
+		o.TotalAmt = *totalAmt
+	}
+
+	if authority != nil {
+		o.Meta.PaymentAuthority = *authority
+	}
+
+	return o
 }

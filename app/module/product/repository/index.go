@@ -5,11 +5,12 @@ import (
 	"go-fiber-starter/app/module/product/request"
 	"go-fiber-starter/internal/bootstrap/database"
 	"go-fiber-starter/utils/paginator"
+
 	"gorm.io/gorm"
 )
 
 type IRepository interface {
-	GetAll(req request.ProductsRequest) (products []*schema.Post, paging paginator.Pagination, err error)
+	GetAll(req request.ProductsRequest, isForUser bool) (products []*schema.Post, paging paginator.Pagination, err error)
 	GetOne(businessID uint64, id uint64) (post *schema.Post, err error)
 	GetOneVariant(businessID uint64, id uint64) (product *schema.Product, err error)
 	Create(product *schema.Product) (err error)
@@ -19,6 +20,7 @@ type IRepository interface {
 	DeleteAttribute(productID uint64, attrID uint64) error
 	Updates(products []*schema.Product) error
 	Delete(businessID uint64, id uint64) error
+	DeleteVariant(businessID uint64, productID uint64, variantID uint64) error
 }
 
 func Repository(db *database.Database) IRepository {
@@ -29,9 +31,13 @@ type repo struct {
 	DB *database.Database
 }
 
-func (_i *repo) GetAll(req request.ProductsRequest) (products []*schema.Post, paging paginator.Pagination, err error) {
+func (_i *repo) GetAll(req request.ProductsRequest, isForUser bool) (products []*schema.Post, paging paginator.Pagination, err error) {
 	query := _i.DB.Main.Model(&schema.Post{}).
 		Where(&schema.Post{BusinessID: req.BusinessID, Type: schema.PostTypeProduct})
+
+	if isForUser {
+		query = query.Where(&schema.Post{Status: schema.PostStatusPublished})
+	}
 
 	if req.CategoryID != "" {
 		query = query.
@@ -169,4 +175,10 @@ func (_i *repo) Delete(businessID uint64, id uint64) error {
 	return _i.DB.Main.
 		Where(&schema.Post{BusinessID: businessID}).
 		Delete(&schema.Post{}, id).Error
+}
+
+func (_i *repo) DeleteVariant(businessID uint64, productID uint64, variantID uint64) error {
+	return _i.DB.Main.
+		Where(&schema.Product{PostID: productID, BusinessID: businessID}).
+		Delete(&schema.Product{}, variantID).Error
 }

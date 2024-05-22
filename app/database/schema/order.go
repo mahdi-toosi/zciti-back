@@ -43,10 +43,11 @@ const (
 )
 
 type OrderMeta struct {
-	TaxAmt    uint64
-	UserNote  string
-	UserAgent string
-	UserIP    string
+	UserIP           string
+	TaxAmt           uint64
+	UserNote         string
+	UserAgent        string
+	PaymentAuthority string
 }
 
 func (bm *OrderMeta) Scan(value any) error {

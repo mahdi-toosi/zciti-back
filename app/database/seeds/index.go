@@ -16,7 +16,7 @@ func MainDBSeeders() []Seeder {
 		Business{},
 		Post{},
 		Product{},
-		Order{},
+		//Order{},
 		Comment{},
 		Taxonomy{},
 		NotificationTemplate{},

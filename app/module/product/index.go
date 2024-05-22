@@ -1,13 +1,14 @@
 package product
 
 import (
-	"github.com/gofiber/fiber/v2"
 	mdl "go-fiber-starter/app/middleware"
 	postController "go-fiber-starter/app/module/post/controller"
 	"go-fiber-starter/app/module/product/controller"
 	"go-fiber-starter/app/module/product/repository"
 	"go-fiber-starter/app/module/product/service"
 	"go-fiber-starter/utils/config"
+
+	"github.com/gofiber/fiber/v2"
 	"go.uber.org/fx"
 )
 
@@ -27,13 +28,17 @@ func (_i *Router) RegisterRoutes(cfg *config.Config) {
 		router.Get("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PReadAll), c.Index)
 		router.Get("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PReadSingle), c.Show)
 		router.Post("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PCreate), c.Store)
-		router.Post("/:id/product-variant", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PCreate), c.StoreVariant)
-		router.Post("/:id/product-attribute", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PCreate), c.StoreAttribute)
-		router.Post("/:id/delete-taxonomies", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PCreate), pc.DeleteTaxonomies)
-		router.Post("/:id/insert-taxonomies", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PCreate), pc.InsertTaxonomies)
-		router.Put("/:id/product-variant", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PCreate), c.StoreVariant)
 		router.Put("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PUpdate), c.Update)
 		router.Delete("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PDelete), c.Delete)
+
+		router.Post("/:id/product-attribute", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PCreate), c.StoreAttribute)
+
+		router.Post("/:id/delete-taxonomies", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PCreate), pc.DeleteTaxonomies)
+		router.Post("/:id/insert-taxonomies", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PCreate), pc.InsertTaxonomies)
+
+		router.Post("/:id/product-variant", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PCreate), c.StoreVariant)
+		router.Put("/:id/product-variant", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PCreate), c.StoreVariant)
+		router.Delete("/:id/product-variant/:variantID", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PCreate), c.DeleteVariant)
 	})
 
 	_i.App.Route("/v1/user/business/:businessID/products", func(router fiber.Router) {

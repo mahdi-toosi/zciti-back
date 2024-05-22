@@ -14,7 +14,7 @@ type OrderItem struct {
 	Subtotal      float64       `gorm:"not null"` // The subtotal for the order item (quantity * price).
 	TaxAmt        float64       `gorm:"not null"`
 	ReservationID *uint64       `faker:"-"`
-	Reservation   Reservation   `gorm:"foreignKey:ReservationID" faker:"-"`
+	Reservation   *Reservation  `gorm:"foreignKey:ReservationID" faker:"-"`
 	PostID        uint64        `faker:"-"`
 	Post          Post          `gorm:"foreignKey:PostID" faker:"-"`
 	OrderID       uint64        `gorm:"index" faker:"-"`
@@ -35,12 +35,13 @@ const (
 )
 
 type OrderItemMeta struct {
-	TaxAmt             uint64
-	ProductID          uint64
-	ProductTitle       string
-	ProductDetail      string // attributes
-	ProductType        ProductType
-	ProductVariantType ProductVariantType
+	TaxAmt             uint64             `json:",omitempty"`
+	ProductID          uint64             `json:",omitempty"`
+	ProductTitle       string             `json:",omitempty"`
+	ProductDetail      string             `json:",omitempty"` // attributes
+	ProductSKU         string             `json:",omitempty"`
+	ProductType        ProductType        `json:",omitempty"`
+	ProductVariantType ProductVariantType `json:",omitempty"`
 }
 
 func (oim *OrderItemMeta) Scan(value any) error {

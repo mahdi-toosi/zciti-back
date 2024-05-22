@@ -22,6 +22,7 @@ func (_i *Router) RegisterRoutes(cfg *config.Config) {
 	// define routes
 	_i.App.Route("/v1/business/:businessID/uni-wash", func(router fiber.Router) {
 		router.Post("/send-command", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PReadAll), c.SendCommand)
+		router.Get("/check-last-command-status/:reservationID", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DProduct, mdl.PReadAll), c.CheckLastCommandStatus)
 	})
 
 	_i.App.Route("/v1/user/business/:businessID/uni-wash", func(router fiber.Router) {

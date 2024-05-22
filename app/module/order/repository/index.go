@@ -48,7 +48,7 @@ func (_i *repo) GetAll(req request.Orders) (orders []*schema.Order, paging pagin
 		query.Preload("User")
 	}
 
-	err = query.Preload("OrderItems").Order("created_at asc").Find(&orders).Error
+	err = query.Preload("OrderItems.Reservation").Order("created_at desc").Find(&orders).Error
 	if err != nil {
 		return
 	}
@@ -61,6 +61,7 @@ func (_i *repo) GetAll(req request.Orders) (orders []*schema.Order, paging pagin
 func (_i *repo) GetOne(businessID uint64, id uint64) (order *schema.Order, err error) {
 	if err := _i.DB.Main.
 		Where(&schema.Order{BusinessID: businessID}).
+		Preload("OrderItems").
 		First(&order, id).
 		Error; err != nil {
 		return nil, err

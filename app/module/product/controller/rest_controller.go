@@ -1,7 +1,7 @@
 package controller
 
 import (
-		"go-fiber-starter/app/module/product/request"
+	"go-fiber-starter/app/module/product/request"
 	"go-fiber-starter/app/module/product/service"
 	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
@@ -14,10 +14,11 @@ type IRestController interface {
 	Index(c *fiber.Ctx) error
 	Show(c *fiber.Ctx) error
 	Store(c *fiber.Ctx) error
-	StoreVariant(c *fiber.Ctx) error
 	StoreAttribute(c *fiber.Ctx) error
 	Update(c *fiber.Ctx) error
 	Delete(c *fiber.Ctx) error
+	StoreVariant(c *fiber.Ctx) error
+	DeleteVariant(c *fiber.Ctx) error
 }
 
 func RestController(s service.IService) IRestController {
@@ -237,6 +238,38 @@ func (_i *controller) Delete(c *fiber.Ctx) error {
 	}
 
 	err = _i.service.Delete(businessID, id)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON("success")
+}
+
+// DeleteVariant
+// @Summary      delete product variant
+// @Tags         Product
+// @Security     Bearer
+// @Param        id path int true "Product ID"
+// @Param        businessID path int true "Business ID"
+// @Param        variantID path int true "Variant ID"
+// @Router       /business/:businessID/products/:id [delete]
+func (_i *controller) DeleteVariant(c *fiber.Ctx) error {
+	businessID, err := utils.GetIntInParams(c, "businessID")
+	if err != nil {
+		return err
+	}
+
+	productID, err := utils.GetIntInParams(c, "id")
+	if err != nil {
+		return err
+	}
+
+	variantID, err := utils.GetIntInParams(c, "variantID")
+	if err != nil {
+		return err
+	}
+
+	err = _i.service.DeleteVariant(businessID, productID, variantID)
 	if err != nil {
 		return err
 	}

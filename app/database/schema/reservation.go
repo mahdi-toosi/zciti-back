@@ -26,8 +26,9 @@ type Reservation struct {
 type ReservationStatus string
 
 const (
-	ReservationStatusCanceled ReservationStatus = "canceled"
-	ReservationStatusReserved ReservationStatus = "reserved"
+	ReservationStatusCanceled       ReservationStatus = "canceled"
+	ReservationStatusReserved       ReservationStatus = "reserved"
+	ReservationStatusPaymentPending ReservationStatus = "paymentPending"
 )
 
 type UniWashCommand string
@@ -35,8 +36,8 @@ type UniWashCommand string
 const (
 	UniWashCommandON        UniWashCommand = "ON"
 	UniWashCommandOFF       UniWashCommand = "OFF"
-	UniWashCommandMoreWater UniWashCommand = "MORE_WATER"
 	UniWashCommandOffline   UniWashCommand = "OFFLINE"
+	UniWashCommandMoreWater UniWashCommand = "MORE_WATER"
 )
 
 type ReservationMeta struct {

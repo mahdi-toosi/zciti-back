@@ -10,8 +10,8 @@ import (
 type IService interface {
 	Index(req request.OrderItems) (orderItems []*response.OrderItem, paging paginator.Pagination, err error)
 	Show(id uint64) (orderItem *response.OrderItem, err error)
-	Store(req request.OrderItem) (err error)
-	Update(id uint64, req request.OrderItem) (err error)
+	//Store(req request.OrderItem) (err error)
+	//Update(id uint64, req request.OrderItem) (err error)
 	Destroy(id uint64) error
 }
 
@@ -47,13 +47,13 @@ func (_i *service) Show(id uint64) (article *response.OrderItem, err error) {
 	return response.FromDomain(result), nil
 }
 
-func (_i *service) Store(req request.OrderItem) (err error) {
-	return _i.Repo.Create(req.ToDomain())
-}
+//func (_i *service) Store(req request.OrderItem) (err error) {
+//	return _i.Repo.Create(req.ToDomain())
+//}
 
-func (_i *service) Update(id uint64, req request.OrderItem) (err error) {
-	return _i.Repo.Update(id, req.ToDomain())
-}
+//func (_i *service) Update(id uint64, req request.OrderItem) (err error) {
+//	return _i.Repo.Update(id, req.ToDomain(req))
+//}
 
 func (_i *service) Destroy(id uint64) error {
 	return _i.Repo.Delete(id)

@@ -100,7 +100,7 @@ type ProductMeta struct {
 	CouldReserveUntil    time.Time                      `json:",omitempty" validator:"omitempty,datetime"` // millisecond from now
 	TaxStatus            ProductTaxStatus               `json:",omitempty" validator:"omitempty,oneof: none taxable shipping" faker:"oneof: none, taxable, shipping"`
 	Images               []string                       `json:",omitempty" faker:"-"`
-	AttributesMap        map[uint64]uint64              `json:",omitempty" faker:"-"`
+	AttributesMap        map[uint64]uint64              `faker:"-"`
 	SelectedAttributes   []ProductMetaSelectedAttribute `json:",omitempty" faker:"-"`
 
 	SalePrice          float64   `json:",omitempty" validator:"omitempty,number"`

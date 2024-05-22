@@ -17,6 +17,9 @@ type SendCommand struct {
 type ReservedMachinesRequest struct {
 	BusinessID uint64
 	UserID     uint64
+	ProductID  uint64
+	Date       time.Time
+	With       string
 	Pagination *paginator.Pagination
 }
 
@@ -31,13 +34,11 @@ type StoreUniWash struct {
 }
 
 func (s StoreUniWash) GetStartDateTime() time.Time {
-	loc, _ := time.LoadLocation("Asia/Tehran")
-	startTime, _ := time.ParseInLocation(time.DateTime, s.Date+" "+s.StartTime, loc)
+	startTime, _ := time.Parse(time.DateTime, s.Date+" "+s.StartTime)
 	return startTime.UTC()
 }
 
 func (s StoreUniWash) GetEndDateTime() time.Time {
-	loc, _ := time.LoadLocation("Asia/Tehran")
-	endTime, _ := time.ParseInLocation(time.DateTime, s.Date+" "+s.EndTime, loc)
+	endTime, _ := time.Parse(time.DateTime, s.Date+" "+s.EndTime)
 	return endTime.UTC()
 }

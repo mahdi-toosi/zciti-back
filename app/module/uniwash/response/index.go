@@ -7,12 +7,14 @@ import (
 )
 
 type Reservation struct {
-	ID            uint64    `json:",omitempty"`
-	EndTime       time.Time `json:",omitempty"`
-	StartTime     time.Time `json:",omitempty"`
-	ProductID     uint64    `json:",omitempty"`
-	ProductSKU    string    `json:",omitempty"`
-	ProductDetail string    `json:",omitempty"`
+	ID            uint64                `json:",omitempty"`
+	EndTime       time.Time             `json:",omitempty"`
+	StartTime     time.Time             `json:",omitempty"`
+	ProductID     uint64                `json:",omitempty"`
+	ProductSKU    string                `json:",omitempty"`
+	LastCommand   schema.UniWashCommand `json:",omitempty"`
+	ProductTitle  string                `json:",omitempty"`
+	ProductDetail string                `json:",omitempty"`
 }
 
 func FromDomain(item *schema.Reservation) (res *Reservation) {
@@ -26,7 +28,9 @@ func FromDomain(item *schema.Reservation) (res *Reservation) {
 		StartTime:     item.StartTime,
 		ProductID:     item.ProductID,
 		ProductSKU:    item.Product.Meta.SKU,
+		ProductTitle:  item.Product.Post.Title,
 		ProductDetail: item.Product.Meta.Detail,
+		LastCommand:   item.Meta.UniWashLastCommand,
 	}
 
 	return p
