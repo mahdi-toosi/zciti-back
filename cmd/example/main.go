@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/efectn/fx-zerolog"
+	"go-fiber-starter/app/middleware"
 	"go-fiber-starter/app/module/asset"
 	"go-fiber-starter/app/module/auth"
 	"go-fiber-starter/app/module/business"
@@ -14,9 +16,6 @@ import (
 	"go-fiber-starter/app/module/taxonomy"
 	"go-fiber-starter/app/module/uniwash"
 	"go-fiber-starter/app/module/user"
-
-	"github.com/efectn/fx-zerolog"
-	"go-fiber-starter/app/middleware"
 	"go-fiber-starter/app/router"
 	"go-fiber-starter/internal"
 	"go-fiber-starter/internal/bootstrap"
@@ -52,6 +51,8 @@ func main() {
 		fx.Provide(bootstrap.NewFiber),
 		// database
 		fx.Provide(database.NewDatabase),
+		// zarin pal
+		fx.Provide(internal.NewZarinPal),
 		//// redis
 		//fx.Provide(bootstrap.NewRedis),
 		// middleware

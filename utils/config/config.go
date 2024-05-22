@@ -55,6 +55,11 @@ type services = struct {
 	MessageWay struct {
 		ApiKey string `toml:"apiKey"`
 	}
+
+	ZarinPal struct {
+		MerchantID string `toml:"merchantId"`
+		Sandbox    bool   `toml:"sandbox"`
+	}
 }
 
 // middleware

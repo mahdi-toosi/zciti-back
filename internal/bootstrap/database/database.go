@@ -27,7 +27,7 @@ func NewDatabase(cfg *config.Config, log zerolog.Logger) *Database {
 
 func (_db *Database) ConnectDatabase() {
 	mainDB, err := gorm.Open(postgres.Open(_db.Cfg.DB.Main.Url), &gorm.Config{
-		//QueryFields:            true,
+		QueryFields:            true,
 		PrepareStmt:            true,
 		SkipDefaultTransaction: true,
 	})
