@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"github.com/gofiber/fiber/v2"
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/message/request"
 	msgResponse "go-fiber-starter/app/module/message/response"
@@ -11,6 +10,8 @@ import (
 	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
 	"go-fiber-starter/utils/response"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type IRestController interface {
@@ -43,8 +44,9 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	}
 	user, err := utils.GetAuthenticatedUser(c)
 	if err != nil {
-		return fiber.ErrForbidden
+		return err
 	}
+	
 	paginate, err := paginator.Paginate(c)
 	if err != nil {
 		return err

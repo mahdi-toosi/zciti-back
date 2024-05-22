@@ -112,7 +112,7 @@ func (_i *controller) Delete(c *fiber.Ctx) error {
 
 	user, err := utils.GetAuthenticatedUser(c)
 	if err != nil {
-		return fiber.ErrForbidden
+		return err
 	}
 
 	err = _i.service.Destroy(user, id)

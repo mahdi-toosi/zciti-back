@@ -12,6 +12,7 @@ import (
 	userResponse "go-fiber-starter/app/module/user/response"
 	"go-fiber-starter/utils/config"
 	"go-fiber-starter/utils/helpers"
+	"strings"
 )
 
 //go:generate mockgen -destination=article_service_mock.go -package=service . AuthService
@@ -42,13 +43,13 @@ func (_i *service) Login(req request.Login, jwtConfig config.Jwt) (res response.
 	}
 
 	if user == nil {
-		err = errors.New("user not found")
+		err = errors.New("نام کاربری یا رمز عبور اشتباه است")
 		return
 	}
 
 	// check password
 	if !user.ComparePassword(req.Password) {
-		err = errors.New("password not match")
+		err = errors.New("نام کاربری یا رمز عبور اشتباه است")
 		return
 	}
 
@@ -76,6 +77,11 @@ func (_i *service) Register(req *request.Register, jwtConfig config.Jwt) (res re
 
 	err = _i.Repo.Create(user)
 	if err != nil {
+		if strings.Contains(err.Error(), "idx_users_mobile") {
+			err = errors.New("این شماره موبایل قبلا استفاده شده است")
+			return response.Register{}, err
+		}
+
 		return response.Register{}, err
 	}
 

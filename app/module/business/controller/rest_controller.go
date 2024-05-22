@@ -132,7 +132,7 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 
 	user, err := utils.GetAuthenticatedUser(c)
 	if err != nil {
-		return fiber.ErrBadRequest
+		return err
 	}
 
 	business, err := _i.service.Show(businessID)
@@ -171,7 +171,7 @@ func (_i *controller) Delete(c *fiber.Ctx) error {
 
 	user, err := utils.GetAuthenticatedUser(c)
 	if err != nil {
-		return fiber.ErrBadRequest
+		return err
 	}
 
 	business, err := _i.service.Show(businessID)

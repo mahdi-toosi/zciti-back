@@ -99,7 +99,7 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 
 	user, err := utils.GetAuthenticatedUser(c)
 	if err != nil {
-		return fiber.ErrForbidden
+		return err
 	}
 
 	req := new(request.Post)

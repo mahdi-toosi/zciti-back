@@ -166,7 +166,7 @@ func (_i *controller) BusinessUsers(c *fiber.Ctx) error {
 
 	user, err := utils.GetAuthenticatedUser(c)
 	if err != nil {
-		return fiber.ErrBadRequest
+		return err
 	}
 
 	business, err := _i.bService.Show(businessID)
@@ -217,7 +217,7 @@ func (_i *controller) InsertUser(c *fiber.Ctx) error {
 
 	user, err := utils.GetAuthenticatedUser(c)
 	if err != nil {
-		return fiber.ErrBadRequest
+		return err
 	}
 
 	business, err := _i.bService.Show(businessID)
@@ -258,7 +258,7 @@ func (_i *controller) DeleteUser(c *fiber.Ctx) error {
 
 	user, err := utils.GetAuthenticatedUser(c)
 	if err != nil {
-		return fiber.ErrBadRequest
+		return err
 	}
 
 	business, err := _i.bService.Show(businessID)

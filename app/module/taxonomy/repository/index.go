@@ -83,7 +83,7 @@ func (_i *repo) GetAll(req request.Taxonomies) (taxonomies []*schema.Taxonomy, p
 }
 
 func (_i *repo) Search(req request.Taxonomies) (taxonomies []*schema.Taxonomy, paging paginator.Pagination, err error) {
-	query := _i.DB.Main.Debug().Model(schema.Taxonomy{}).
+	query := _i.DB.Main.Model(schema.Taxonomy{}).
 		Where(schema.Taxonomy{BusinessID: req.BusinessID})
 
 	// TODO what if we doesnt want to add parent_id in wheres ?!!!!!!!

@@ -1,12 +1,13 @@
 package controller
 
 import (
-	"github.com/gofiber/fiber/v2"
-	"go-fiber-starter/app/module/product/request"
+		"go-fiber-starter/app/module/product/request"
 	"go-fiber-starter/app/module/product/service"
 	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
 	"go-fiber-starter/utils/response"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type IRestController interface {
@@ -100,7 +101,7 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 
 	user, err := utils.GetAuthenticatedUser(c)
 	if err != nil {
-		return fiber.ErrForbidden
+		return err
 	}
 
 	req := new(request.Product)

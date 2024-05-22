@@ -104,8 +104,9 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 
 	user, err := utils.GetAuthenticatedUser(c)
 	if err != nil {
-		return fiber.ErrBadRequest
+		return err
 	}
+
 	req.AuthorID = user.ID
 	req.Status = schema.CommentStatusPending
 
@@ -147,7 +148,7 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 
 	user, err := utils.GetAuthenticatedUser(c)
 	if err != nil {
-		return fiber.ErrBadRequest
+		return err
 	}
 
 	comment, err := _i.service.Show(id)
@@ -198,8 +199,9 @@ func (_i *controller) UpdateStatus(c *fiber.Ctx) error {
 
 	user, err := utils.GetAuthenticatedUser(c)
 	if err != nil {
-		return fiber.ErrBadRequest
+		return err
 	}
+	
 	if !user.IsBusinessOwner(businessID) {
 		return fiber.ErrForbidden
 	}
