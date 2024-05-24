@@ -42,9 +42,9 @@ const (
 const ROOT_BUSINESS_ID = 1
 
 type BusinessMeta struct {
-	ShebaNumber    string
-	AssetsSize     uint64
-	BankCardNumber string
+	ShebaNumber    string `json:",omitempty"`
+	AssetsSize     uint64 `json:",omitempty"`
+	BankCardNumber string `json:",omitempty"`
 }
 
 func (bm *BusinessMeta) Scan(value any) error {

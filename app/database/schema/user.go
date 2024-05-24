@@ -18,7 +18,7 @@ type User struct {
 	Permissions     UserPermissions `gorm:"type:jsonb;not null"`
 	Password        string          `gorm:"varchar(255);not null"`
 	Businesses      []*Business     `gorm:"many2many:business_users;" faker:"-"`
-	//FullName  string `gorm:"->;type:GENERATED ALWAYS AS (concat(firstname,' ',lastname));default:(-);"`
+	//FullName  string `gorm:"->;type:GENERATED ALWAYS AS (concat(first_name,' ',last_name));default:(-);"`
 	Base
 }
 
