@@ -39,7 +39,7 @@ func (_i *repo) GetAll(req request.MessageRooms) (messageRooms []*schema.Message
 		query.Limit(req.Pagination.Limit)
 	}
 
-	err = query.Order("created_at asc").Find(&messageRooms).Error
+	err = query.Order("created_at desc").Find(&messageRooms).Error
 	if err != nil {
 		return
 	}

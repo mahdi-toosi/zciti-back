@@ -37,7 +37,7 @@ func (_i *repo) GetAll(req request.Messages) (messages []*schema.Message, paging
 		query.Limit(req.Pagination.Limit)
 	}
 
-	err = query.Order("created_at asc").Find(&messages).Error
+	err = query.Order("created_at desc").Find(&messages).Error
 	if err != nil {
 		return
 	}

@@ -29,12 +29,7 @@ type repo struct {
 func (_i *repo) GetAll(req request.Examples) (examples []*response.Example, paging paginator.Pagination, err error) {
 	query := _i.DB.Main.
 		Model(&schema.Example{}).
-		Where(&schema.Example{BusinessID: req.BusinessID}).
-		Select("examples.*, " +
-			"users.first_name || ' ' || users.last_name as receiver_full_name, " +
-			"businesses.title as business_title").
-		Joins("INNER JOIN users ON users.id = examples.receiver_id").
-		Joins("INNER JOIN businesses ON businesses.id = examples.business_id")
+		Where(&schema.Example{BusinessID: req.BusinessID})
 
 	if req.Pagination.Page > 0 {
 		var total int64
@@ -45,7 +40,7 @@ func (_i *repo) GetAll(req request.Examples) (examples []*response.Example, pagi
 		query.Limit(req.Pagination.Limit)
 	}
 
-	err = query.Order("created_at asc").Find(&examples).Error
+	err = query.Order("created_at desc").Find(&examples).Error
 	if err != nil {
 		return
 	}

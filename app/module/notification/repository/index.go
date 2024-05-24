@@ -45,7 +45,7 @@ func (_i *repo) GetAll(req request.Notifications) (notifications []*response.Not
 		query.Limit(req.Pagination.Limit)
 	}
 
-	err = query.Order("created_at asc").Find(&notifications).Error
+	err = query.Order("created_at desc").Find(&notifications).Error
 	if err != nil {
 		return
 	}

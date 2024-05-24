@@ -38,7 +38,7 @@ func (_i *repo) GetAll(req request.OrderItems) (orderItems []*schema.OrderItem, 
 		query.Limit(req.Pagination.Limit)
 	}
 
-	err = query.Order("created_at asc").Find(&orderItems).Error
+	err = query.Order("created_at desc").Find(&orderItems).Error
 	if err != nil {
 		return
 	}
