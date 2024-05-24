@@ -55,6 +55,19 @@ func GetIntInQueries(c *fiber.Ctx, key string) (uint64, error) {
 	return strconv.ParseUint(c.Query(key), 10, 64)
 }
 
+func GetDateInQueries(c *fiber.Ctx, key string) *time.Time {
+	if c.Query(key) == "" {
+		return &time.Time{}
+	}
+
+	loc, _ := time.LoadLocation("Asia/Tehran")
+	date, err := time.ParseInLocation(time.DateOnly, c.Query(key), loc)
+	if err != nil {
+		return &time.Time{}
+	}
+	return &date
+}
+
 func GetAuthenticatedUser(c *fiber.Ctx) (schema.User, error) {
 	user, ok := c.Locals("user").(schema.User)
 	if ok {

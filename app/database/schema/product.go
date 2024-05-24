@@ -86,11 +86,18 @@ type ProductMetaReservation struct {
 	Info map[time.Weekday] /* week day num*/ []ProductMetaReservationInfoData `json:",omitempty" example:"1"`
 }
 
+type UniWashMachineStatus string
+
+const (
+	UniWashMachineStatusON  UniWashMachineStatus = "ON"
+	UniWashMachineStatusOFF UniWashMachineStatus = "OFF"
+)
+
 type ProductMeta struct {
 	Detail               string                         `json:",omitempty" example:"Detail" validate:"omitempty,min=2,max=500" faker:"word"`  // The stock keeping unit (SKU) of the product. This is a unique identifier for the product that is used for inventory management.
 	SKU                  string                         `json:",omitempty" example:"sku-2f3s" validate:"omitempty,min=2,max=40" faker:"word"` // The stock keeping unit (SKU) of the product. This is a unique identifier for the product that is used for inventory management.
 	UniWashMobileNumber  string                         `json:",omitempty" example:"09909999999"  faker:"-"`                                  //validate:"omitempty,min=10,max=10"                                // The stock keeping unit (SKU) of the product. This is a unique identifier for the product that is used for inventory management.
-	UniWashMachineStatus UniWashCommand                 `json:",omitempty" faker:"-"`
+	UniWashMachineStatus UniWashMachineStatus           `json:",omitempty" faker:"-"`
 	PurchaseNote         string                         `json:",omitempty" validator:"omitempty,min=2,max=500"` // A note that is displayed to the customer after purchasing the product.
 	Weight               float64                        `json:",omitempty" validator:"omitempty,number"`
 	Width                float64                        `json:",omitempty" validator:"omitempty,number"`

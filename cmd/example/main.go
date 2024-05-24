@@ -13,6 +13,7 @@ import (
 	"go-fiber-starter/app/module/orderItem"
 	"go-fiber-starter/app/module/post"
 	"go-fiber-starter/app/module/product"
+	"go-fiber-starter/app/module/reservation"
 	"go-fiber-starter/app/module/taxonomy"
 	"go-fiber-starter/app/module/uniwash"
 	"go-fiber-starter/app/module/user"
@@ -75,6 +76,7 @@ func main() {
 		taxonomy.Module,
 		business.Module,
 		orderItem.Module,
+		reservation.Module,
 		//messageRoom.Module,
 		notification.Module,
 		notificationtemplate.Module,

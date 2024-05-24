@@ -42,7 +42,7 @@ const (
 
 type ReservationMeta struct {
 	UniWashLastCommand            UniWashCommand `json:",omitempty"`
-	UniWashLastCommandTime        time.Time      `json:",omitempty"`
+	UniWashLastCommandTime        *time.Time     `json:",omitempty"`
 	UniWashLastCommandReferenceID string         `json:",omitempty"`
 }
 

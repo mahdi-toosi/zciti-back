@@ -110,10 +110,10 @@ func (_i *service) SendCommand(req request.SendCommand, isForUser bool) (err err
 	}
 
 	product, err := _i.ProductRepo.GetOneVariant(req.BusinessID, req.ProductID)
-	if err != nil || product.Meta.UniWashMachineStatus == schema.UniWashCommandOffline {
+	if err != nil || product.Meta.UniWashMachineStatus == schema.UniWashMachineStatusOFF {
 		return &fiber.Error{
 			Code:    fiber.StatusBadRequest,
-			Message: "در حال حاضر رزرو این ماشین ممکن نیست",
+			Message: "در حال حاضر دستگاه دچار مشکل شده و در دسترس نیست، در صورتی که دستگاه را رزرو کرده اید، با پشتیبانی تماس بگیرید",
 		}
 	}
 
@@ -124,22 +124,18 @@ func (_i *service) SendCommand(req request.SendCommand, isForUser bool) (err err
 		Mobile:     product.Meta.UniWashMobileNumber,
 	})
 	if err != nil {
-		return err
+		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "ارسال دستور با خطا مواجه شد، دوباره امتحان کنید."}
 	}
 
-	if isForUser {
-		reservation.Meta.UniWashLastCommandTime = time.Now().UTC()
-		reservation.Meta.UniWashLastCommand = schema.UniWashCommandON
-		reservation.Meta.UniWashLastCommandReferenceID = send.ReferenceID
-		if err := _i.Repo.UpdateReservation(reservation); err != nil {
-			return err
-		}
-	}
-
-	product.Meta.UniWashMachineStatus = req.Command
-	if err := _i.ProductRepo.Update(product); err != nil {
+	// if isForUser {
+	t := time.Now().UTC()
+	reservation.Meta.UniWashLastCommandTime = &t
+	reservation.Meta.UniWashLastCommand = req.Command
+	reservation.Meta.UniWashLastCommandReferenceID = send.ReferenceID
+	if err := _i.Repo.UpdateReservation(reservation); err != nil {
 		return err
 	}
+	//}
 
 	return nil
 }

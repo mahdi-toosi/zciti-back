@@ -10,6 +10,7 @@ import (
 	oirepository "go-fiber-starter/app/module/orderItem/repository"
 	oirequest "go-fiber-starter/app/module/orderItem/request"
 	prepository "go-fiber-starter/app/module/product/repository"
+	reserveService "go-fiber-starter/app/module/reservation/service"
 	uniService "go-fiber-starter/app/module/uniwash/service"
 	"go-fiber-starter/internal"
 	"go-fiber-starter/utils/config"
@@ -33,6 +34,7 @@ func Service(
 	uniService uniService.IService,
 	productRepo prepository.IRepository,
 	orderItemRepo oirepository.IRepository,
+	reserveService reserveService.IService,
 ) IService {
 	return &service{
 		repo,
@@ -41,16 +43,18 @@ func Service(
 		uniService,
 		productRepo,
 		orderItemRepo,
+		reserveService,
 	}
 }
 
 type service struct {
-	Repo          repository.IRepository
-	Config        *config.Config
-	ZarinPal      *internal.ZarinPal
-	UniService    uniService.IService
-	ProductRepo   prepository.IRepository
-	OrderItemRepo oirepository.IRepository
+	Repo           repository.IRepository
+	Config         *config.Config
+	ZarinPal       *internal.ZarinPal
+	UniService     uniService.IService
+	ProductRepo    prepository.IRepository
+	OrderItemRepo  oirepository.IRepository
+	ReserveService reserveService.IService
 }
 
 func (_i *service) Index(req request.Orders) (orders []*response.Order, paging paginator.Pagination, err error) {
@@ -108,7 +112,7 @@ func (_i *service) Store(req request.Order) (orderID *uint64, _paymentURL string
 				return nil, "", err
 			}
 
-			if err = _i.UniService.IsReservable(item, req.BusinessID); err != nil {
+			if err = _i.ReserveService.IsReservable(item, req.BusinessID); err != nil {
 				return nil, "", err
 			}
 
@@ -217,73 +221,6 @@ func (_i *service) Status(userID uint64, orderID uint64, authority string) (stat
 
 	return "OK", nil
 }
-
-//func (_i *service) StoreUniWash(req urequest.StoreUniWash) (err error) {
-//	if err = _i.UniService.ValidateReservation(req); err != nil {
-//		return err
-//	}
-//
-//	if err = _i.UniService.IsReservable(req); err != nil {
-//		return err
-//	}
-//
-//	// get product
-//	post, err := _i.ProductRepo.GetOne(req.BusinessID, req.PostID)
-//	if err != nil {
-//		return err
-//	}
-//
-//	var product schema.Product
-//	for _, p := range post.Products {
-//		if p.ID == req.ProductID {
-//			product = p
-//			break
-//		}
-//	}
-//
-//	// TODO add these in transaction
-//	reservationID, err := _i.UniService.Reserve(req)
-//	if err != nil {
-//		return err
-//	}
-//
-//	// create order
-//	orderID, err := _i.Repo.Create(&schema.Order{
-//		ParentID:      nil,
-//		UserID:        req.UserID,
-//		TotalAmt:      product.Price,
-//		BusinessID:    req.BusinessID,
-//		Meta:          schema.OrderMeta{},
-//		Status:        schema.OrderStatusPending,
-//		PaymentMethod: schema.OrderPaymentMethodOnline,
-//	})
-//	if err != nil {
-//		return err
-//	}
-//
-//	// create orderItem
-//	if err := _i.OrderItemRepo.Create(&schema.OrderItem{
-//		Quantity:      1,
-//		PostID:        post.ID,
-//		OrderID:       *orderID,
-//		ReservationID: reservationID,
-//		Price:         product.Price,
-//		Subtotal:      product.Price,
-//		Type:          schema.OrderItemTypeReservation,
-//		Meta: schema.OrderItemMeta{
-//			ProductID:          product.ID,
-//			ProductTitle:       post.Title,
-//			ProductType:        product.Type,
-//			ProductDetail:      product.Meta.Detail,
-//			ProductVariantType: *product.VariantType,
-//			//ProductImage:  post.Image,
-//		},
-//	}); err != nil {
-//		return err
-//	}
-//
-//	return
-//}
 
 func (_i *service) Update(id uint64, req request.Order) (err error) {
 	return _i.Repo.Update(id, req.ToDomain(nil, nil))

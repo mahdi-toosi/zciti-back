@@ -88,7 +88,9 @@ var Permissions = map[schema.UserRole]map[Domain]map[Permission]bool{
 		DMessage:              {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DTaxonomy:             {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DBusiness:             {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
+		DTransaction:          {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DMessageRoom:          {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
+		DReservation:          {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DNotification:         {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DNotificationTemplate: {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 	},
@@ -103,15 +105,17 @@ var Permissions = map[schema.UserRole]map[Domain]map[Permission]bool{
 		DTaxonomy:             {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DBusiness:             {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true},
 		DMessageRoom:          {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
+		DReservation:          {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DNotification:         {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DNotificationTemplate: {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 	},
 	schema.URUser: {
-				DTaxonomy:     {PReadAll: true},
+		DTaxonomy:     {PReadAll: true},
 		DBusiness:     {PReadSingle: true},
 		DPost:         {PReadSingle: true},
 		DOrder:        {PReadSingle: true, PCreate: true},
 		DProduct:      {PReadAll: true, PReadSingle: true},
+		DReservation:  {PReadAll: true, PReadSingle: true},
 		DComment:      {PCreate: true, PReadAll: true, PUpdate: true, PDelete: true},
 		DNotification: {PReadAll: true, PReadSingle: true},
 	},
@@ -133,6 +137,8 @@ const (
 	DMessage
 	DTaxonomy
 	DBusiness
+	DReservation
+	DTransaction
 	DNotification
 	DMessageRoom
 	DNotificationTemplate

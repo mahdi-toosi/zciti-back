@@ -12,6 +12,7 @@ import (
 	"go-fiber-starter/app/module/order"
 	"go-fiber-starter/app/module/post"
 	"go-fiber-starter/app/module/product"
+	"go-fiber-starter/app/module/reservation"
 	"go-fiber-starter/app/module/taxonomy"
 	"go-fiber-starter/app/module/uniwash"
 	"go-fiber-starter/app/module/user"
@@ -27,12 +28,13 @@ type Router struct {
 	PostRouter    *post.Router
 	OrderRouter   *order.Router
 	AssetRouter   *asset.Router
-	UniWash       *uniwash.Router
+	UniWashRouter *uniwash.Router
 	ProductRouter *product.Router
 	//MessageRouter              *message.Router
-	CommentRouter  *comment.Router
-	TaxonomyRouter *taxonomy.Router
-	BusinessRouter *business.Router
+	CommentRouter      *comment.Router
+	TaxonomyRouter     *taxonomy.Router
+	BusinessRouter     *business.Router
+	ReservationsRouter *reservation.Router
 	//MessageRoomRouter          *messageRoom.Router
 	NotificationRouter         *notification.Router
 	NotificationTemplateRouter *notificationtemplate.Router
@@ -45,14 +47,15 @@ func NewRouter(
 	authRouter *auth.Router,
 	userRouter *user.Router,
 	postRouter *post.Router,
-	uniWash *uniwash.Router,
 	orderRouter *order.Router,
 	assetRouter *asset.Router,
 	productRouter *product.Router,
+	uniWashRouter *uniwash.Router,
 	commentRouter *comment.Router,
 	//messageRouter *message.Router,
 	taxonomyRouter *taxonomy.Router,
 	businessRouter *business.Router,
+	reservationsRouter *reservation.Router,
 	//messageRoomRouter *messageRoom.Router,
 	notificationRouter *notification.Router,
 	notificationTemplateRouter *notificationtemplate.Router,
@@ -61,17 +64,18 @@ func NewRouter(
 		App: fiber,
 		Cfg: cfg,
 
-		UniWash:       uniWash,
 		AuthRouter:    authRouter,
 		UserRouter:    userRouter,
 		PostRouter:    postRouter,
 		OrderRouter:   orderRouter,
 		AssetRouter:   assetRouter,
 		ProductRouter: productRouter,
+		UniWashRouter: uniWashRouter,
 		CommentRouter: commentRouter,
 		//MessageRouter:              messageRouter,
-		TaxonomyRouter: taxonomyRouter,
-		BusinessRouter: businessRouter,
+		TaxonomyRouter:     taxonomyRouter,
+		BusinessRouter:     businessRouter,
+		ReservationsRouter: reservationsRouter,
 		//MessageRoomRouter:          messageRoomRouter,
 		NotificationRouter:         notificationRouter,
 		NotificationTemplateRouter: notificationTemplateRouter,
@@ -81,16 +85,17 @@ func NewRouter(
 // Register routes
 func (r *Router) Register() { // Register routes of modules
 	r.AuthRouter.RegisterRoutes()
-	r.UniWash.RegisterRoutes(r.Cfg)
 	r.UserRouter.RegisterRoutes(r.Cfg)
 	r.PostRouter.RegisterRoutes(r.Cfg)
 	r.OrderRouter.RegisterRoutes(r.Cfg)
 	r.AssetRouter.RegisterRoutes(r.Cfg)
 	r.ProductRouter.RegisterRoutes(r.Cfg)
+	r.UniWashRouter.RegisterRoutes(r.Cfg)
 	r.CommentRouter.RegisterRoutes(r.Cfg)
 	//r.MessageRouter.RegisterRoutes(r.Cfg)
 	r.TaxonomyRouter.RegisterRoutes(r.Cfg)
 	r.BusinessRouter.RegisterRoutes(r.Cfg)
+	r.ReservationsRouter.RegisterRoutes(r.Cfg)
 	//r.MessageRoomRouter.RegisterRoutes(r.Cfg)
 	r.NotificationRouter.RegisterRoutes(r.Cfg)
 	r.NotificationTemplateRouter.RegisterRoutes(r.Cfg)

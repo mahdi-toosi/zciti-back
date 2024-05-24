@@ -152,7 +152,7 @@ func (_i *repo) IndexReservedMachines(req request.ReservedMachinesRequest) (rese
 		query.Limit(req.Pagination.Limit)
 	}
 
-	if err = query.Debug().Find(&reservations).Error; err != nil {
+	if err = query.Find(&reservations).Error; err != nil {
 		return
 	}
 
