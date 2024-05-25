@@ -7,7 +7,6 @@ import (
 	"go-fiber-starter/app/module/reservation/request"
 	"go-fiber-starter/app/module/reservation/response"
 	"go-fiber-starter/internal/bootstrap/database"
-	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
 	"time"
 )
@@ -53,7 +52,6 @@ func (_i *repo) GetAll(req request.Reservations) (reservations []*schema.Reserva
 		}
 	}
 
-	utils.Log(req.StartTime.IsZero())
 	if !req.StartTime.IsZero() {
 		query.Where("start_time::Date = ?", req.StartTime)
 	}

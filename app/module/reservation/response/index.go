@@ -38,7 +38,7 @@ func FromDomain(item *schema.Reservation) (res *Reservation) {
 		PostTitle:  item.Product.Post.Title,
 	}
 
-	if res.Meta.UniWashLastCommandTime.IsZero() {
+	if res.Meta.UniWashLastCommandTime == nil || res.Meta.UniWashLastCommandTime.IsZero() {
 		res.Meta.UniWashLastCommandTime = nil
 	}
 
