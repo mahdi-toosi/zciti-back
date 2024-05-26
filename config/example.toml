@@ -22,6 +22,9 @@ url = ""  # <driver>://<username>:<password>@<host>:<port>/<database>
 [services.messageWay]
 apiKey = ""
 
+[services.googleRecaptcha]
+secretKey = ""
+
 [services.zarinpal]
 merchantID = ""
 Sandbox = false

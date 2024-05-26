@@ -60,6 +60,10 @@ type services = struct {
 		MerchantID string `toml:"merchantId"`
 		Sandbox    bool   `toml:"sandbox"`
 	}
+
+	GoogleRecaptcha struct {
+		SecretKey string `toml:"secretKey"`
+	}
 }
 
 // middleware
