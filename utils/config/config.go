@@ -15,14 +15,15 @@ import (
 
 // app struct config
 type app = struct {
-	Name        string        `toml:"name"`
-	Domain      string        `toml:"domain"`
-	Port        string        `toml:"port"`
-	PrintRoutes bool          `toml:"print-routes"`
-	Prefork     bool          `toml:"prefork"`
-	Production  bool          `toml:"production"`
-	IdleTimeout time.Duration `toml:"idle-timeout"`
-	TLS         struct {
+	Name           string        `toml:"name"`
+	FrontendDomain string        `toml:"frontendDomain"`
+	BackendDomain  string        `toml:"backendDomain"`
+	Port           string        `toml:"port"`
+	PrintRoutes    bool          `toml:"print-routes"`
+	Prefork        bool          `toml:"prefork"`
+	Production     bool          `toml:"production"`
+	IdleTimeout    time.Duration `toml:"idle-timeout"`
+	TLS            struct {
 		Enable   bool   `toml:"enable"`
 		CertFile string `toml:"cert-asset"`
 		KeyFile  string `toml:"key-asset"`
@@ -161,5 +162,5 @@ func NewConfig() *Config {
 
 // ParseAddress func to parse address
 func (c Config) ParseAddress() string {
-	return c.App.Domain + ":" + c.App.Port
+	return c.App.BackendDomain + ":" + c.App.Port
 }

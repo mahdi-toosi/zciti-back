@@ -163,7 +163,7 @@ func (_i *service) Store(req request.Order) (orderID *uint64, _paymentURL string
 	}
 
 	if int(totalAmt) != 0 {
-		callbackURL := fmt.Sprintf("%s/card/payment/result?OrderID=%d&UserID=%d", _i.Config.App.Domain, *orderID, req.UserID)
+		callbackURL := fmt.Sprintf("%s/card/payment/result?OrderID=%d&UserID=%d", _i.Config.App.FrontendDomain, *orderID, req.UserID)
 		paymentURL, _, _, err := _i.ZarinPal.NewPaymentRequest(int(totalAmt), callbackURL, "رزرو ماشین لباسشویی", "", "")
 		if err != nil {
 			return nil, "", err

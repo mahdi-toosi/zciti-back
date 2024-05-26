@@ -1,7 +1,8 @@
 # Configuration vars for cmd/app
 [app]
 name = "Fiber starter"
-domain = "http://example.com"
+backendDomain = "http://example.com"
+frontenddomain = "http://example.com"
 port = "8000"
 idle-timeout = 5 # As seconds
 print-routes = false
