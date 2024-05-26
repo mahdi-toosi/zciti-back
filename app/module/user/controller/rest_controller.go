@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	bService "go-fiber-starter/app/module/business/service"
 	orequest "go-fiber-starter/app/module/order/request"
@@ -8,6 +9,7 @@ import (
 	"go-fiber-starter/app/module/user/request"
 	"go-fiber-starter/app/module/user/service"
 	"go-fiber-starter/utils"
+	"go-fiber-starter/utils/config"
 	"go-fiber-starter/utils/paginator"
 	"go-fiber-starter/utils/response"
 	"strconv"
@@ -29,14 +31,15 @@ type IRestController interface {
 	OrderStatus(c *fiber.Ctx) error
 }
 
-func RestController(s service.IService, b bService.IService, o oService.IService) IRestController {
-	return &controller{s, b, o}
+func RestController(s service.IService, b bService.IService, o oService.IService, config *config.Config) IRestController {
+	return &controller{s, b, o, config}
 }
 
 type controller struct {
 	service  service.IService
 	bService bService.IService
 	oService oService.IService
+	Config   *config.Config
 }
 
 // Index
@@ -329,15 +332,22 @@ func (_i *controller) OrderStatus(c *fiber.Ctx) error {
 		return err
 	}
 	authority := c.Query("Authority")
+	status := c.Query("Status")
 
-	status, err := _i.oService.Status(userID, orderID, authority)
-	if err != nil {
-		return err
+	if status == "OK" {
+		status, err = _i.oService.Status(userID, orderID, authority)
+		if err != nil {
+			return err
+		}
 	}
 
-	return response.Resp(c, response.Response{
-		Data: status,
-	})
+	url := fmt.Sprintf(
+		"%s/card/payment/result?Status=%s",
+		_i.Config.App.FrontendDomain,
+		status,
+	)
+
+	return c.Redirect(url)
 }
 
 // OrderStore

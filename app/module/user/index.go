@@ -38,7 +38,7 @@ func (_i *Router) RegisterRoutes(cfg *config.Config) {
 	_i.App.Route("/v1/user/orders", func(router fiber.Router) {
 		router.Get("/", mdl.Protected(cfg), c.Orders)
 		router.Post("/", mdl.Protected(cfg), c.OrderStore)
-		router.Get("/status", mdl.Protected(cfg), c.OrderStatus)
+		router.Get("/status", c.OrderStatus)
 	})
 }
 
