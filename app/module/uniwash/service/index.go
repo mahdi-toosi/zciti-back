@@ -120,7 +120,7 @@ func (_i *service) SendCommand(req request.SendCommand, isForUser bool) (err err
 	send, err := _i.MessageWay.Send(MessageWay.Message{
 		TemplateID: 8698,
 		Method:     "sms",
-		Params:     []string{commandProxy[schema.UniWashCommandON]},
+		Params:     []string{commandProxy[req.Command]},
 		Mobile:     product.Meta.UniWashMobileNumber,
 	})
 	if err != nil {
@@ -164,6 +164,13 @@ func (_i *service) CheckLastCommandStatus(businessID uint64, reservationID uint6
 	reservation, err := _i.Repo.GetSingleReservation(businessID, reservationID)
 	if err != nil {
 		return nil, err
+	}
+
+	if reservation.Meta.UniWashLastCommand == "" {
+		return &MessageWay.StatusResponse{
+			OTPStatus: "دستوری ارسال نشده",
+			Status:    "danger",
+		}, nil
 	}
 
 	return _i.MessageWay.GetStatus(MessageWay.StatusRequest{ReferenceID: reservation.Meta.UniWashLastCommandReferenceID})
