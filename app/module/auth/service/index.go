@@ -17,8 +17,8 @@ import (
 
 //go:generate mockgen -destination=article_service_mock.go -package=service . AuthService
 type IService interface {
-	Login(req request.Login, jwtConfig config.Jwt) (res response.Login, err error)
-	Register(req *request.Register, jwtConfig config.Jwt) (res response.Register, err error)
+	Login(req request.Login, jwtConfig config.Jwt) (res response.Auth, err error)
+	Register(req *request.Register, jwtConfig config.Jwt) (res response.Auth, err error)
 	SendOtp(req *request.SendOtp) error
 	ResetPass(req *request.ResetPass) error
 }
@@ -35,7 +35,7 @@ type service struct {
 	MessageWay *MessageWay.App
 }
 
-func (_i *service) Login(req request.Login, jwtConfig config.Jwt) (res response.Login, err error) {
+func (_i *service) Login(req request.Login, jwtConfig config.Jwt) (res response.Auth, err error) {
 	// check user by username
 	user, err := _i.Repo.FindUserByMobile(req.Mobile)
 	if err != nil {
@@ -54,18 +54,19 @@ func (_i *service) Login(req request.Login, jwtConfig config.Jwt) (res response.
 	}
 
 	// do create token
-	token, err := middleware.GenerateTokenAccess(*user, jwtConfig)
+	token, expiresAt, err := middleware.GenerateTokenAccess(*user, jwtConfig)
 	if err != nil {
 		return
 	}
 
-	res.User = *userResponse.FromDomain(user)
 	res.Token = token
+	res.ExpiresAt = expiresAt
+	res.User = *userResponse.FromDomain(user)
 
 	return
 }
 
-func (_i *service) Register(req *request.Register, jwtConfig config.Jwt) (res response.Register, err error) {
+func (_i *service) Register(req *request.Register, jwtConfig config.Jwt) (res response.Auth, err error) {
 	// check user by username
 	user := &schema.User{
 		Mobile:      req.Mobile,
@@ -79,20 +80,21 @@ func (_i *service) Register(req *request.Register, jwtConfig config.Jwt) (res re
 	if err != nil {
 		if strings.Contains(err.Error(), "idx_users_mobile") {
 			err = errors.New("این شماره موبایل قبلا استفاده شده است")
-			return response.Register{}, err
+			return response.Auth{}, err
 		}
 
-		return response.Register{}, err
+		return response.Auth{}, err
 	}
 
 	// do create token
-	token, err := middleware.GenerateTokenAccess(*user, jwtConfig)
+	token, expiresAt, err := middleware.GenerateTokenAccess(*user, jwtConfig)
 	if err != nil {
 		return
 	}
 
-	res.User = *userResponse.FromDomain(user)
 	res.Token = token
+	res.ExpiresAt = expiresAt
+	res.User = *userResponse.FromDomain(user)
 
 	return
 }

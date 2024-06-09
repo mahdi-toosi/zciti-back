@@ -1,15 +1,12 @@
 package response
 
 import (
+	"github.com/golang-jwt/jwt/v4"
 	"go-fiber-starter/app/module/user/response"
 )
 
-type Login struct {
-	User  response.User
-	Token string
-}
-
-type Register struct {
-	User  response.User
-	Token string
+type Auth struct {
+	Token     string
+	User      response.User
+	ExpiresAt *jwt.NumericDate
 }

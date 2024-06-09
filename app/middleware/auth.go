@@ -40,9 +40,9 @@ func jwtSuccess(c *fiber.Ctx) error {
 	return c.Next()
 }
 
-func GenerateTokenAccess(user schema.User, jwtConfig config.Jwt) (token string, err error) {
+func GenerateTokenAccess(user schema.User, jwtConfig config.Jwt) (token string, expiresAt *jwt.NumericDate, err error) {
 	conf := config.NewConfig()
-	expiresAt := jwt.NewNumericDate(time.Now().Add(jwtConfig.Expiration * time.Second))
+	expiresAt = jwt.NewNumericDate(time.Now().Add(jwtConfig.Expiration * time.Second))
 
 	jwtCustomClaim := JWTCustomClaim{
 		User: schema.User{
@@ -60,8 +60,8 @@ func GenerateTokenAccess(user schema.User, jwtConfig config.Jwt) (token string, 
 	unSignedToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwtCustomClaim)
 	token, err = unSignedToken.SignedString([]byte(conf.Middleware.Jwt.Secret))
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
-	return token, nil
+	return token, expiresAt, nil
 }
