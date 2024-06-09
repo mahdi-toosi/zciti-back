@@ -25,8 +25,8 @@ type app = struct {
 	IdleTimeout    time.Duration `toml:"idle-timeout"`
 	TLS            struct {
 		Enable   bool   `toml:"enable"`
-		CertFile string `toml:"cert-asset"`
-		KeyFile  string `toml:"key-asset"`
+		CertFile string `toml:"cert-file"`
+		KeyFile  string `toml:"key-file"`
 	}
 }
 
@@ -162,5 +162,5 @@ func NewConfig() *Config {
 
 // ParseAddress func to parse address
 func (c Config) ParseAddress() string {
-	return c.App.BackendDomain + ":" + c.App.Port
+	return c.App.BackendDomain
 }

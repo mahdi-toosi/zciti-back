@@ -1,7 +1,9 @@
 package response
 
 import (
+	"fmt"
 	"github.com/lib/pq"
+	"go-fiber-starter/app/module/user/response"
 	"time"
 )
 
@@ -19,24 +21,26 @@ type Example struct {
 	UpdatedAt time.Time
 }
 
-//func FromDomain(item *schema.Example) (res *Example) {
-//	if item != nil {
-//		res = &Example{
-//			ID:         item.ID,
-//			Type:       item.Type,
-//			BusinessID: item.BusinessID,
-//			SentAt:     item.SentAt,
-//			TemplateID: item.TemplateID,
-//			//ReceiverID: item.ReceiverID,
-//			Receiver: response.User{
-//				ID:       item.Receiver.ID,
-//				FullName: fmt.Sprint(item.Receiver.FirstName, " ", item.Receiver.LastName),
-//			},
-//
-//			CreatedAt: item.CreatedAt,
-//			UpdatedAt: item.UpdatedAt,
-//		}
-//	}
-//
-//	return res
-//}
+func FromDomain(item *schema.Example) (res *Example) {
+	if item == nil {
+		return nil
+	}
+
+	res = &Example{
+		ID:         item.ID,
+		Type:       item.Type,
+		BusinessID: item.BusinessID,
+		SentAt:     item.SentAt,
+		TemplateID: item.TemplateID,
+		//ReceiverID: item.ReceiverID,
+		Receiver: response.User{
+			ID:       item.Receiver.ID,
+			FullName: fmt.Sprint(item.Receiver.FirstName, " ", item.Receiver.LastName),
+		},
+
+		CreatedAt: item.CreatedAt,
+		UpdatedAt: item.UpdatedAt,
+	}
+
+	return res
+}

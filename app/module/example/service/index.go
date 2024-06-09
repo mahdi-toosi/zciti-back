@@ -26,11 +26,14 @@ type service struct {
 }
 
 func (_i *service) Index(req request.Examples) (examples []*response.Example, paging paginator.Pagination, err error) {
-	examples, paging, err = _i.Repo.GetAll(req)
+	results, paging, err := _i.Repo.GetAll(req)
 	if err != nil {
 		return
 	}
 
+	for _, result := range results {
+		examples = append(examples, response.FromDomain(result))
+	}
 	return
 }
 
@@ -40,7 +43,7 @@ func (_i *service) Show(businessID uint64, id uint64) (article *response.Example
 		return nil, err
 	}
 
-	return result, nil
+	return response.FromDomain(result), nil
 }
 
 func (_i *service) Store(req request.Example) (err error) {
@@ -48,7 +51,6 @@ func (_i *service) Store(req request.Example) (err error) {
 }
 
 func (_i *service) Update(id uint64, req request.Example) (err error) {
-	// TODO : check business id permission
 	return _i.Repo.Update(id, req.ToDomain())
 }
 
