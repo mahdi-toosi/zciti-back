@@ -18,6 +18,7 @@ type IRestController interface {
 	Store(c *fiber.Ctx) error
 	Update(c *fiber.Ctx) error
 	Delete(c *fiber.Ctx) error
+	MyBusinesses(c *fiber.Ctx) error
 }
 
 func RestController(s service.IService) IRestController {
@@ -89,7 +90,6 @@ func (_i *controller) Show(c *fiber.Ctx) error {
 	if businessID == 1 {
 		return fiber.ErrForbidden
 	}
-
 	business, err := _i.service.Show(businessID)
 	if err != nil {
 		return err
@@ -189,4 +189,38 @@ func (_i *controller) Delete(c *fiber.Ctx) error {
 	}
 
 	return c.JSON("success")
+}
+
+// MyBusinesses
+// @Summary      Get user businesses
+// @Tags         Businesses
+// @Security     Bearer
+// @Router       /user/businesses [get]
+func (_i *controller) MyBusinesses(c *fiber.Ctx) error {
+	user, err := utils.GetAuthenticatedUser(c)
+	if err != nil {
+		return err
+	}
+
+	if len(user.Permissions) == 0 {
+		return c.JSON([]string{})
+	}
+	paginate, err := paginator.Paginate(c)
+	if err != nil {
+		return err
+	}
+
+	var req request.Businesses
+	paginate.Page = 0
+	req.Pagination = paginate
+	for ID := range user.Permissions {
+		req.IDs = append(req.IDs, ID)
+	}
+
+	businesses, _, err := _i.service.Index(req)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(businesses)
 }

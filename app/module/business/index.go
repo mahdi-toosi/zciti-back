@@ -30,6 +30,7 @@ func (_i *Router) RegisterRoutes(cfg *config.Config) {
 	})
 
 	_i.App.Route("/v1/user/businesses", func(router fiber.Router) {
+		router.Get("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PReadSingle), c.MyBusinesses)
 		router.Get("/:businessID", c.Show)
 	})
 

@@ -12,7 +12,7 @@ type Business struct {
 	TypeDisplay string              `json:",omitempty"`
 	Description string              `json:",omitempty"`
 	OwnerID     uint64              `json:",omitempty"`
-	Owner       response.User       `json:",omitempty"`
+	Owner       *response.User      `json:",omitempty"`
 	Meta        schema.BusinessMeta `json:",omitempty"`
 }
 
@@ -26,17 +26,22 @@ func FromDomain(item *schema.Business) (res *Business) {
 		return res
 	}
 
-	return &Business{
-		ID:          item.ID,
-		Type:        item.Type,
-		Meta:        item.Meta,
+	b := &Business{
+		ID:   item.ID,
+		Type: item.Type,
+		//Meta:        item.Meta,
 		Title:       item.Title,
 		OwnerID:     item.OwnerID,
 		Description: item.Description,
 		TypeDisplay: schema.TypeDisplayProxy[item.Type],
-		Owner: response.User{
+	}
+
+	if item.Owner.ID != 0 {
+		b.Owner = &response.User{
 			ID:       item.Owner.ID,
 			FullName: item.Owner.FullName(),
-		},
+		}
 	}
+
+	return b
 }
