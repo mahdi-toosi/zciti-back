@@ -12,18 +12,25 @@ type User struct {
 	Mobile          uint64                 `json:",omitempty"`
 	MobileConfirmed bool                   `json:",omitempty"`
 	Permissions     schema.UserPermissions `json:",omitempty"`
+	Roles           []schema.UserRole      `json:",omitempty"`
 }
 
-func FromDomain(item *schema.User) (res *User) {
-	if item != nil {
-		res = &User{
-			ID:              item.ID,
-			FullName:        item.FullName(),
-			Mobile:          item.Mobile,
-			MobileConfirmed: item.MobileConfirmed,
-			Permissions:     item.Permissions,
-		}
+func FromDomain(item *schema.User, businessID *uint64) (res *User) {
+	if item == nil {
+		return nil
 	}
 
+	res = &User{
+		ID:              item.ID,
+		Mobile:          item.Mobile,
+		FullName:        item.FullName(),
+		MobileConfirmed: item.MobileConfirmed,
+	}
+
+	if businessID != nil {
+		res.Roles = item.Permissions[*businessID]
+	} else {
+		res.Permissions = item.Permissions
+	}
 	return res
 }

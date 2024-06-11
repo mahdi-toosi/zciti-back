@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"go-fiber-starter/app/database/schema"
 	bService "go-fiber-starter/app/module/business/service"
 	orequest "go-fiber-starter/app/module/order/request"
 	oService "go-fiber-starter/app/module/order/service"
@@ -12,6 +13,7 @@ import (
 	"go-fiber-starter/utils/config"
 	"go-fiber-starter/utils/paginator"
 	"go-fiber-starter/utils/response"
+	"golang.org/x/exp/slices"
 	"strconv"
 )
 
@@ -25,6 +27,7 @@ type IRestController interface {
 	BusinessUsers(c *fiber.Ctx) error
 	InsertUser(c *fiber.Ctx) error
 	DeleteUser(c *fiber.Ctx) error
+	BusinessUsersAddRole(c *fiber.Ctx) error
 
 	Orders(c *fiber.Ctx) error
 	OrderStore(c *fiber.Ctx) error
@@ -285,6 +288,40 @@ func (_i *controller) DeleteUser(c *fiber.Ctx) error {
 	})
 }
 
+// BusinessUsersAddRole
+// @Summary      BusinessUsersAddRole add role to business user
+// @Tags         Users
+// @Security     Bearer
+// @Param        businessId path int true "Business ID"
+// @Router       /businesses/:businessID/users-add-role [post]
+func (_i *controller) BusinessUsersAddRole(c *fiber.Ctx) error {
+	businessID, err := utils.GetIntInParams(c, "businessID")
+	if err != nil {
+		return fiber.ErrBadRequest
+	}
+
+	req := new(request.BusinessUsersStoreRole)
+	req.BusinessID = businessID
+	if err := response.ParseAndValidate(c, req); err != nil {
+		return err
+	}
+
+	validRoles := []schema.UserRole{schema.URUser, schema.URBusinessOwner, schema.URAdmin}
+	for _, role := range req.Roles {
+		if !slices.Contains(validRoles, role) {
+			return &fiber.Error{Code: fiber.StatusBadRequest, Message: "درخواست شما معتبر نمی باشد."}
+		}
+	}
+
+	if err := _i.service.BusinessUsersAddRole(*req); err != nil {
+		return err
+	}
+
+	return response.Resp(c, response.Response{
+		Messages: response.Messages{"success"},
+	})
+}
+
 // Orders
 // @Summary      Get all orders
 // @Tags         Users
@@ -364,7 +401,7 @@ func (_i *controller) OrderStore(c *fiber.Ctx) error {
 	}
 
 	req := new(orequest.Order)
-	req.UserID = user.ID
+	req.User = user
 	if err := response.ParseAndValidate(c, req); err != nil {
 		return err
 	}

@@ -17,6 +17,7 @@ type IRepository interface {
 	FindUserByMobile(mobile uint64) (user *schema.User, err error)
 
 	GetUsers(req request.BusinessUsers) (users []*schema.User, paging paginator.Pagination, err error)
+	GetUser(req request.BusinessUsersStoreRole) (user *schema.User, err error)
 	InsertUser(businessID uint64, userID uint64) (err error)
 	DeleteUser(businessID uint64, userID uint64) (err error)
 }
@@ -119,13 +120,22 @@ func (_i *repo) GetUsers(req request.BusinessUsers) (users []*schema.User, pagin
 	return
 }
 
+func (_i *repo) GetUser(req request.BusinessUsersStoreRole) (user *schema.User, err error) {
+	if err := _i.DB.Main.Exec(
+		`SELECT FROM business_users WHERE user_id = ? AND business_id = ?`,
+		req.UserID, req.BusinessID,
+	).Error; err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
 func (_i *repo) InsertUser(businessID uint64, userID uint64) (err error) {
 	err = _i.DB.Main.
-		Exec(`INSERT INTO business_users 
-    		(user_id, business_id) VALUES (?, ?)`,
+		Exec(`INSERT INTO business_users (user_id, business_id) VALUES (?, ?)`,
 			userID, businessID,
-		).
-		Error
+		).Error
 
 	if err != nil {
 		return err
@@ -136,10 +146,10 @@ func (_i *repo) InsertUser(businessID uint64, userID uint64) (err error) {
 
 func (_i *repo) DeleteUser(businessID uint64, userID uint64) (err error) {
 	err = _i.DB.Main.
-		Exec(`DELETE FROM business_users 
-       		WHERE user_id = ? AND business_id = ?`,
-			userID, businessID).
-		Error
+		Exec(
+			`DELETE FROM business_users WHERE user_id = ? AND business_id = ?`,
+			userID, businessID,
+		).Error
 
 	if err != nil {
 		return err

@@ -61,7 +61,7 @@ func (_i *service) Login(req request.Login, jwtConfig config.Jwt) (res response.
 
 	res.Token = token
 	res.ExpiresAt = expiresAt
-	res.User = *userResponse.FromDomain(user)
+	res.User = *userResponse.FromDomain(user, nil)
 
 	return
 }
@@ -94,7 +94,7 @@ func (_i *service) Register(req *request.Register, jwtConfig config.Jwt) (res re
 
 	res.Token = token
 	res.ExpiresAt = expiresAt
-	res.User = *userResponse.FromDomain(user)
+	res.User = *userResponse.FromDomain(user, nil)
 
 	return
 }

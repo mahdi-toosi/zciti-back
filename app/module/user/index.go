@@ -28,10 +28,11 @@ func (_i *Router) RegisterRoutes(cfg *config.Config) {
 		router.Delete("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DUser, mdl.PDelete), c.Delete)
 	})
 
-	_i.App.Route("/v1/business", func(router fiber.Router) {
-		router.Get("/:businessID/users", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PReadSingle), c.BusinessUsers)
-		router.Post("/:businessID/users/:userID", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PReadSingle), c.InsertUser)
-		router.Delete("/:businessID/users/:userID", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PDelete), c.DeleteUser)
+	_i.App.Route("/v1/business/:businessID", func(router fiber.Router) {
+		router.Get("/users", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PReadSingle), c.BusinessUsers)
+		router.Post("/users/:userID", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PReadSingle), c.InsertUser)
+		router.Post("/users-add-role", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PUpdate), c.BusinessUsersAddRole)
+		router.Delete("/users/:userID", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PDelete), c.DeleteUser)
 	})
 
 	// TODO move it to orders module

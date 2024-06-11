@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/gofiber/fiber/v2"
 	"go-fiber-starter/app/module/user/repository"
 	"go-fiber-starter/app/module/user/request"
 	"go-fiber-starter/app/module/user/response"
@@ -17,12 +18,11 @@ type IService interface {
 	Users(req request.BusinessUsers) (users []*response.User, paging paginator.Pagination, err error)
 	InsertUser(businessID uint64, userID uint64) (err error)
 	DeleteUser(businessID uint64, userID uint64) (err error)
+	BusinessUsersAddRole(req request.BusinessUsersStoreRole) error
 }
 
-func Service(Repo repository.IRepository) IService {
-	return &service{
-		Repo,
-	}
+func Service(repo repository.IRepository) IService {
+	return &service{repo}
 }
 
 type service struct {
@@ -36,7 +36,7 @@ func (_i *service) Index(req request.Users) (users []*response.User, paging pagi
 	}
 
 	for _, result := range results {
-		users = append(users, response.FromDomain(result))
+		users = append(users, response.FromDomain(result, nil))
 	}
 
 	return
@@ -48,7 +48,7 @@ func (_i *service) Show(id uint64) (user *response.User, err error) {
 		return nil, err
 	}
 
-	return response.FromDomain(result), nil
+	return response.FromDomain(result, nil), nil
 }
 
 func (_i *service) Store(req request.User) (err error) {
@@ -70,7 +70,7 @@ func (_i *service) Users(req request.BusinessUsers) (users []*response.User, pag
 	}
 
 	for _, result := range results {
-		users = append(users, response.FromDomain(result))
+		users = append(users, response.FromDomain(result, &req.BusinessID))
 	}
 
 	return
@@ -89,6 +89,28 @@ func (_i *service) DeleteUser(businessID uint64, userID uint64) (err error) {
 	err = _i.Repo.DeleteUser(businessID, userID)
 	if err != nil {
 		return
+	}
+
+	return nil
+}
+func (_i *service) BusinessUsersAddRole(req request.BusinessUsersStoreRole) error {
+	_, err := _i.Repo.GetUser(req)
+	if err != nil {
+		return &fiber.Error{
+			Code:    fiber.StatusBadRequest,
+			Message: "فقط برای کاربر خود میتوانید نقش مشخص کنید",
+		}
+	}
+
+	user, err := _i.Repo.GetOne(req.UserID)
+	if err != nil {
+		return err
+	}
+
+	user.Permissions[req.BusinessID] = req.Roles
+
+	if err = _i.Repo.Update(req.UserID, user); err != nil {
+		return err
 	}
 
 	return nil

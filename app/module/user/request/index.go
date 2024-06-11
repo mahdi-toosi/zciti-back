@@ -20,6 +20,12 @@ type BusinessUsers struct {
 	Keyword    string
 }
 
+type BusinessUsersStoreRole struct {
+	Roles      []schema.UserRole `example:"[user]" validate:"required"`
+	UserID     uint64            `example:"1" validate:"required,number,min=1"`
+	BusinessID uint64            `example:"1" validate:"required,number,min=1"`
+}
+
 type Users struct {
 	Pagination *paginator.Pagination
 	Keyword    string
