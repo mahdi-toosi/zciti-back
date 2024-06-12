@@ -102,7 +102,7 @@ func (_i *controller) Store(c *fiber.Ctx) error {
 	}
 
 	req := new(request.Order)
-	req.UserID = user.ID
+	req.User = user
 	req.BusinessID = businessID
 	if err := response.ParseAndValidate(c, req); err != nil {
 		return err

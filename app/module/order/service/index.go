@@ -12,6 +12,7 @@ import (
 	prepository "go-fiber-starter/app/module/product/repository"
 	reserveService "go-fiber-starter/app/module/reservation/service"
 	uniService "go-fiber-starter/app/module/uniwash/service"
+	userService "go-fiber-starter/app/module/user/service"
 	"go-fiber-starter/internal"
 	"go-fiber-starter/utils/config"
 	"go-fiber-starter/utils/paginator"
@@ -32,6 +33,7 @@ func Service(
 	repo repository.IRepository,
 	zarinPal *internal.ZarinPal,
 	uniService uniService.IService,
+	userService userService.IService,
 	productRepo prepository.IRepository,
 	orderItemRepo oirepository.IRepository,
 	reserveService reserveService.IService,
@@ -41,6 +43,7 @@ func Service(
 		config,
 		zarinPal,
 		uniService,
+		userService,
 		productRepo,
 		orderItemRepo,
 		reserveService,
@@ -52,6 +55,7 @@ type service struct {
 	Config         *config.Config
 	ZarinPal       *internal.ZarinPal
 	UniService     uniService.IService
+	UserService    userService.IService
 	ProductRepo    prepository.IRepository
 	OrderItemRepo  oirepository.IRepository
 	ReserveService reserveService.IService
@@ -116,7 +120,7 @@ func (_i *service) Store(req request.Order) (orderID *uint64, _paymentURL string
 				return nil, "", err
 			}
 
-			reservationID, err = _i.UniService.ReserveReservation(item, req.UserID, req.BusinessID)
+			reservationID, err = _i.UniService.ReserveReservation(item, req.User.ID, req.BusinessID)
 			if err != nil {
 				return nil, "", err
 			}
@@ -129,7 +133,6 @@ func (_i *service) Store(req request.Order) (orderID *uint64, _paymentURL string
 			Quantity:      item.Quantity,
 			ReservationID: reservationID,
 		})
-
 	}
 
 	var orderItems []schema.OrderItem
@@ -162,13 +165,16 @@ func (_i *service) Store(req request.Order) (orderID *uint64, _paymentURL string
 		}
 	}
 
-	if int(totalAmt) != 0 {
+	if req.Status == schema.OrderStatusCompleted {
+		if err = _i.UpdateOrderItemsAfterOrderComplete(orderItems); err != nil {
+			return orderID, "", nil
+		}
+	} else {
 		callbackURL := fmt.Sprintf("%s/v1/user/orders/status?OrderID=%d&UserID=%d",
 			_i.Config.App.BackendDomain,
 			*orderID,
-			req.UserID,
-		)
-		paymentURL, _, _, err := _i.ZarinPal.NewPaymentRequest(int(totalAmt), callbackURL, "رزرو ماشین لباسشویی", "", "")
+			req.User.ID)
+		paymentURL, _, _, err := _i.ZarinPal.NewPaymentRequest(int(totalAmt), callbackURL, "رزرو ماشین لباسشویی", "", fmt.Sprintf("0%d", req.User.Mobile))
 		if err != nil {
 			return nil, "", err
 		}
@@ -185,6 +191,8 @@ func (_i *service) Store(req request.Order) (orderID *uint64, _paymentURL string
 
 		_paymentURL = paymentURL
 	}
+
+	_ = _i.UserService.InsertUser(req.BusinessID, req.User.ID)
 
 	return orderID, _paymentURL, nil
 }
@@ -212,18 +220,23 @@ func (_i *service) Status(userID uint64, orderID uint64, authority string) (stat
 		return "OK", err
 	}
 
-	for _, item := range order.OrderItems {
-		if item.Meta.ProductVariantType != schema.ProductVariantTypeWashingMachine {
-			continue
-		}
-
-		err := _i.UniService.Reserve(*item.ReservationID)
-		if err != nil {
-			return "OK", err
-		}
+	if err = _i.UpdateOrderItemsAfterOrderComplete(order.OrderItems); err != nil {
+		return "OK", err
 	}
 
 	return "OK", nil
+}
+
+func (_i *service) UpdateOrderItemsAfterOrderComplete(orderItems []schema.OrderItem) error {
+	for _, item := range orderItems {
+		if item.Meta.ProductVariantType == schema.ProductVariantTypeWashingMachine {
+			if err := _i.UniService.Reserve(*item.ReservationID); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 func (_i *service) Update(id uint64, req request.Order) (err error) {
