@@ -52,6 +52,7 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	req.BusinessID = businessID
 	req.Mobile = c.Query("Mobile")
 	req.FullName = c.Query("FullName")
+	req.EndTime = utils.GetDateInQueries(c, "EndTime")
 	req.StartTime = utils.GetDateInQueries(c, "StartTime")
 	req.ProductID, _ = utils.GetIntInQueries(c, "ProductID")
 

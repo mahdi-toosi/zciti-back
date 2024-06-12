@@ -56,6 +56,10 @@ func (_i *repo) GetAll(req request.Reservations) (reservations []*schema.Reserva
 		query.Where("start_time::Date = ?", req.StartTime)
 	}
 
+	if !req.EndTime.IsZero() {
+		query.Where("end_time::Date = ?", req.EndTime)
+	}
+
 	if req.Pagination.Page > 0 {
 		var total int64
 		query.Count(&total)

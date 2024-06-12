@@ -22,6 +22,7 @@ type Reservations struct {
 	FullName   string
 	ProductID  uint64
 	StartTime  *time.Time
+	EndTime    *time.Time
 	Pagination *paginator.Pagination
 }
 
