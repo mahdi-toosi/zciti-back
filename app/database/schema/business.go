@@ -29,8 +29,9 @@ const (
 )
 
 var TypeDisplayProxy = map[BusinessType]string{
-	BTypeGymManager: "مدیر باشگاه",
-	BTypeBakery:     "نانوایی",
+	BTypeGymManager:    "مدیر باشگاه",
+	BTypeBakery:        "نانوایی",
+	BTypeWMReservation: "یونی واش",
 }
 
 type BusinessAccount string
