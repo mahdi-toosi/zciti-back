@@ -83,6 +83,7 @@ var Permissions = map[schema.UserRole]map[Domain]map[Permission]bool{
 		DFile:                 {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DPost:                 {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DOrder:                {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
+		DCoupon:               {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DProduct:              {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DComment:              {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DMessage:              {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
@@ -103,7 +104,7 @@ var Permissions = map[schema.UserRole]map[Domain]map[Permission]bool{
 		DComment:              {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DMessage:              {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DTaxonomy:             {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
-		DBusiness:             {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true},
+		DBusiness:             {PCreate: true, PReadSingle: true, PUpdate: true},
 		DMessageRoom:          {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DReservation:          {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DNotification:         {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
@@ -132,6 +133,7 @@ const (
 	DUser
 	DOrder
 	DFile
+	DCoupon
 	DProduct
 	DComment
 	DMessage

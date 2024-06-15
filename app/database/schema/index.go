@@ -15,6 +15,7 @@ func MainDBModels() []any {
 		Reservation{},
 		Taxonomy{},
 		Comment{},
+		Coupon{},
 		NotificationTemplate{},
 		Notification{},
 	}

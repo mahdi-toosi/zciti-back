@@ -7,6 +7,7 @@ import (
 	"go-fiber-starter/app/module/auth"
 	"go-fiber-starter/app/module/business"
 	"go-fiber-starter/app/module/comment"
+	"go-fiber-starter/app/module/coupon"
 	"go-fiber-starter/app/module/notification"
 	"go-fiber-starter/app/module/notificationTemplate"
 	"go-fiber-starter/app/module/order"
@@ -70,6 +71,7 @@ func main() {
 		asset.Module,
 		order.Module,
 		//message.Module,
+		coupon.Module,
 		comment.Module,
 		product.Module,
 		uniwash.Module,

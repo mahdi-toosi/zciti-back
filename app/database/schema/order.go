@@ -16,6 +16,8 @@ type Order struct {
 	User          User               `gorm:"foreignKey:UserID" faker:"-"`
 	BusinessID    uint64             `gorm:"index" faker:"-"`
 	Business      Business           `gorm:"foreignKey:BusinessID" faker:"-"`
+	CouponID      *uint64            `faker:"-"`
+	Coupon        Coupon             `gorm:"foreignKey:CouponID" faker:"-"`
 	ParentID      *uint64            `faker:"-"`
 	OrderItems    []OrderItem        `faker:"-"`
 	//Transactions  []Transaction `faker:"-"`

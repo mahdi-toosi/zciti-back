@@ -9,8 +9,8 @@ import (
 
 type IRepository interface {
 	GetAll(req request.Orders) (orders []*schema.Order, paging paginator.Pagination, err error)
-	GetOne(businessID uint64, id uint64) (order *schema.Order, err error)
-	Create(order *schema.Order) (orderID *uint64, err error)
+	GetOne(userID uint64, id uint64) (order *schema.Order, err error)
+	Create(order *schema.Order) (orderID uint64, err error)
 	Update(id uint64, order *schema.Order) (err error)
 	Delete(id uint64) (err error)
 }
@@ -58,9 +58,9 @@ func (_i *repo) GetAll(req request.Orders) (orders []*schema.Order, paging pagin
 	return
 }
 
-func (_i *repo) GetOne(businessID uint64, id uint64) (order *schema.Order, err error) {
+func (_i *repo) GetOne(userID uint64, id uint64) (order *schema.Order, err error) {
 	if err := _i.DB.Main.
-		Where(&schema.Order{BusinessID: businessID}).
+		Where(&schema.Order{UserID: userID}).
 		Preload("OrderItems").
 		First(&order, id).
 		Error; err != nil {
@@ -70,11 +70,11 @@ func (_i *repo) GetOne(businessID uint64, id uint64) (order *schema.Order, err e
 	return order, nil
 }
 
-func (_i *repo) Create(order *schema.Order) (orderID *uint64, err error) {
+func (_i *repo) Create(order *schema.Order) (orderID uint64, err error) {
 	if err = _i.DB.Main.Create(&order).Error; err != nil {
-		return nil, err
+		return 0, err
 	}
-	return &order.ID, nil
+	return order.ID, nil
 }
 
 func (_i *repo) Update(id uint64, order *schema.Order) (err error) {

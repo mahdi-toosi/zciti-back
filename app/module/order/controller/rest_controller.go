@@ -68,7 +68,7 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 // @Param        businessID path int true "Business ID"
 // @Router       /business/:businessID/orders/:id [get]
 func (_i *controller) Show(c *fiber.Ctx) error {
-	businessID, err := utils.GetIntInParams(c, "businessID")
+	user, err := utils.GetAuthenticatedUser(c)
 	if err != nil {
 		return err
 	}
@@ -77,7 +77,7 @@ func (_i *controller) Show(c *fiber.Ctx) error {
 		return err
 	}
 
-	order, err := _i.service.Show(businessID, id)
+	order, err := _i.service.Show(user.ID, id)
 	if err != nil {
 		return err
 	}

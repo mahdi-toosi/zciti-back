@@ -7,6 +7,7 @@ import (
 	"go-fiber-starter/app/module/auth"
 	"go-fiber-starter/app/module/business"
 	"go-fiber-starter/app/module/comment"
+	"go-fiber-starter/app/module/coupon"
 	"go-fiber-starter/app/module/notification"
 	"go-fiber-starter/app/module/notificationTemplate"
 	"go-fiber-starter/app/module/order"
@@ -28,6 +29,7 @@ type Router struct {
 	PostRouter    *post.Router
 	OrderRouter   *order.Router
 	AssetRouter   *asset.Router
+	CouponRouter  *coupon.Router
 	UniWashRouter *uniwash.Router
 	ProductRouter *product.Router
 	//MessageRouter              *message.Router
@@ -49,6 +51,7 @@ func NewRouter(
 	postRouter *post.Router,
 	orderRouter *order.Router,
 	assetRouter *asset.Router,
+	couponRouter *coupon.Router,
 	productRouter *product.Router,
 	uniWashRouter *uniwash.Router,
 	commentRouter *comment.Router,
@@ -69,6 +72,7 @@ func NewRouter(
 		PostRouter:    postRouter,
 		OrderRouter:   orderRouter,
 		AssetRouter:   assetRouter,
+		CouponRouter:  couponRouter,
 		ProductRouter: productRouter,
 		UniWashRouter: uniWashRouter,
 		CommentRouter: commentRouter,
@@ -89,6 +93,7 @@ func (r *Router) Register() { // Register routes of modules
 	r.PostRouter.RegisterRoutes(r.Cfg)
 	r.OrderRouter.RegisterRoutes(r.Cfg)
 	r.AssetRouter.RegisterRoutes(r.Cfg)
+	r.CouponRouter.RegisterRoutes(r.Cfg)
 	r.ProductRouter.RegisterRoutes(r.Cfg)
 	r.UniWashRouter.RegisterRoutes(r.Cfg)
 	r.CommentRouter.RegisterRoutes(r.Cfg)

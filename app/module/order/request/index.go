@@ -12,6 +12,7 @@ type Order struct {
 	PaymentMethod schema.OrderPaymentMethod `example:"online" validate:"required,oneof=cash online cashOnDelivery"`
 	UserNote      string                    `example:"note note" validate:"omitempty,min=2,max=255" json:",omitempty" faker:""`
 	BusinessID    uint64                    `example:"1" validate:"min=1"`
+	CouponCode    string                    `example:"code"`
 	User          schema.User
 	OrderItems    []request.OrderItem
 }
