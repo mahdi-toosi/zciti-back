@@ -118,6 +118,7 @@ func (_i *service) SendCommand(req request.SendCommand, isForUser bool) (err err
 	}
 
 	send, err := _i.MessageWay.Send(MessageWay.Message{
+		Provider:   3, // با سرشماره 9000
 		TemplateID: 8698,
 		Method:     "sms",
 		Params:     []string{commandProxy[req.Command]},
