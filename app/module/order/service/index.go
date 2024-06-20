@@ -158,6 +158,8 @@ func (_i *service) Store(req request.Order) (orderID uint64, paymentURL string, 
 		if err = _i.CouponService.ApplyCoupon(coupon, req.User.ID, &totalAmt); err != nil {
 			return 0, "", err
 		}
+
+		req.CouponID = &coupon.ID
 	}
 
 	if int(totalAmt) == 0 {

@@ -13,6 +13,7 @@ type Order struct {
 	UserNote      string                    `example:"note note" validate:"omitempty,min=2,max=255" json:",omitempty" faker:""`
 	BusinessID    uint64                    `example:"1" validate:"min=1"`
 	CouponCode    string                    `example:"code"`
+	CouponID      *uint64
 	User          schema.User
 	OrderItems    []request.OrderItem
 }
@@ -37,6 +38,10 @@ func (req *Order) ToDomain(totalAmt *float64, authority *string) *schema.Order {
 
 	if totalAmt != nil {
 		o.TotalAmt = *totalAmt
+	}
+
+	if req.CouponID != nil {
+		o.CouponID = req.CouponID
 	}
 
 	if int(*totalAmt) == 0 {
