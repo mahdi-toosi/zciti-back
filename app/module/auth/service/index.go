@@ -12,6 +12,7 @@ import (
 	userResponse "go-fiber-starter/app/module/user/response"
 	"go-fiber-starter/utils/config"
 	"go-fiber-starter/utils/helpers"
+	"gorm.io/gorm"
 	"strings"
 )
 
@@ -39,11 +40,9 @@ func (_i *service) Login(req request.Login, jwtConfig config.Jwt) (res response.
 	// check user by username
 	user, err := _i.Repo.FindUserByMobile(req.Mobile)
 	if err != nil {
-		return
-	}
-
-	if user == nil {
-		err = errors.New("نام کاربری یا رمز عبور اشتباه است")
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			err = errors.New("نام کاربری یا رمز عبور اشتباه است")
+		}
 		return
 	}
 
