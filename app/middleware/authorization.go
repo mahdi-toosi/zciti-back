@@ -103,6 +103,7 @@ var Permissions = map[schema.UserRole]map[Domain]map[Permission]bool{
 		DProduct:              {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DComment:              {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DMessage:              {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
+		DCoupon:               {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DTaxonomy:             {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DBusiness:             {PCreate: true, PReadSingle: true, PUpdate: true},
 		DMessageRoom:          {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
