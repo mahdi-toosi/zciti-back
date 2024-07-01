@@ -11,7 +11,7 @@ type User struct {
 	FullName        string                 `json:",omitempty"`
 	Mobile          uint64                 `json:",omitempty"`
 	MobileConfirmed bool                   `json:",omitempty"`
-	Permissions     schema.UserPermissions `json:",omitempty"`
+	Permissions     schema.UserPermissions ``
 	Roles           []schema.UserRole      `json:",omitempty"`
 }
 
