@@ -306,7 +306,13 @@ func (_i *controller) BusinessUsersAddRole(c *fiber.Ctx) error {
 		return err
 	}
 
-	validRoles := []schema.UserRole{schema.URUser, schema.URBusinessOwner, schema.URAdmin}
+	validRoles := []schema.UserRole{
+		schema.URUser,
+		schema.URAdmin,
+		schema.URBusinessOwner,
+		schema.URReservationViewer,
+	}
+
 	for _, role := range req.Roles {
 		if !slices.Contains(validRoles, role) {
 			return &fiber.Error{Code: fiber.StatusBadRequest, Message: "درخواست شما معتبر نمی باشد."}

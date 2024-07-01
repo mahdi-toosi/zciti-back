@@ -47,9 +47,10 @@ func (u *User) FullName() string {
 type UserRole string
 
 const (
-	URUser          UserRole = "user"
-	URAdmin         UserRole = "admin"
-	URBusinessOwner UserRole = "businessOwner"
+	URUser              UserRole = "user"
+	URAdmin             UserRole = "admin"
+	URBusinessOwner     UserRole = "businessOwner"
+	URReservationViewer UserRole = "reservationViewer"
 )
 
 func (u *User) IsAdmin() bool {

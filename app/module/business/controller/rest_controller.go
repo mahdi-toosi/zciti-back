@@ -36,7 +36,6 @@ type controller struct {
 // @Router       /businesses [get]
 func (_i *controller) Index(c *fiber.Ctx) error {
 	// TODO we need new endpoint for hiding business phone numbers
-	// TODO only admins can access this endpoint
 
 	paginate, err := paginator.Paginate(c)
 	if err != nil {
