@@ -20,6 +20,7 @@ type Order struct {
 
 type Orders struct {
 	BusinessID uint64
+	CouponID   uint64
 	UserID     uint64
 	Pagination *paginator.Pagination
 }

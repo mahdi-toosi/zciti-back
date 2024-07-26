@@ -46,8 +46,9 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	}
 
 	var req request.Orders
-	req.BusinessID = businessID
 	req.Pagination = paginate
+	req.BusinessID = businessID
+	req.CouponID, _ = utils.GetIntInQueries(c, "CouponID")
 
 	orders, paging, err := _i.service.Index(req)
 	if err != nil {

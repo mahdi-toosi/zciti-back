@@ -23,6 +23,7 @@ type Coupon struct {
 
 type Coupons struct {
 	BusinessID uint64
+	Title      string
 	Pagination *paginator.Pagination
 }
 

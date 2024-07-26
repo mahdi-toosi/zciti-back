@@ -6,16 +6,16 @@ import (
 )
 
 type Coupon struct {
-	ID          uint64
-	Code        string
-	Title       string
-	Description *string
-	Value       float64
-	Type        schema.CouponType
-	StartTime   string
-	EndTime     string
-	TimesUsed   int
-	Meta        schema.CouponMeta
+	ID          uint64            `json:",omitempty"`
+	Code        string            `json:",omitempty"`
+	Title       string            `json:",omitempty"`
+	Description *string           `json:",omitempty"`
+	Value       float64           `json:",omitempty"`
+	StartTime   string            `json:",omitempty"`
+	EndTime     string            `json:",omitempty"`
+	TimesUsed   int               `json:",omitempty"`
+	Type        schema.CouponType `json:",omitempty"`
+	Meta        schema.CouponMeta `json:",omitempty"`
 }
 
 func FromDomain(item *schema.Coupon) (res *Coupon) {

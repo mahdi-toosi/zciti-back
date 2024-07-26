@@ -2,6 +2,7 @@ package response
 
 import (
 	"go-fiber-starter/app/database/schema"
+	cresponse "go-fiber-starter/app/module/coupon/response"
 	oresponse "go-fiber-starter/app/module/orderItem/response"
 	"go-fiber-starter/app/module/user/response"
 	"time"
@@ -16,6 +17,7 @@ type Order struct {
 	UpdatedAt     time.Time                 `json:",omitempty"`
 	User          response.User             `json:",omitempty"`
 	Meta          schema.OrderMeta          `json:",omitempty"`
+	Coupon        cresponse.Coupon          `json:",omitempty"`
 	Status        schema.OrderStatus        `json:",omitempty"`
 	PaymentMethod schema.OrderPaymentMethod `json:",omitempty"`
 	OrderItems    []oresponse.OrderItem     `json:",omitempty"`
@@ -36,6 +38,10 @@ func FromDomain(item *schema.Order) (res *Order) {
 		UpdatedAt:     item.UpdatedAt,
 		BusinessID:    item.BusinessID,
 		PaymentMethod: item.PaymentMethod,
+		Coupon: cresponse.Coupon{
+			ID:    item.Coupon.ID,
+			Title: item.Coupon.Title,
+		},
 		User: response.User{
 			ID:       item.User.ID,
 			Mobile:   item.User.Mobile,

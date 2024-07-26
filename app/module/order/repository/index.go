@@ -35,6 +35,10 @@ func (_i *repo) GetAll(req request.Orders) (orders []*schema.Order, paging pagin
 		query.Where(&schema.Order{UserID: req.UserID})
 	}
 
+	if req.CouponID > 0 {
+		query.Where(&schema.Order{CouponID: &req.CouponID})
+	}
+
 	if req.Pagination.Page > 0 {
 		var total int64
 		query.Count(&total)
@@ -48,7 +52,7 @@ func (_i *repo) GetAll(req request.Orders) (orders []*schema.Order, paging pagin
 		query.Preload("User")
 	}
 
-	err = query.Preload("OrderItems.Reservation").Order("created_at desc").Find(&orders).Error
+	err = query.Preload("Coupon").Preload("OrderItems.Reservation").Order("created_at desc").Debug().Find(&orders).Error
 	if err != nil {
 		return
 	}
