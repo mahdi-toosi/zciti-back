@@ -22,6 +22,7 @@ type IRestController interface {
 	Show(c *fiber.Ctx) error
 	Store(c *fiber.Ctx) error
 	Update(c *fiber.Ctx) error
+	UpdateAccount(c *fiber.Ctx) error
 	Delete(c *fiber.Ctx) error
 
 	BusinessUsers(c *fiber.Ctx) error
@@ -133,6 +134,30 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 	}
 
 	err = _i.service.Update(id, *req)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON("success")
+}
+
+// UpdateAccount
+// @Summary      update user
+// @Security     Bearer
+// @Tags         Users
+// @Param 		 user body request.UpdateUserAccount true "User details"
+// @Param        id path int true "User ID"
+// @Router       /users/user/account [put]
+func (_i *controller) UpdateAccount(c *fiber.Ctx) error {
+	req := new(request.UpdateUserAccount)
+	if err := response.ParseAndValidate(c, req); err != nil {
+		return err
+	}
+	if err := utils.ValidateMobileNumber(strconv.FormatUint(req.Mobile, 10)); err != nil {
+		return err
+	}
+
+	err := _i.service.UpdateAccount(*req)
 	if err != nil {
 		return err
 	}

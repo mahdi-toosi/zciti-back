@@ -52,7 +52,7 @@ func (_i *repo) GetAll(req request.Orders) (orders []*schema.Order, paging pagin
 		query.Preload("User")
 	}
 
-	err = query.Preload("Coupon").Preload("OrderItems.Reservation").Order("created_at desc").Debug().Find(&orders).Error
+	err = query.Preload("Coupon").Preload("OrderItems.Reservation").Order("created_at desc").Find(&orders).Error
 	if err != nil {
 		return
 	}

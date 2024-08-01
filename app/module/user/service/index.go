@@ -5,6 +5,7 @@ import (
 	"go-fiber-starter/app/module/user/repository"
 	"go-fiber-starter/app/module/user/request"
 	"go-fiber-starter/app/module/user/response"
+	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
 )
 
@@ -13,6 +14,7 @@ type IService interface {
 	Show(id uint64) (user *response.User, err error)
 	Store(req request.User) (err error)
 	Update(id uint64, req request.User) (err error)
+	UpdateAccount(req request.UpdateUserAccount) (err error)
 	Destroy(id uint64) error
 
 	Users(req request.BusinessUsers) (users []*response.User, paging paginator.Pagination, err error)
@@ -57,6 +59,12 @@ func (_i *service) Store(req request.User) (err error) {
 
 func (_i *service) Update(id uint64, req request.User) (err error) {
 	return _i.Repo.Update(id, req.ToDomain())
+}
+
+func (_i *service) UpdateAccount(req request.UpdateUserAccount) (err error) {
+	u := req.ToDomain()
+	utils.Log(u)
+	return _i.Repo.Update(u.ID, u)
 }
 
 func (_i *service) Destroy(id uint64) error {

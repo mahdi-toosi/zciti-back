@@ -14,6 +14,13 @@ type User struct {
 	Permissions schema.UserPermissions `example:"{1:['operator']}"`
 }
 
+type UpdateUserAccount struct {
+	ID        uint64 `example:"1" validate:"required,min=1"`
+	FirstName string `example:"mahdi" validate:"required,min=2,max=255"`
+	LastName  string `example:"lastname" validate:"required,min=2,max=255"`
+	Mobile    uint64 `example:"9380338494" validate:"required,number"`
+}
+
 type BusinessUsers struct {
 	Pagination *paginator.Pagination
 	BusinessID uint64
@@ -38,5 +45,14 @@ func (req *User) ToDomain() *schema.User {
 		LastName:    req.LastName,
 		Mobile:      req.Mobile,
 		Permissions: req.Permissions,
+	}
+}
+
+func (req *UpdateUserAccount) ToDomain() *schema.User {
+	return &schema.User{
+		ID:        req.ID,
+		Mobile:    req.Mobile,
+		LastName:  req.LastName,
+		FirstName: req.FirstName,
 	}
 }

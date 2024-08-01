@@ -47,7 +47,7 @@ func (_i *repo) GetAll(req request.Businesses) (businesses []*schema.Business, p
 		query.Where("id in (?)", req.IDs)
 	}
 
-	err = query.Order("created_at desc").Debug().Find(&businesses).Error
+	err = query.Order("created_at desc").Find(&businesses).Error
 	if err != nil {
 		return
 	}

@@ -26,6 +26,8 @@ func (_i *Router) RegisterRoutes(cfg *config.Config) {
 		router.Post("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DUser, mdl.PCreate), c.Store)
 		router.Put("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DUser, mdl.PUpdate), c.Update)
 		router.Delete("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DUser, mdl.PDelete), c.Delete)
+
+		router.Put("/user/account", mdl.Protected(cfg), c.UpdateAccount)
 	})
 
 	_i.App.Route("/v1/business/:businessID", func(router fiber.Router) {

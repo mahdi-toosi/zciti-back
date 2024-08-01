@@ -23,6 +23,8 @@ func FromDomain(item *schema.User, businessID *uint64) (res *User) {
 	res = &User{
 		ID:              item.ID,
 		Mobile:          item.Mobile,
+		LastName:        item.LastName,
+		FirstName:       item.FirstName,
 		FullName:        item.FullName(),
 		MobileConfirmed: item.MobileConfirmed,
 	}
