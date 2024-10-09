@@ -190,7 +190,13 @@ func (_i *service) Store(req request.Order) (orderID uint64, paymentURL string, 
 			_i.Config.App.BackendDomain,
 			orderID,
 			req.User.ID)
-		_paymentURL, _, _, err := _i.ZarinPal.NewPaymentRequest(int(totalAmt), callbackURL, "رزرو ماشین لباسشویی", "", fmt.Sprintf("0%d", req.User.Mobile))
+
+		_paymentURL, _, _, err := _i.ZarinPal.NewPaymentRequest(
+			int(totalAmt), callbackURL,
+			"رزرو ماشین لباسشویی",
+			"",
+			fmt.Sprintf("0%d", req.User.Mobile),
+		)
 		if err != nil {
 			return 0, "", err
 		}

@@ -114,17 +114,15 @@ func (_i *repo) IndexReservedMachines(req request.ReservedMachinesRequest) (rese
 	}
 
 	if !req.Date.IsZero() {
-		loc, _ := time.LoadLocation("Asia/Tehran")
-		startTime := time.Date(req.Date.Year(), req.Date.Month(), req.Date.Day(), 0, 0, 0, 0, loc)
-		endTime := time.Date(req.Date.Year(), req.Date.Month(), req.Date.Day(), 23, 59, 59, 999999999, loc)
+		startTime := time.Date(req.Date.Year(), req.Date.Month(), req.Date.Day(), 0, 0, 0, 0, time.UTC)
+		endTime := time.Date(req.Date.Year(), req.Date.Month(), req.Date.Day(), 23, 59, 59, 999999999, time.UTC)
 		query.Where("start_time BETWEEN ? AND ?", startTime, endTime)
 
 		//query.Where("start_time::date = ?", req.Date)
 		//utils.Log(err)
 		//utils.Log(reservations)
 		//return
-		//loc, _ := time.LoadLocation("Asia/Tehran")
-		//date, err := time.ParseInLocation(time.DateOnly, req.Date, loc)
+		//date, err := time.Parse(time.DateOnly, req.Date)
 		//if err != nil {
 		//	return nil, paginator.Pagination{}, err
 		//}
