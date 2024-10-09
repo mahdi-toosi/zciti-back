@@ -1,6 +1,7 @@
 package service
 
 import (
+	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/business/repository"
 	"go-fiber-starter/app/module/business/request"
 	"go-fiber-starter/app/module/business/response"
@@ -9,7 +10,7 @@ import (
 
 type IService interface {
 	Index(req request.Businesses) (businesses []*response.Business, paging paginator.Pagination, err error)
-	Show(id uint64) (business *response.Business, err error)
+	Show(id uint64, role schema.UserRole) (business *response.Business, err error)
 	Store(req request.Business) (err error)
 	Update(id uint64, req request.Business) (err error)
 	Destroy(id uint64) error
@@ -32,19 +33,24 @@ func (_i *service) Index(req request.Businesses) (businesses []*response.Busines
 	}
 
 	for _, result := range results {
-		businesses = append(businesses, response.FromDomain(result))
+		businesses = append(businesses, response.FromDomain(result, schema.URUser))
 	}
 
 	return
 }
 
-func (_i *service) Show(id uint64) (business *response.Business, err error) {
+func (_i *service) Show(id uint64, role schema.UserRole) (business *response.Business, err error) {
 	result, err := _i.Repo.GetOne(id)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.FromDomain(result), nil
+	if role == schema.URBusinessOwner {
+		return response.FromDomain(result, schema.URBusinessOwner), nil
+	}
+
+	return response.FromDomain(result, schema.URUser), nil
+
 }
 
 func (_i *service) Store(req request.Business) (err error) {

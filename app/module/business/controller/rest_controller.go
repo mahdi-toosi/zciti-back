@@ -15,6 +15,7 @@ type IRestController interface {
 	Index(c *fiber.Ctx) error
 	Types(c *fiber.Ctx) error
 	Show(c *fiber.Ctx) error
+	OperatorShow(c *fiber.Ctx) error
 	Store(c *fiber.Ctx) error
 	Update(c *fiber.Ctx) error
 	Delete(c *fiber.Ctx) error
@@ -89,7 +90,30 @@ func (_i *controller) Show(c *fiber.Ctx) error {
 	if businessID == 1 {
 		return fiber.ErrForbidden
 	}
-	business, err := _i.service.Show(businessID)
+	business, err := _i.service.Show(businessID, schema.URUser)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(business)
+}
+
+// OperatorShow
+// @Summary      Get operator business
+// @Tags         Businesses
+// @Security     Bearer
+// @Param        id path int true "Business ID"
+// @Router       operator/businesses/:businessID [get]
+func (_i *controller) OperatorShow(c *fiber.Ctx) error {
+	businessID, err := utils.GetIntInParams(c, "businessID")
+	if err != nil {
+		return err
+	}
+	// TODO remove it
+	if businessID == 1 {
+		return fiber.ErrForbidden
+	}
+	business, err := _i.service.Show(businessID, schema.URBusinessOwner)
 	if err != nil {
 		return err
 	}
@@ -134,7 +158,7 @@ func (_i *controller) Update(c *fiber.Ctx) error {
 		return err
 	}
 
-	business, err := _i.service.Show(businessID)
+	business, err := _i.service.Show(businessID, schema.URUser)
 	if err != nil {
 		return fiber.ErrNotFound
 	}
@@ -173,7 +197,7 @@ func (_i *controller) Delete(c *fiber.Ctx) error {
 		return err
 	}
 
-	business, err := _i.service.Show(businessID)
+	business, err := _i.service.Show(businessID, schema.URBusinessOwner)
 	if err != nil {
 		return fiber.ErrNotFound
 	}

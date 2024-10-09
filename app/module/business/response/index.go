@@ -21,19 +21,22 @@ type BusinessTypesOption struct {
 	Value schema.BusinessType
 }
 
-func FromDomain(item *schema.Business) (res *Business) {
+func FromDomain(item *schema.Business, userRole schema.UserRole) (res *Business) {
 	if item == nil {
 		return res
 	}
 
 	b := &Business{
-		ID:   item.ID,
-		Type: item.Type,
-		//Meta:        item.Meta,
+		ID:          item.ID,
+		Type:        item.Type,
 		Title:       item.Title,
 		OwnerID:     item.OwnerID,
 		Description: item.Description,
 		TypeDisplay: schema.TypeDisplayProxy[item.Type],
+	}
+
+	if userRole == schema.URBusinessOwner {
+		b.Meta = item.Meta
 	}
 
 	if item.Owner.ID != 0 {

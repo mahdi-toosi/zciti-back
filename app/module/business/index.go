@@ -22,11 +22,18 @@ func (_i *Router) RegisterRoutes(cfg *config.Config) {
 	// define routes
 	_i.App.Route("/v1/businesses", func(router fiber.Router) {
 		router.Get("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PReadAll), c.Index)
-		router.Get("/types", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PReadSingle), c.Types)
 		router.Get("/:businessID", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PReadSingle), c.Show)
 		router.Post("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PCreate), c.Store)
 		router.Put("/:businessID", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PUpdate), c.Update)
 		router.Delete("/:businessID", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PDelete), c.Delete)
+	})
+
+	_i.App.Route("/v1/system/businesses", func(router fiber.Router) {
+		router.Get("/types", mdl.Protected(cfg), c.Types)
+	})
+
+	_i.App.Route("/v1/business-owner/businesses", func(router fiber.Router) {
+		router.Get("/:businessID", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PUpdate), c.OperatorShow)
 	})
 
 	_i.App.Route("/v1/user/businesses", func(router fiber.Router) {
