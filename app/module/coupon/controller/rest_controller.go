@@ -18,7 +18,8 @@ type IRestController interface {
 	Update(c *fiber.Ctx) error
 	Delete(c *fiber.Ctx) error
 
-	ValidateCoupon(c *fiber.Ctx) error
+	CouponValidate(c *fiber.Ctx) error
+	CouponMessageSend(c *fiber.Ctx) error
 }
 
 func RestController(s service.IService) IRestController {
@@ -164,13 +165,13 @@ func (_i *controller) Delete(c *fiber.Ctx) error {
 	return c.JSON("success")
 }
 
-// ValidateCoupon
+// CouponValidate
 // @Summary      Validate coupon
 // @Tags         Coupons
 // @Param 		 coupon body request.ValidateCoupon true "Coupon details"
 // @Param        businessID path int true "Business ID"
-// @Router       /business/:businessID/validate-coupon [post]
-func (_i *controller) ValidateCoupon(c *fiber.Ctx) error {
+// @Router       /business/:businessID/coupon-validate [post]
+func (_i *controller) CouponValidate(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")
 	if err != nil {
 		return err
@@ -192,4 +193,30 @@ func (_i *controller) ValidateCoupon(c *fiber.Ctx) error {
 	return response.Resp(c, response.Response{
 		Data: totalAmt,
 	})
+}
+
+// CouponMessageSend
+// @Summary      Coupon Message Send
+// @Tags         Coupons
+// @Param 		 coupon body request.CouponMessageSend true "Coupon details"
+// @Param        businessID path int true "Business ID"
+// @Router       /business/:businessID/coupon-message/send [post]
+func (_i *controller) CouponMessageSend(c *fiber.Ctx) error {
+	businessID, err := utils.GetIntInParams(c, "businessID")
+	if err != nil {
+		return err
+	}
+
+	req := new(request.CouponMessageSend)
+	req.BusinessID = businessID
+	if err := response.ParseAndValidate(c, req); err != nil {
+		return err
+	}
+
+	err = _i.service.CouponMessageSend(*req)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON("success")
 }

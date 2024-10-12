@@ -2,11 +2,15 @@ package service
 
 import (
 	"fmt"
+	MessageWay "github.com/MessageWay/MessageWayGolang"
 	"github.com/gofiber/fiber/v2"
+	ptime "github.com/yaa110/go-persian-calendar"
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/coupon/repository"
 	"go-fiber-starter/app/module/coupon/request"
 	"go-fiber-starter/app/module/coupon/response"
+	userRequest "go-fiber-starter/app/module/user/request"
+	userService "go-fiber-starter/app/module/user/service"
 	"go-fiber-starter/utils/paginator"
 	"golang.org/x/exp/slices"
 	"time"
@@ -19,17 +23,24 @@ type IService interface {
 	Update(id uint64, req request.Coupon) (err error)
 	Destroy(id uint64) error
 
+	CouponMessageSend(req request.CouponMessageSend) error
 	ValidateCoupon(req request.ValidateCoupon) (coupon *schema.Coupon, err error)
 	ApplyCoupon(coupon *schema.Coupon, userID uint64, totalAmt *float64) (err error)
 	CalcTotalAmtWithDiscount(coupon *schema.Coupon, totalAmt *float64) (_totalAmt float64)
 }
 
-func Service(Repo repository.IRepository) IService {
-	return &service{Repo}
+func Service(Repo repository.IRepository, userService userService.IService, messageWay *MessageWay.App) IService {
+	return &service{
+		Repo,
+		userService,
+		messageWay,
+	}
 }
 
 type service struct {
-	Repo repository.IRepository
+	Repo        repository.IRepository
+	UserService userService.IService
+	MessageWay  *MessageWay.App
 }
 
 func (_i *service) Index(req request.Coupons) (coupons []*response.Coupon, paging paginator.Pagination, err error) {
@@ -76,6 +87,41 @@ func (_i *service) Destroy(id uint64) error {
 	return _i.Repo.Delete(id)
 }
 
+func (_i *service) CouponMessageSend(req request.CouponMessageSend) error {
+	payload := userRequest.BusinessUsers{UserIDs: req.UserIDs, BusinessID: req.BusinessID}
+
+	users, _, err := _i.UserService.Users(payload)
+	if err != nil {
+		return err
+	}
+
+	coupon, err := _i.Show(req.BusinessID, req.CouponID)
+	if err != nil {
+		return err
+	}
+
+	gTime, err := time.Parse(time.DateTime, coupon.EndTime)
+	if err != nil {
+		return err
+	}
+	jTime := ptime.New(gTime)
+	for _, user := range users {
+
+		_, err := _i.MessageWay.Send(MessageWay.Message{
+			Provider:   5, // با سرشماره 5000
+			TemplateID: 12109,
+			Method:     "sms",
+			Params:     []string{user.FullName, coupon.Code, jTime.Format("yyyy/MM/dd HH:MM")},
+			Mobile:     fmt.Sprintf("0%d", user.Mobile),
+		})
+		if err != nil {
+			return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "ارسال دستور با خطا مواجه شد، دوباره امتحان کنید."}
+		}
+	}
+
+	return nil
+}
+
 func (_i *service) ValidateCoupon(req request.ValidateCoupon) (coupon *schema.Coupon, err error) {
 	coupon, err = _i.Repo.GetOne(req.BusinessID, nil, &req.Code)
 	if err != nil {
@@ -86,8 +132,7 @@ func (_i *service) ValidateCoupon(req request.ValidateCoupon) (coupon *schema.Co
 		return nil, &fiber.Error{Code: fiber.StatusBadRequest, Message: "کد تخفیف برای شما قبلا استفاده شده است"}
 	}
 
-	loc, _ := time.LoadLocation("Asia/Tehran")
-	now := time.Now().In(loc)
+	now := time.Now()
 	if now.After(coupon.EndTime) {
 		return nil, &fiber.Error{Code: fiber.StatusBadRequest, Message: "کد تخفیف منقضی شده است"}
 	} else if now.Before(coupon.StartTime) {

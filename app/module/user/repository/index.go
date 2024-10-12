@@ -97,11 +97,11 @@ func (_i *repo) GetUsers(req request.BusinessUsers) (users []*schema.User, pagin
 		Where("business_users.business_id = ?", req.BusinessID).
 		Order("created_at ASC")
 
-	if err != nil {
-		return
+	if len(req.UserIDs) > 0 {
+		query.Where("users.id IN (?)", req.UserIDs)
 	}
 
-	if req.Pagination.Page > 0 {
+	if req.Pagination != nil && req.Pagination.Page > 0 {
 		var total int64
 		query.Count(&total)
 		req.Pagination.Total = total
@@ -115,7 +115,9 @@ func (_i *repo) GetUsers(req request.BusinessUsers) (users []*schema.User, pagin
 		return
 	}
 
-	paging = *req.Pagination
+	if req.Pagination != nil {
+		paging = *req.Pagination
+	}
 
 	return
 }

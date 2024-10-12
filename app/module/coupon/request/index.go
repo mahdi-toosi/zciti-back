@@ -34,6 +34,12 @@ type ValidateCoupon struct {
 	OrderTotalAmt float64
 }
 
+type CouponMessageSend struct {
+	CouponID   uint64
+	BusinessID uint64
+	UserIDs    []uint64
+}
+
 func (req *Coupon) ToDomain() (item *schema.Coupon, err error) {
 	item = &schema.Coupon{
 		ID:          req.ID,
@@ -47,12 +53,10 @@ func (req *Coupon) ToDomain() (item *schema.Coupon, err error) {
 	}
 
 	if req.StartTime != "" {
-		loc, _ := time.LoadLocation("Asia/Tehran")
-		item.StartTime, _ = time.ParseInLocation(time.DateTime, req.StartTime, loc)
+		item.StartTime, _ = time.Parse(time.DateTime, req.StartTime)
 	}
 	if req.EndTime != "" {
-		loc, _ := time.LoadLocation("Asia/Tehran")
-		item.EndTime, _ = time.ParseInLocation(time.DateTime, req.EndTime, loc)
+		item.EndTime, _ = time.Parse(time.DateTime, req.EndTime)
 	}
 
 	if item.EndTime.Before(item.StartTime) {

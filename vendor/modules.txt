@@ -224,6 +224,9 @@ github.com/valyala/fasthttp/stackless
 # github.com/valyala/tcplisten v1.0.0
 ## explicit; go 1.12
 github.com/valyala/tcplisten
+# github.com/yaa110/go-persian-calendar v1.2.1
+## explicit; go 1.16
+github.com/yaa110/go-persian-calendar
 # go.uber.org/automaxprocs v1.5.3
 ## explicit; go 1.18
 go.uber.org/automaxprocs

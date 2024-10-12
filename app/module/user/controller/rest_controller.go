@@ -202,7 +202,7 @@ func (_i *controller) BusinessUsers(c *fiber.Ctx) error {
 		return err
 	}
 
-	business, err := _i.bService.Show(businessID)
+	business, err := _i.bService.Show(businessID, schema.URUser)
 	if err != nil {
 		return fiber.ErrNotFound
 	}
@@ -253,7 +253,7 @@ func (_i *controller) InsertUser(c *fiber.Ctx) error {
 		return err
 	}
 
-	business, err := _i.bService.Show(businessID)
+	business, err := _i.bService.Show(businessID, schema.URUser)
 	if err != nil {
 		return fiber.ErrNotFound
 	}
@@ -294,7 +294,7 @@ func (_i *controller) DeleteUser(c *fiber.Ctx) error {
 		return err
 	}
 
-	business, err := _i.bService.Show(businessID)
+	business, err := _i.bService.Show(businessID, schema.URUser)
 	if err != nil {
 		return fiber.ErrNotFound
 	}

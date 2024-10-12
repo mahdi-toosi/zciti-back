@@ -29,7 +29,8 @@ func (_i *Router) RegisterRoutes(cfg *config.Config) {
 	})
 
 	_i.App.Route("/v1/business/:businessID", func(router fiber.Router) {
-		router.Post("/validate-coupon", mdl.Protected(cfg), c.ValidateCoupon)
+		router.Post("/coupon-validate", mdl.Protected(cfg), c.CouponValidate)
+		router.Post("/coupon-message/send", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DCoupon, mdl.PCreate), c.CouponMessageSend)
 	})
 
 }
