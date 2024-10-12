@@ -53,11 +53,11 @@ func (_i *repo) GetAll(req request.Reservations) (reservations []*schema.Reserva
 	}
 
 	if !req.StartTime.IsZero() {
-		query.Where("start_time::Date = ?", req.StartTime)
+		query.Where("start_time >= ?", req.StartTime.Truncate(24*time.Hour))
 	}
 
 	if !req.EndTime.IsZero() {
-		query.Where("end_time::Date = ?", req.EndTime)
+		query.Where("end_time <= ?", req.EndTime.Truncate(24*time.Hour).Add(24*time.Hour).Add(-time.Second))
 	}
 
 	if req.Pagination.Page > 0 {
