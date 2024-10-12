@@ -1,24 +1,28 @@
 package response
 
 import (
+	ptime "github.com/yaa110/go-persian-calendar"
 	"go-fiber-starter/app/database/schema"
 	bresponse "go-fiber-starter/app/module/business/response"
+
 	uresponse "go-fiber-starter/app/module/user/response"
 	"time"
 )
 
 type Reservation struct {
-	ID         uint64
-	Status     schema.ReservationStatus
-	StartTime  time.Time
-	EndTime    time.Time
-	User       uresponse.User
-	ProductID  uint64
-	PostID     uint64
-	PostTitle  string
-	ProductSKU string
-	Business   *bresponse.Business
-	Meta       schema.ReservationMeta
+	ID               uint64
+	Status           schema.ReservationStatus
+	EndTime          time.Time
+	StartTime        time.Time
+	EndTimeDisplay   string
+	StartTimeDisplay string
+	User             uresponse.User
+	ProductID        uint64
+	PostID           uint64
+	PostTitle        string
+	ProductSKU       string
+	Business         *bresponse.Business
+	Meta             schema.ReservationMeta
 }
 
 func FromDomain(item *schema.Reservation) (res *Reservation) {
@@ -56,6 +60,9 @@ func FromDomain(item *schema.Reservation) (res *Reservation) {
 			Title: item.Business.Title,
 		}
 	}
+
+	res.EndTimeDisplay = ptime.New(res.EndTime).Format("HH:mm - yyyy/MM/dd")
+	res.StartTimeDisplay = ptime.New(res.StartTime).Format("HH:mm - yyyy/MM/dd")
 
 	return res
 }

@@ -1,20 +1,23 @@
 package response
 
 import (
+	ptime "github.com/yaa110/go-persian-calendar"
 	"go-fiber-starter/app/database/schema"
 	tresponse "go-fiber-starter/app/module/taxonomy/response"
 	"time"
 )
 
 type Reservation struct {
-	ID            uint64                `json:",omitempty"`
-	EndTime       time.Time             `json:",omitempty"`
-	StartTime     time.Time             `json:",omitempty"`
-	ProductID     uint64                `json:",omitempty"`
-	ProductSKU    string                `json:",omitempty"`
-	LastCommand   schema.UniWashCommand `json:",omitempty"`
-	ProductTitle  string                `json:",omitempty"`
-	ProductDetail string                `json:",omitempty"`
+	ID               uint64                `json:",omitempty"`
+	EndTime          time.Time             `json:",omitempty"`
+	StartTime        time.Time             `json:",omitempty"`
+	EndTimeDisplay   string                `json:",omitempty"`
+	StartTimeDisplay string                `json:",omitempty"`
+	ProductID        uint64                `json:",omitempty"`
+	ProductSKU       string                `json:",omitempty"`
+	LastCommand      schema.UniWashCommand `json:",omitempty"`
+	ProductTitle     string                `json:",omitempty"`
+	ProductDetail    string                `json:",omitempty"`
 }
 
 func FromDomain(item *schema.Reservation) (res *Reservation) {
@@ -32,6 +35,9 @@ func FromDomain(item *schema.Reservation) (res *Reservation) {
 		ProductDetail: item.Product.Meta.Detail,
 		LastCommand:   item.Meta.UniWashLastCommand,
 	}
+
+	p.EndTimeDisplay = ptime.New(p.EndTime).Format("HH:mm - yyyy/MM/dd")
+	p.StartTimeDisplay = ptime.New(p.StartTime).Format("HH:mm - yyyy/MM/dd")
 
 	return p
 }

@@ -111,7 +111,7 @@ func (_i *service) CouponMessageSend(req request.CouponMessageSend) error {
 			Provider:   5, // با سرشماره 5000
 			TemplateID: 12109,
 			Method:     "sms",
-			Params:     []string{user.FullName, coupon.Code, jTime.Format("yyyy/MM/dd HH:MM")},
+			Params:     []string{user.FullName, coupon.Code, jTime.Format("yyyy/MM/dd HH:mm")},
 			Mobile:     fmt.Sprintf("0%d", user.Mobile),
 		})
 		if err != nil {
