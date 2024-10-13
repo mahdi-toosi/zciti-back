@@ -53,10 +53,12 @@ func (req *Coupon) ToDomain() (item *schema.Coupon, err error) {
 	}
 
 	if req.StartTime != "" {
-		item.StartTime, _ = time.Parse(time.DateTime, req.StartTime)
+		loc, _ := time.LoadLocation("Asia/Tehran")
+		item.StartTime, _ = time.ParseInLocation(time.DateTime, req.StartTime, loc)
 	}
 	if req.EndTime != "" {
-		item.EndTime, _ = time.Parse(time.DateTime, req.EndTime)
+		loc, _ := time.LoadLocation("Asia/Tehran")
+		item.EndTime, _ = time.ParseInLocation(time.DateTime, req.EndTime, loc)
 	}
 
 	if item.EndTime.Before(item.StartTime) {

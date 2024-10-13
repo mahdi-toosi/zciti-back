@@ -22,12 +22,14 @@ type OrderItem struct {
 }
 
 func (req *OrderItem) GetStartDateTime() time.Time {
-	startTime, _ := time.Parse(time.DateTime, req.Date+" "+req.StartTime)
+	loc, _ := time.LoadLocation("Asia/Tehran")
+	startTime, _ := time.ParseInLocation(time.DateTime, req.Date+" "+req.StartTime, loc)
 	return startTime.UTC()
 }
 
 func (req *OrderItem) GetEndDateTime() time.Time {
-	endTime, _ := time.Parse(time.DateTime, req.Date+" "+req.EndTime)
+	loc, _ := time.LoadLocation("Asia/Tehran")
+	endTime, _ := time.ParseInLocation(time.DateTime, req.Date+" "+req.EndTime, loc)
 	return endTime.UTC()
 }
 

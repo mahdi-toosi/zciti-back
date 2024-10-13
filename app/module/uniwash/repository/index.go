@@ -114,8 +114,9 @@ func (_i *repo) IndexReservedMachines(req request.ReservedMachinesRequest) (rese
 	}
 
 	if !req.Date.IsZero() {
-		startTime := time.Date(req.Date.Year(), req.Date.Month(), req.Date.Day(), 0, 0, 0, 0, time.UTC)
-		endTime := time.Date(req.Date.Year(), req.Date.Month(), req.Date.Day(), 23, 59, 59, 999999999, time.UTC)
+		loc, _ := time.LoadLocation("Asia/Tehran")
+		startTime := time.Date(req.Date.Year(), req.Date.Month(), req.Date.Day(), 0, 0, 0, 0, loc)
+		endTime := time.Date(req.Date.Year(), req.Date.Month(), req.Date.Day(), 23, 59, 59, 999999999, loc)
 		query.Where("start_time BETWEEN ? AND ?", startTime, endTime)
 
 		//query.Where("start_time::date = ?", req.Date)

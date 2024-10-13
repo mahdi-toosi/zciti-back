@@ -82,7 +82,8 @@ func (_i *controller) IndexReservedMachines(c *fiber.Ctx) error {
 	req.BusinessID = businessID
 
 	if c.Query("Date") != "" {
-		date, err := time.Parse(time.DateOnly, c.Query("Date"))
+		loc, _ := time.LoadLocation("Asia/Tehran")
+		date, err := time.ParseInLocation(time.DateOnly, c.Query("Date"), loc)
 		if err != nil {
 			return err
 		}
