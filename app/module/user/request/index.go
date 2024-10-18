@@ -23,7 +23,7 @@ type UpdateUserAccount struct {
 
 type BusinessUsers struct {
 	BusinessID uint64
-	Keyword    string
+	Username   string
 	UserIDs    []uint64
 	Pagination *paginator.Pagination
 }
