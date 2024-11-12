@@ -86,8 +86,11 @@ func (_i *controller) Show(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+
+	user, _ := utils.GetAuthenticatedUser(c)
+
 	// TODO remove it
-	if businessID == 1 {
+	if businessID == 1 && !user.IsAdmin() {
 		return fiber.ErrForbidden
 	}
 	business, err := _i.service.Show(businessID, schema.URUser)
@@ -109,8 +112,11 @@ func (_i *controller) OperatorShow(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+
+	user, _ := utils.GetAuthenticatedUser(c)
+
 	// TODO remove it
-	if businessID == 1 {
+	if businessID == 1 && !user.IsAdmin() {
 		return fiber.ErrForbidden
 	}
 	business, err := _i.service.Show(businessID, schema.URBusinessOwner)
