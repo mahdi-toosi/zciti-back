@@ -8,6 +8,7 @@ import (
 	"go-fiber-starter/app/module/reservation/response"
 	"go-fiber-starter/internal/bootstrap/database"
 	"go-fiber-starter/utils/paginator"
+	"strings"
 	"time"
 )
 
@@ -45,7 +46,7 @@ func (_i *repo) GetAll(req request.Reservations) (reservations []*schema.Reserva
 	if req.FullName != "" || req.Mobile != "" {
 		query.Joins("JOIN users ON reservations.user_id = users.id")
 		if req.FullName != "" {
-			query.Where("concat(users.first_name, ' ', users.last_name) LIKE ?", "%"+req.FullName+"%")
+			query.Where("concat(users.first_name, ' ', users.last_name) LIKE ?", strings.ReplaceAll("%"+req.FullName+"%", " ", "%"))
 		}
 		if req.Mobile != "" {
 			query.Where("users.mobile = ?", req.Mobile)

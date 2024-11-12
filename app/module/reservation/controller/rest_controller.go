@@ -3,6 +3,7 @@ package controller
 import (
 	"go-fiber-starter/utils"
 	"strconv"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"go-fiber-starter/app/module/reservation/request"
@@ -50,9 +51,9 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	var req request.Reservations
 	req.Pagination = paginate
 	req.BusinessID = businessID
-	req.Mobile = c.Query("Mobile")
-	req.FullName = c.Query("FullName")
+	req.Mobile = strings.TrimSpace(c.Query("Mobile"))
 	req.EndTime = utils.GetDateInQueries(c, "EndTime")
+	req.FullName = strings.TrimSpace(c.Query("FullName"))
 	req.StartTime = utils.GetDateInQueries(c, "StartTime")
 	req.ProductID, _ = utils.GetIntInQueries(c, "ProductID")
 

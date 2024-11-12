@@ -59,8 +59,7 @@ func GetDateInQueries(c *fiber.Ctx, key string) *time.Time {
 	if c.Query(key) == "" {
 		return &time.Time{}
 	}
-	loc, _ := time.LoadLocation("Asia/Tehran")
-	date, err := time.ParseInLocation(time.DateOnly, c.Query(key), loc)
+	date, err := time.Parse(time.DateOnly, c.Query(key))
 	if err != nil {
 		return &time.Time{}
 	}
