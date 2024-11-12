@@ -4,7 +4,6 @@ import (
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/user/request"
 	"go-fiber-starter/internal/bootstrap/database"
-	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
 )
 
@@ -103,7 +102,6 @@ func (_i *repo) GetUsers(req request.BusinessUsers) (users []*schema.User, pagin
 	}
 
 	if len(req.Username) > 0 {
-		utils.Log(req.Username)
 		query.Where("users.mobile = ?", req.Username)
 	}
 

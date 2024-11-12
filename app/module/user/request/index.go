@@ -3,6 +3,7 @@ package request
 import (
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/utils/paginator"
+	"strings"
 )
 
 type User struct {
@@ -42,10 +43,10 @@ type Users struct {
 func (req *User) ToDomain() *schema.User {
 	return &schema.User{
 		ID:          req.ID,
-		FirstName:   req.FirstName,
-		LastName:    req.LastName,
 		Mobile:      req.Mobile,
 		Permissions: req.Permissions,
+		LastName:    strings.TrimSpace(req.LastName),
+		FirstName:   strings.TrimSpace(req.FirstName),
 	}
 }
 
@@ -53,7 +54,7 @@ func (req *UpdateUserAccount) ToDomain() *schema.User {
 	return &schema.User{
 		ID:        req.ID,
 		Mobile:    req.Mobile,
-		LastName:  req.LastName,
-		FirstName: req.FirstName,
+		LastName:  strings.TrimSpace(req.LastName),
+		FirstName: strings.TrimSpace(req.FirstName),
 	}
 }
