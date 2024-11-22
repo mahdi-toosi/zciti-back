@@ -85,7 +85,7 @@ func (_i *service) SendCommand(req request.SendCommand, isForUser bool) (err err
 				Message: "شما این دستگاه را رزرو نکرده اید",
 			}
 		}
-		// TODO talk about this condition with esmaiil and hosein
+
 		// check the 10 min before start time is after now
 		if !time.Now().After(reservation.StartTime.Add(-10 * time.Minute)) {
 			return &fiber.Error{
@@ -101,10 +101,11 @@ func (_i *service) SendCommand(req request.SendCommand, isForUser bool) (err err
 			}
 		}
 
-		if reservation.Meta.UniWashLastCommand == schema.UniWashCommandON {
+		if reservation.Meta.UniWashLastCommand == schema.UniWashCommandON &&
+			!time.Now().After(reservation.Meta.UniWashLastCommandTime.Add(30*time.Second)) {
 			return &fiber.Error{
 				Code:    fiber.StatusBadRequest,
-				Message: "دستگاه در حال حاضر روشن می باشد",
+				Message: "در صورت روشن نشدن دستگاه ۳۰ ثانیه بعد دوباره درخواست دهید.",
 			}
 		}
 	}
@@ -191,13 +192,6 @@ var DefaultSetting = schema.ProductMetaReservation{
 	Info: map[time.Weekday][]schema.ProductMetaReservationInfoData{
 		0: { // sunday
 			{From: "00:00:00", To: "01:00:00"},
-			{From: "01:00:00", To: "02:00:00"},
-			{From: "02:00:00", To: "03:00:00"},
-			{From: "03:00:00", To: "04:00:00"},
-			{From: "04:00:00", To: "05:00:00"},
-			{From: "05:00:00", To: "06:00:00"},
-			{From: "06:00:00", To: "07:00:00"},
-			{From: "07:00:00", To: "08:00:00"},
 			{From: "08:00:00", To: "09:00:00"},
 			{From: "09:00:00", To: "10:00:00"},
 			{From: "10:00:00", To: "11:00:00"},
@@ -217,13 +211,6 @@ var DefaultSetting = schema.ProductMetaReservation{
 		},
 		1: { // monday
 			{From: "00:00:00", To: "01:00:00"},
-			{From: "01:00:00", To: "02:00:00"},
-			{From: "02:00:00", To: "03:00:00"},
-			{From: "03:00:00", To: "04:00:00"},
-			{From: "04:00:00", To: "05:00:00"},
-			{From: "05:00:00", To: "06:00:00"},
-			{From: "06:00:00", To: "07:00:00"},
-			{From: "07:00:00", To: "08:00:00"},
 			{From: "08:00:00", To: "09:00:00"},
 			{From: "09:00:00", To: "10:00:00"},
 			{From: "10:00:00", To: "11:00:00"},
@@ -243,13 +230,6 @@ var DefaultSetting = schema.ProductMetaReservation{
 		},
 		2: { // tuesday
 			{From: "00:00:00", To: "01:00:00"},
-			{From: "01:00:00", To: "02:00:00"},
-			{From: "02:00:00", To: "03:00:00"},
-			{From: "03:00:00", To: "04:00:00"},
-			{From: "04:00:00", To: "05:00:00"},
-			{From: "05:00:00", To: "06:00:00"},
-			{From: "06:00:00", To: "07:00:00"},
-			{From: "07:00:00", To: "08:00:00"},
 			{From: "08:00:00", To: "09:00:00"},
 			{From: "09:00:00", To: "10:00:00"},
 			{From: "10:00:00", To: "11:00:00"},
@@ -269,13 +249,6 @@ var DefaultSetting = schema.ProductMetaReservation{
 		},
 		3: { // wednesday
 			{From: "00:00:00", To: "01:00:00"},
-			{From: "01:00:00", To: "02:00:00"},
-			{From: "02:00:00", To: "03:00:00"},
-			{From: "03:00:00", To: "04:00:00"},
-			{From: "04:00:00", To: "05:00:00"},
-			{From: "05:00:00", To: "06:00:00"},
-			{From: "06:00:00", To: "07:00:00"},
-			{From: "07:00:00", To: "08:00:00"},
 			{From: "08:00:00", To: "09:00:00"},
 			{From: "09:00:00", To: "10:00:00"},
 			{From: "10:00:00", To: "11:00:00"},
@@ -295,13 +268,6 @@ var DefaultSetting = schema.ProductMetaReservation{
 		},
 		4: { // thursday
 			{From: "00:00:00", To: "01:00:00"},
-			{From: "01:00:00", To: "02:00:00"},
-			{From: "02:00:00", To: "03:00:00"},
-			{From: "03:00:00", To: "04:00:00"},
-			{From: "04:00:00", To: "05:00:00"},
-			{From: "05:00:00", To: "06:00:00"},
-			{From: "06:00:00", To: "07:00:00"},
-			{From: "07:00:00", To: "08:00:00"},
 			{From: "08:00:00", To: "09:00:00"},
 			{From: "09:00:00", To: "10:00:00"},
 			{From: "10:00:00", To: "11:00:00"},
@@ -321,13 +287,6 @@ var DefaultSetting = schema.ProductMetaReservation{
 		},
 		5: { // friday
 			{From: "00:00:00", To: "01:00:00"},
-			{From: "01:00:00", To: "02:00:00"},
-			{From: "02:00:00", To: "03:00:00"},
-			{From: "03:00:00", To: "04:00:00"},
-			{From: "04:00:00", To: "05:00:00"},
-			{From: "05:00:00", To: "06:00:00"},
-			{From: "06:00:00", To: "07:00:00"},
-			{From: "07:00:00", To: "08:00:00"},
 			{From: "08:00:00", To: "09:00:00"},
 			{From: "09:00:00", To: "10:00:00"},
 			{From: "10:00:00", To: "11:00:00"},
@@ -347,13 +306,6 @@ var DefaultSetting = schema.ProductMetaReservation{
 		},
 		6: { // saturday
 			{From: "00:00:00", To: "01:00:00"},
-			{From: "01:00:00", To: "02:00:00"},
-			{From: "02:00:00", To: "03:00:00"},
-			{From: "03:00:00", To: "04:00:00"},
-			{From: "04:00:00", To: "05:00:00"},
-			{From: "05:00:00", To: "06:00:00"},
-			{From: "06:00:00", To: "07:00:00"},
-			{From: "07:00:00", To: "08:00:00"},
 			{From: "08:00:00", To: "09:00:00"},
 			{From: "09:00:00", To: "10:00:00"},
 			{From: "10:00:00", To: "11:00:00"},
