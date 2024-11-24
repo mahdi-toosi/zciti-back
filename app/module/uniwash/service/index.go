@@ -192,6 +192,7 @@ var DefaultSetting = schema.ProductMetaReservation{
 	Info: map[time.Weekday][]schema.ProductMetaReservationInfoData{
 		0: { // sunday
 			{From: "00:00:00", To: "01:00:00"},
+			{From: "07:00:00", To: "08:00:00"},
 			{From: "08:00:00", To: "09:00:00"},
 			{From: "09:00:00", To: "10:00:00"},
 			{From: "10:00:00", To: "11:00:00"},
@@ -211,6 +212,7 @@ var DefaultSetting = schema.ProductMetaReservation{
 		},
 		1: { // monday
 			{From: "00:00:00", To: "01:00:00"},
+			{From: "07:00:00", To: "08:00:00"},
 			{From: "08:00:00", To: "09:00:00"},
 			{From: "09:00:00", To: "10:00:00"},
 			{From: "10:00:00", To: "11:00:00"},
@@ -230,6 +232,7 @@ var DefaultSetting = schema.ProductMetaReservation{
 		},
 		2: { // tuesday
 			{From: "00:00:00", To: "01:00:00"},
+			{From: "07:00:00", To: "08:00:00"},
 			{From: "08:00:00", To: "09:00:00"},
 			{From: "09:00:00", To: "10:00:00"},
 			{From: "10:00:00", To: "11:00:00"},
@@ -249,6 +252,7 @@ var DefaultSetting = schema.ProductMetaReservation{
 		},
 		3: { // wednesday
 			{From: "00:00:00", To: "01:00:00"},
+			{From: "07:00:00", To: "08:00:00"},
 			{From: "08:00:00", To: "09:00:00"},
 			{From: "09:00:00", To: "10:00:00"},
 			{From: "10:00:00", To: "11:00:00"},
@@ -268,6 +272,7 @@ var DefaultSetting = schema.ProductMetaReservation{
 		},
 		4: { // thursday
 			{From: "00:00:00", To: "01:00:00"},
+			{From: "07:00:00", To: "08:00:00"},
 			{From: "08:00:00", To: "09:00:00"},
 			{From: "09:00:00", To: "10:00:00"},
 			{From: "10:00:00", To: "11:00:00"},
@@ -287,6 +292,7 @@ var DefaultSetting = schema.ProductMetaReservation{
 		},
 		5: { // friday
 			{From: "00:00:00", To: "01:00:00"},
+			{From: "07:00:00", To: "08:00:00"},
 			{From: "08:00:00", To: "09:00:00"},
 			{From: "09:00:00", To: "10:00:00"},
 			{From: "10:00:00", To: "11:00:00"},
@@ -306,6 +312,7 @@ var DefaultSetting = schema.ProductMetaReservation{
 		},
 		6: { // saturday
 			{From: "00:00:00", To: "01:00:00"},
+			{From: "07:00:00", To: "08:00:00"},
 			{From: "08:00:00", To: "09:00:00"},
 			{From: "09:00:00", To: "10:00:00"},
 			{From: "10:00:00", To: "11:00:00"},
