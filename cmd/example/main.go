@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/efectn/fx-zerolog"
+	fxzerolog "github.com/efectn/fx-zerolog"
 	"go-fiber-starter/app/middleware"
 	"go-fiber-starter/app/module/asset"
 	"go-fiber-starter/app/module/auth"
@@ -49,6 +49,8 @@ func main() {
 		fx.Provide(config.NewConfig),
 		// logging
 		fx.Provide(bootstrap.NewLogger),
+		// bale bot
+		fx.Provide(internal.NewBaleBotLogger),
 		// fiber
 		fx.Provide(bootstrap.NewFiber),
 		// database

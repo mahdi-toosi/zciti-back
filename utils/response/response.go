@@ -2,6 +2,9 @@ package response
 
 import (
 	"fmt"
+	baleBotApi "github.com/ghiac/bale-bot-api"
+	"go-fiber-starter/internal"
+	"go-fiber-starter/utils"
 	"strings"
 
 	"github.com/go-playground/validator"
@@ -33,7 +36,7 @@ type Response struct {
 var IsProduction bool
 
 // Default error handler
-var ErrorHandler = func(c *fiber.Ctx, err error) error {
+var ErrorHandler = func(c *fiber.Ctx, err error, baleBot *internal.BaleBot) error {
 	resp := Response{
 		Code: fiber.StatusInternalServerError,
 	}
@@ -58,9 +61,13 @@ var ErrorHandler = func(c *fiber.Ctx, err error) error {
 	} else {
 		resp.Messages = Messages{err.Error()}
 	}
-
 	if !IsProduction {
 		log.Error().Err(err).Msg("From: Fiber's error handler")
+	}
+
+	msg := baleBotApi.NewMessage(baleBot.LoggerChatID, utils.PrettyJSON(resp))
+	if _, err := baleBot.Bot.Send(msg); err != nil {
+		log.Err(err).Msg("fail to send msg to bale bot")
 	}
 
 	return Resp(c, resp)

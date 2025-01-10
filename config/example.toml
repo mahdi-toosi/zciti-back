@@ -30,6 +30,11 @@ secretKey = ""
 merchantID = ""
 Sandbox = false
 
+[services.BaleBot]
+debug = false
+loggerChatID = 0
+loggerBotToken = ""
+
 [logger]
 time-format = "" # https://pkg.go.dev/time#pkg-constants, https://github.com/rs/zerolog/blob/master/api.go#L10 
 level = 0 # panic -> 5, fatal -> 4, error -> 3, warn -> 2, info -> 1, debug -> 0, trace -> -1

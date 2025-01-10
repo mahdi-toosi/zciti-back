@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/disintegration/imaging"
@@ -68,7 +69,8 @@ func GetDateInQueries(c *fiber.Ctx, key string) *time.Time {
 
 func GetAuthenticatedUser(c *fiber.Ctx) (schema.User, error) {
 	user, ok := c.Locals("user").(schema.User)
-	if ok {
+	if ok && c.Locals("user") != nil {
+
 		return user, nil
 	}
 	return schema.User{}, errors.New("ابتدا وارد حساب کاربری خود شوید و دوباره تلاش کنید")
@@ -294,4 +296,15 @@ func deleteAllContents(path string) error {
 	}
 
 	return nil
+}
+
+func PrettyJSON(v interface{}) string {
+	// Marshal the struct into JSON with indentation
+	jsonData, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		log.Err(err).Msg("Error marshaling to JSON with utils.PrettyJSON")
+	}
+
+	// Log the pretty-printed JSON
+	return string(jsonData)
 }
