@@ -20,6 +20,7 @@ type IRestController interface {
 	Update(c *fiber.Ctx) error
 	Delete(c *fiber.Ctx) error
 	MyBusinesses(c *fiber.Ctx) error
+	MenuItems(c *fiber.Ctx) error
 }
 
 func RestController(s service.IService) IRestController {
@@ -252,4 +253,28 @@ func (_i *controller) MyBusinesses(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(businesses)
+}
+
+// MenuItems
+// @Summary      get user business menu items
+// @Security     Bearer
+// @Tags         Businesses
+// @Param        id path int true "Business ID"
+// @Router       /user/businesses/:businessID/menu-items [get]
+func (_i *controller) MenuItems(c *fiber.Ctx) error {
+	user, _ := utils.GetAuthenticatedUser(c)
+
+	businessID, err := utils.GetIntInParams(c, "businessID")
+	if err != nil {
+		return fiber.ErrBadRequest
+	}
+
+	menuItems, err := _i.service.RoleMenuItems(businessID, user)
+	if err != nil {
+		return err
+	}
+
+	return response.Resp(c, response.Response{
+		Data: menuItems,
+	})
 }
