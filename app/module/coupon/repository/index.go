@@ -1,10 +1,12 @@
 package repository
 
 import (
+	"errors"
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/coupon/request"
 	"go-fiber-starter/internal/bootstrap/database"
 	"go-fiber-starter/utils/paginator"
+	"strings"
 )
 
 type IRepository interface {
@@ -73,13 +75,25 @@ func (_i *repo) GetOne(businessID uint64, id *uint64, code *string) (coupon *sch
 }
 
 func (_i *repo) Create(coupon *schema.Coupon) (err error) {
-	return _i.DB.Main.Create(coupon).Error
+	err = _i.DB.Main.Create(coupon).Error
+
+	if err != nil && strings.Contains(err.Error(), "value violates unique constraint") {
+		return errors.New("این کد کوپن قبلا ثبت شده است، لطفا مقداری خاص ثبت کنید")
+	}
+
+	return err
 }
 
 func (_i *repo) Update(id uint64, coupon *schema.Coupon) (err error) {
-	return _i.DB.Main.Model(&schema.Coupon{}).
+	err = _i.DB.Main.Model(&schema.Coupon{}).
 		Where(&schema.Coupon{ID: id, BusinessID: coupon.BusinessID}).
 		Updates(coupon).Error
+
+	if err != nil && strings.Contains(err.Error(), "value violates unique constraint") {
+		return errors.New("این کد کوپن قبلا ثبت شده است، لطفا مقداری خاص ثبت کنید")
+	}
+
+	return err
 }
 
 func (_i *repo) Delete(id uint64) error {

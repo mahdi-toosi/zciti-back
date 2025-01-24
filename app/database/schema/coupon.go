@@ -31,12 +31,13 @@ const (
 )
 
 type CouponMeta struct {
-	UsedBy         []uint64 `json:",omitempty"`
-	MaxUsage       int      `json:",omitempty"`
-	MinPrice       float64  `json:",omitempty"`
-	MaxPrice       float64  `json:",omitempty"`
-	MaxDiscount    float64  `json:",omitempty"`
-	IncludeUserIDs []uint64 `json:",omitempty"`
+	UsedBy                 []uint64 `json:",omitempty"`
+	MaxUsage               int      `json:",omitempty"`
+	MinPrice               float64  `json:",omitempty"`
+	MaxPrice               float64  `json:",omitempty"`
+	MaxDiscount            float64  `json:",omitempty"`
+	IncludeUserIDs         []uint64 `json:",omitempty"`
+	LimitInReservationTime bool     `json:",omitempty"`
 	//IncludeProducts []uint64 `json:",omitempty"`
 	//ExcludeProducts []uint64 `json:",omitempty"`
 }
