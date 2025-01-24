@@ -2,6 +2,7 @@ package internal
 
 import (
 	baleBotApi "github.com/ghiac/bale-bot-api"
+	"github.com/rs/zerolog/log"
 	"go-fiber-starter/utils/config"
 )
 
@@ -13,7 +14,11 @@ type BaleBot struct {
 func NewBaleBotLogger(cfg *config.Config) *BaleBot {
 	bot, err := baleBotApi.NewBaleBotAPI(cfg.Services.BaleBot.LoggerBotToken)
 	if err != nil {
-		panic(err)
+		log.Err(err).Msg("Error creating new BaleBot")
+		return &BaleBot{
+			Bot:          nil,
+			LoggerChatID: cfg.Services.BaleBot.LoggerChatID,
+		}
 	}
 
 	bot.Debug = cfg.Services.BaleBot.Debug
