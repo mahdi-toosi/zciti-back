@@ -2,8 +2,8 @@ package bootstrap
 
 import (
 	"context"
+	"go-fiber-starter/internal"
 	"os"
-	"runtime"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -16,16 +16,23 @@ import (
 	"go.uber.org/fx"
 )
 
-func NewFiber(cfg *config.Config) *fiber.App {
+func NewFiber(cfg *config.Config, baleBot *internal.BaleBot) *fiber.App {
+	var errHandler = func(c *fiber.Ctx, _error error) error {
+		if err := response.ErrorHandler(c, _error, baleBot); err != nil {
+			return err
+		}
+		return nil
+	}
+
 	// setup
 	app := fiber.New(fiber.Config{
+		DisableStartupMessage: true,
+		ErrorHandler:          errHandler,
 		ServerHeader:          cfg.App.Name,
 		AppName:               cfg.App.Name,
 		Prefork:               cfg.App.Prefork,
-		ErrorHandler:          response.ErrorHandler,
-		IdleTimeout:           cfg.App.IdleTimeout * time.Second,
 		EnablePrintRoutes:     cfg.App.PrintRoutes,
-		DisableStartupMessage: true,
+		IdleTimeout:           cfg.App.IdleTimeout * time.Second,
 	})
 
 	// pass production config to check it
@@ -34,10 +41,19 @@ func NewFiber(cfg *config.Config) *fiber.App {
 	return app
 }
 
-func Start(lifecycle fx.Lifecycle, cfg *config.Config, fiber *fiber.App, router *router.Router, middlewares *middleware.Middleware, database *database.Database, log zerolog.Logger) {
+func Start(
+	lifecycle fx.Lifecycle,
+	cfg *config.Config,
+	fiber *fiber.App,
+	router *router.Router,
+	middlewares *middleware.Middleware,
+	database *database.Database,
+	log zerolog.Logger,
+) {
 	lifecycle.Append(
 		fx.Hook{
 			OnStart: func(ctx context.Context) error {
+
 				// Register middlewares & routes
 				middlewares.Register()
 				router.Register()
@@ -48,29 +64,29 @@ func Start(lifecycle fx.Lifecycle, cfg *config.Config, fiber *fiber.App, router 
 
 				// Debug information
 				if !cfg.App.Production {
-					prefork := "Enabled"
-					procs := runtime.GOMAXPROCS(0)
-					if !cfg.App.Prefork {
-						procs = 1
-						prefork = "Disabled"
-					}
+					//prefork := "Enabled"
+					//procs := runtime.GOMAXPROCS(0)
+					//if !cfg.App.Prefork {
+					//	procs = 1
+					//	prefork = "Disabled"
+					//}
 
-					log.Info().Msgf("Version: %s", "-")
-					log.Info().Msgf("Serve On: %s", cfg.ParseAddress())
-					log.Info().Msgf("Prefork: %s", prefork)
-					log.Info().Msgf("Handlers: %d", fiber.HandlersCount())
-					log.Info().Msgf("Processes: %d", procs)
+					//log.Info().Msgf("Version: %s", "-")
+					//log.Info().Msgf("Serve On: %s", cfg.ParseAddress())
+					//log.Info().Msgf("Prefork: %s", prefork)
+					//log.Info().Msgf("Handlers: %d", fiber.HandlersCount())
+					//log.Info().Msgf("Processes: %d", procs)
 					log.Info().Msgf("PID: %d", os.Getpid())
 				}
 
 				// Listen the app (with TLS Support)
-				if cfg.App.TLS.Enable {
-					log.Info().Msg("TLS support was enabled.")
-
-					if err := fiber.ListenTLS(cfg.App.Port, cfg.App.TLS.CertFile, cfg.App.TLS.KeyFile); err != nil {
-						log.Error().Err(err).Msg("An unknown error occurred when to run server!")
-					}
-				}
+				//if cfg.App.TLS.Enable {
+				//	log.Info().Msg("TLS support was enabled.")
+				//
+				//	if err := fiber.ListenTLS(cfg.App.Port, cfg.App.TLS.CertFile, cfg.App.TLS.KeyFile); err != nil {
+				//		log.Error().Err(err).Msg("An unknown error occurred when to run server!")
+				//	}
+				//}
 
 				go func() {
 					if err := fiber.Listen(":" + cfg.App.Port); err != nil {

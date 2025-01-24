@@ -65,6 +65,12 @@ type services = struct {
 	GoogleRecaptcha struct {
 		SecretKey string `toml:"secretKey"`
 	}
+
+	BaleBot struct {
+		Debug          bool   `toml:"debug"`
+		LoggerChatID   int64  `toml:"loggerChatID"`
+		LoggerBotToken string `toml:"loggerBotToken"`
+	}
 }
 
 // middleware

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/business/repository"
 	"go-fiber-starter/app/module/business/request"
@@ -14,11 +15,12 @@ type IService interface {
 	Store(req request.Business) (err error)
 	Update(id uint64, req request.Business) (err error)
 	Destroy(id uint64) error
+	RoleMenuItems(BusinessID uint64, user schema.User) (menuItems []response.MenuItem, err error)
 }
 
-func Service(Repo repository.IRepository) IService {
+func Service(repo repository.IRepository) IService {
 	return &service{
-		Repo,
+		repo,
 	}
 }
 
@@ -63,4 +65,18 @@ func (_i *service) Update(id uint64, req request.Business) (err error) {
 
 func (_i *service) Destroy(id uint64) error {
 	return _i.Repo.Delete(id)
+}
+
+func (_i *service) RoleMenuItems(businessID uint64, user schema.User) (menuItems []response.MenuItem, err error) {
+	if len(user.Permissions[businessID]) == 0 {
+		return nil, errors.New("شما به این کسب و کار دسترسی ندارید")
+	}
+
+	business, err := _i.Show(businessID, schema.URUser)
+	if err != nil {
+		return nil, err
+	}
+	menuItems = GenerateMenuItems(businessID, business.Type, user)
+
+	return menuItems, nil
 }

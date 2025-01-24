@@ -139,6 +139,34 @@ func (_i *service) ValidateCoupon(req request.ValidateCoupon) (coupon *schema.Co
 		return nil, &fiber.Error{Code: fiber.StatusBadRequest, Message: "کد تخفیف در حال حاضر فعال نمی باشد"}
 	}
 
+	if coupon.Meta.LimitInReservationTime {
+		jCouponStartTime := ptime.New(coupon.StartTime).Format("HH:mm - MM/dd")
+		jCouponEndTime := ptime.New(coupon.EndTime).Format("HH:mm - MM/dd")
+
+		if len(req.OrderReservationRange) == 0 {
+			return nil, &fiber.Error{
+				Code:    fiber.StatusBadRequest,
+				Message: fmt.Sprintf("کد تخیف در بازه زمانی %s - %s قابل استفاده است", jCouponStartTime, jCouponEndTime),
+			}
+		}
+
+		reqStartTime, err := time.Parse(time.DateTime, req.OrderReservationRange[0])
+		if err != nil {
+			return nil, err
+		}
+		reqEndTime, err := time.Parse(time.DateTime, req.OrderReservationRange[1])
+		if err != nil {
+			return nil, err
+		}
+
+		if coupon.StartTime.Before(reqStartTime) || coupon.EndTime.After(reqEndTime) {
+			return nil, &fiber.Error{
+				Code:    fiber.StatusBadRequest,
+				Message: fmt.Sprintf("کد تخیف در بازه زمانی %s - %s قابل استفاده است", jCouponStartTime, jCouponEndTime),
+			}
+		}
+	}
+
 	if coupon.Meta.MaxUsage > 0 && coupon.TimesUsed >= coupon.Meta.MaxUsage {
 		return nil, &fiber.Error{Code: fiber.StatusBadRequest, Message: "تعداد استفاده از کد تخفیف بیش از حد مجاز است"}
 	}
