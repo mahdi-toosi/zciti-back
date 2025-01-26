@@ -150,16 +150,17 @@ func (_i *service) ValidateCoupon(req request.ValidateCoupon) (coupon *schema.Co
 			}
 		}
 
-		reqStartTime, err := time.Parse(time.DateTime, req.OrderReservationRange[0])
+		loc, _ := time.LoadLocation("Asia/Tehran")
+		reqStartTime, err := time.ParseInLocation(time.DateTime, req.OrderReservationRange[0], loc)
 		if err != nil {
 			return nil, err
 		}
-		reqEndTime, err := time.Parse(time.DateTime, req.OrderReservationRange[1])
+		reqEndTime, err := time.ParseInLocation(time.DateTime, req.OrderReservationRange[1], loc)
 		if err != nil {
 			return nil, err
 		}
 
-		if coupon.StartTime.Before(reqStartTime) || coupon.EndTime.After(reqEndTime) {
+		if reqStartTime.Before(coupon.StartTime) || reqEndTime.After(coupon.EndTime) {
 			return nil, &fiber.Error{
 				Code:    fiber.StatusBadRequest,
 				Message: fmt.Sprintf("کد تخیف در بازه زمانی %s - %s قابل استفاده است", jCouponStartTime, jCouponEndTime),
