@@ -5,7 +5,6 @@ import (
 	"go-fiber-starter/app/module/user/repository"
 	"go-fiber-starter/app/module/user/request"
 	"go-fiber-starter/app/module/user/response"
-	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
 )
 
@@ -63,7 +62,6 @@ func (_i *service) Update(id uint64, req request.User) (err error) {
 
 func (_i *service) UpdateAccount(req request.UpdateUserAccount) (err error) {
 	u := req.ToDomain()
-	utils.Log(u)
 	return _i.Repo.Update(u.ID, u)
 }
 

@@ -143,7 +143,7 @@ func (_i *service) ValidateCoupon(req request.ValidateCoupon) (coupon *schema.Co
 		jCouponStartTime := ptime.New(coupon.StartTime).Format("HH:mm - MM/dd")
 		jCouponEndTime := ptime.New(coupon.EndTime).Format("HH:mm - MM/dd")
 
-		if len(req.OrderReservationRange) == 0 {
+		if len(req.OrderReservationRanges) == 0 || len(req.OrderReservationRanges[0]) == 0 {
 			return nil, &fiber.Error{
 				Code:    fiber.StatusBadRequest,
 				Message: fmt.Sprintf("کد تخیف در بازه زمانی %s - %s قابل استفاده است", jCouponStartTime, jCouponEndTime),
@@ -151,19 +151,21 @@ func (_i *service) ValidateCoupon(req request.ValidateCoupon) (coupon *schema.Co
 		}
 
 		loc, _ := time.LoadLocation("Asia/Tehran")
-		reqStartTime, err := time.ParseInLocation(time.DateTime, req.OrderReservationRange[0], loc)
-		if err != nil {
-			return nil, err
-		}
-		reqEndTime, err := time.ParseInLocation(time.DateTime, req.OrderReservationRange[1], loc)
-		if err != nil {
-			return nil, err
-		}
+		for _, orderReservationRang := range req.OrderReservationRanges {
+			reqStartTime, err := time.ParseInLocation(time.DateTime, orderReservationRang[0], loc)
+			if err != nil {
+				return nil, err
+			}
+			reqEndTime, err := time.ParseInLocation(time.DateTime, orderReservationRang[1], loc)
+			if err != nil {
+				return nil, err
+			}
 
-		if reqStartTime.Before(coupon.StartTime) || reqEndTime.After(coupon.EndTime) {
-			return nil, &fiber.Error{
-				Code:    fiber.StatusBadRequest,
-				Message: fmt.Sprintf("کد تخیف در بازه زمانی %s - %s قابل استفاده است", jCouponStartTime, jCouponEndTime),
+			if reqStartTime.Before(coupon.StartTime) || reqEndTime.After(coupon.EndTime) {
+				return nil, &fiber.Error{
+					Code:    fiber.StatusBadRequest,
+					Message: fmt.Sprintf("کد تخیف در بازه زمانی %s - %s قابل استفاده است", jCouponStartTime, jCouponEndTime),
+				}
 			}
 		}
 	}

@@ -25,7 +25,6 @@ type IService interface {
 	Show(userID uint64, id uint64) (order *response.Order, err error)
 	Store(req request.Order) (orderID uint64, paymentURL string, err error)
 	Status(userID uint64, orderID uint64, authority string) (status string, err error)
-	//StoreUniWash(req urequest.StoreUniWash) (err error)
 	Update(id uint64, req request.Order) (err error)
 	Destroy(id uint64) error
 }
@@ -94,6 +93,7 @@ func (_i *service) Store(req request.Order) (orderID uint64, paymentURL string, 
 	req.Status = schema.OrderStatusPending
 
 	var items = make([]oirequest.ToDomainParams, 0)
+	var OrderReservationRanges = make([][]string, 0)
 
 	for _, item := range req.OrderItems {
 		// get product
@@ -124,6 +124,11 @@ func (_i *service) Store(req request.Order) (orderID uint64, paymentURL string, 
 			if err != nil {
 				return 0, "", err
 			}
+
+			OrderReservationRanges = append(
+				OrderReservationRanges,
+				[]string{item.Date + " " + item.StartTime, item.Date + " " + item.EndTime},
+			)
 		}
 
 		items = append(items, oirequest.ToDomainParams{
@@ -145,12 +150,15 @@ func (_i *service) Store(req request.Order) (orderID uint64, paymentURL string, 
 	}
 
 	if req.CouponCode != "" {
-		coupon, err := _i.CouponService.ValidateCoupon(couponRequst.ValidateCoupon{
-			OrderTotalAmt: totalAmt,
-			UserID:        req.User.ID,
-			BusinessID:    req.BusinessID,
-			Code:          req.CouponCode,
-		})
+		p := couponRequst.ValidateCoupon{
+			OrderTotalAmt:          totalAmt,
+			UserID:                 req.User.ID,
+			BusinessID:             req.BusinessID,
+			Code:                   req.CouponCode,
+			OrderReservationRanges: OrderReservationRanges,
+		}
+
+		coupon, err := _i.CouponService.ValidateCoupon(p)
 		if err != nil {
 			return 0, "", err
 		}
