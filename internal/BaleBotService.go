@@ -9,6 +9,7 @@ import (
 type BaleBot struct {
 	Bot          *baleBotApi.BotAPI
 	LoggerChatID int64
+	Connected    bool
 }
 
 func NewBaleBotLogger(cfg *config.Config) *BaleBot {
@@ -17,6 +18,7 @@ func NewBaleBotLogger(cfg *config.Config) *BaleBot {
 		log.Err(err).Msg("Error creating new BaleBot")
 		return &BaleBot{
 			Bot:          nil,
+			Connected:    false,
 			LoggerChatID: cfg.Services.BaleBot.LoggerChatID,
 		}
 	}
@@ -49,6 +51,7 @@ func NewBaleBotLogger(cfg *config.Config) *BaleBot {
 
 	return &BaleBot{
 		Bot:          bot,
+		Connected:    true,
 		LoggerChatID: cfg.Services.BaleBot.LoggerChatID,
 	}
 }
