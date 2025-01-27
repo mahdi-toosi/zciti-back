@@ -31,6 +31,8 @@ type Response struct {
 	Messages Messages `json:",omitempty"`
 	Data     any      `json:",omitempty"`
 	Meta     any      `json:",omitempty"`
+	URL      string   `json:",omitempty"`
+	Token    []string `json:",omitempty"`
 }
 
 var IsProduction bool
@@ -65,9 +67,14 @@ var ErrorHandler = func(c *fiber.Ctx, err error, baleBot *internal.BaleBot) erro
 		log.Error().Err(err).Msg("From: Fiber's error handler")
 	}
 
-	msg := baleBotApi.NewMessage(baleBot.LoggerChatID, utils.PrettyJSON(resp))
-	if _, err := baleBot.Bot.Send(msg); err != nil {
-		log.Err(err).Msg("fail to send msg to bale bot")
+	if baleBot.Connected {
+		baleBotMsgPayload := resp
+		baleBotMsgPayload.URL = c.Request().URI().String()
+		baleBotMsgPayload.Token = c.GetReqHeaders()["Authorization"]
+		msg := baleBotApi.NewMessage(baleBot.LoggerChatID, utils.PrettyJSON(baleBotMsgPayload))
+		if _, err := baleBot.Bot.Send(msg); err != nil {
+			log.Err(err).Msg("fail to send msg to bale bot")
+		}
 	}
 
 	return Resp(c, resp)

@@ -28,11 +28,11 @@ type Coupons struct {
 }
 
 type ValidateCoupon struct {
-	Code                  string
-	UserID                uint64
-	BusinessID            uint64
-	OrderTotalAmt         float64
-	OrderReservationRange []string
+	Code                   string
+	UserID                 uint64
+	BusinessID             uint64
+	OrderTotalAmt          float64
+	OrderReservationRanges [][]string
 }
 
 type CouponMessageSend struct {

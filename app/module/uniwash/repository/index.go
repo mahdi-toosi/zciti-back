@@ -155,7 +155,6 @@ func (_i *repo) IndexReservedMachines(req request.ReservedMachinesRequest) (rese
 		return
 	}
 
-	// utils.Log(reservations)
 	paging = *req.Pagination
 
 	return
