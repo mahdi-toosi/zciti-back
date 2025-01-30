@@ -3,6 +3,9 @@ package response
 import (
 	"fmt"
 	baleBotApi "github.com/ghiac/bale-bot-api"
+	"github.com/golang-jwt/jwt/v4"
+	"go-fiber-starter/app/database/schema"
+	"go-fiber-starter/app/middleware"
 	"go-fiber-starter/internal"
 	"go-fiber-starter/utils"
 	"strings"
@@ -31,8 +34,6 @@ type Response struct {
 	Messages Messages `json:",omitempty"`
 	Data     any      `json:",omitempty"`
 	Meta     any      `json:",omitempty"`
-	URL      string   `json:",omitempty"`
-	Token    []string `json:",omitempty"`
 }
 
 var IsProduction bool
@@ -67,15 +68,7 @@ var ErrorHandler = func(c *fiber.Ctx, err error, baleBot *internal.BaleBot) erro
 		log.Error().Err(err).Msg("From: Fiber's error handler")
 	}
 
-	if baleBot.Connected {
-		baleBotMsgPayload := resp
-		baleBotMsgPayload.URL = c.Request().URI().String()
-		baleBotMsgPayload.Token = c.GetReqHeaders()["Authorization"]
-		msg := baleBotApi.NewMessage(baleBot.LoggerChatID, utils.PrettyJSON(baleBotMsgPayload))
-		if _, err := baleBot.Bot.Send(msg); err != nil {
-			log.Err(err).Msg("fail to send msg to bale bot")
-		}
-	}
+	sendErrorToBale(c, resp, baleBot)
 
 	return Resp(c, resp)
 }
@@ -105,4 +98,58 @@ func removeTopStruct(fields map[string]string) map[string]string {
 	}
 
 	return res
+}
+
+type ErrorLog struct {
+	URL           string   `json:",omitempty"`
+	Code          int      `json:",omitempty"`
+	UserID        uint64   `json:",omitempty"`
+	UserFullName  string   `json:",omitempty"`
+	ErrorMessages Messages `json:",omitempty"`
+}
+
+func sendErrorToBale(c *fiber.Ctx, resp Response, baleBot *internal.BaleBot) {
+	if !baleBot.Connected {
+		return
+	}
+
+	baleBotMsgPayload := ErrorLog{
+		URL:           c.OriginalURL(),
+		Code:          resp.Code,
+		ErrorMessages: resp.Messages,
+	}
+
+	baleBotMsgPayload.URL = c.Request().URI().String()
+	if len(c.GetReqHeaders()["Authorization"]) > 0 {
+		user, err := getUserFromToken(c.GetReqHeaders()["Authorization"][0])
+		if err != nil {
+			utils.Log(err)
+		}
+		baleBotMsgPayload.UserID = user.ID
+		baleBotMsgPayload.UserFullName = user.FullName()
+	}
+
+	msg := baleBotApi.NewMessage(baleBot.LoggerChatID, utils.PrettyJSON(baleBotMsgPayload))
+	if _, err := baleBot.Bot.Send(msg); err != nil {
+		log.Err(err).Msg("fail to send msg to bale bot")
+	}
+}
+
+func getUserFromToken(tokenString string) (schema.User, error) {
+	tokenParts := strings.Split(tokenString, " ")
+	if len(tokenParts) != 2 {
+		return schema.User{}, fmt.Errorf("invalid token format")
+	}
+
+	token, _, err := new(jwt.Parser).ParseUnverified(tokenParts[1], &middleware.JWTCustomClaim{})
+	if err != nil {
+		return schema.User{}, err
+	}
+
+	claims, ok := token.Claims.(*middleware.JWTCustomClaim)
+	if !ok {
+		return schema.User{}, fmt.Errorf("invalid token claims")
+	}
+
+	return claims.User, nil
 }
