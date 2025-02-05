@@ -75,10 +75,9 @@ func (_i *service) ValidateReservation(req oirequest.OrderItem) error {
 }
 
 func (_i *service) SendCommand(req request.SendCommand, isForUser bool) (err error) {
-	var reservation *schema.Reservation
+	reservation, err := _i.Repo.GetReservation(req)
 
 	if isForUser {
-		reservation, err = _i.Repo.GetReservation(req)
 		if err != nil {
 			return &fiber.Error{
 				Code:    fiber.StatusBadRequest,
@@ -129,7 +128,6 @@ func (_i *service) SendCommand(req request.SendCommand, isForUser bool) (err err
 		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "ارسال دستور با خطا مواجه شد، دوباره امتحان کنید."}
 	}
 
-	// if isForUser {
 	t := time.Now().UTC()
 	reservation.Meta.UniWashLastCommandTime = &t
 	reservation.Meta.UniWashLastCommand = req.Command
@@ -137,7 +135,6 @@ func (_i *service) SendCommand(req request.SendCommand, isForUser bool) (err err
 	if err := _i.Repo.UpdateReservation(reservation); err != nil {
 		return err
 	}
-	//}
 
 	return nil
 }
