@@ -8,6 +8,7 @@ import (
 	"go-fiber-starter/app/module/reservation/response"
 	"go-fiber-starter/internal/bootstrap/database"
 	"go-fiber-starter/utils/paginator"
+	"gorm.io/gorm"
 	"strings"
 	"time"
 )
@@ -74,7 +75,14 @@ func (_i *repo) GetAll(req request.Reservations) (reservations []*schema.Reserva
 	}
 
 	err = query.
-		Preload("User").Preload("Product.Post").Order("start_time desc").Find(&reservations).Error
+		Preload("User").
+		Preload("Product", func(db *gorm.DB) *gorm.DB {
+			return db.Unscoped() // This will include soft-deleted products
+		}).
+		Preload("Product.Post", func(db *gorm.DB) *gorm.DB {
+			return db.Unscoped() // This will include soft-deleted posts
+		}).
+		Order("start_time desc").Find(&reservations).Error
 	if err != nil {
 		return
 	}
