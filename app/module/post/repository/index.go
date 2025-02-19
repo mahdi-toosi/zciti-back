@@ -30,11 +30,21 @@ type repo struct {
 
 func (_i *repo) GetAll(req request.PostsRequest) (posts []*schema.Post, paging paginator.Pagination, err error) {
 	query := _i.DB.Main.Model(&schema.Post{}).
-		Where("business_id = ?", req.BusinessID).
-		Where("type = ?", schema.PostTypePost)
+		Where("posts.business_id = ?", req.BusinessID).
+		Where("posts.type = ?", schema.PostTypePost)
+
+	if req.Status != "" {
+		query.Where("posts.status = ?", req.Status)
+	}
 
 	if req.Keyword != "" {
 		query.Where("title Like ?", "%"+req.Keyword+"%")
+	}
+
+	if len(req.Taxonomies) > 0 {
+		query.Joins("JOIN posts_taxonomies ON posts_taxonomies.post_id = posts.id").
+			Joins("JOIN taxonomies ON taxonomies.id = posts_taxonomies.taxonomy_id").
+			Where("taxonomies.title IN (?)", req.Taxonomies)
 	}
 
 	if req.Pagination.Page > 0 {
@@ -49,7 +59,7 @@ func (_i *repo) GetAll(req request.PostsRequest) (posts []*schema.Post, paging p
 	err = query.
 		Preload("Author").
 		Preload("Business").
-		Preload("Taxonomies").
+		Preload("Taxonomies").Debug().
 		Order("created_at desc").Find(&posts).Error
 	if err != nil {
 		return
@@ -65,8 +75,8 @@ func (_i *repo) GetOne(businessID uint64, id uint64) (post *schema.Post, err err
 		Preload("Author").
 		Preload("Business").
 		Preload("Taxonomies").
-		Where("business_id = ?", businessID).
-		Where("type = ?", schema.PostTypePost).
+		Where("posts.business_id = ?", businessID).
+		Where("posts.type = ?", schema.PostTypePost).
 		First(&post, id).Error
 	if err != nil {
 		return nil, err

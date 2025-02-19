@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/post/request"
 	"go-fiber-starter/app/module/post/service"
 	"go-fiber-starter/utils"
@@ -47,6 +48,10 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	req.Pagination = paginate
 	req.BusinessID = businessID
 	req.Keyword = c.Query("keyword")
+	req.Taxonomies = c.Query("Taxonomies")
+	if utils.IsForUser(c) {
+		req.Status = schema.PostStatusPublished
+	}
 
 	posts, paging, err := _i.service.Index(req)
 	if err != nil {
