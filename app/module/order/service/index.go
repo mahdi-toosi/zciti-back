@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"go-fiber-starter/app/database/schema"
@@ -88,35 +89,44 @@ func (_i *service) Show(userID uint64, id uint64) (article *response.Order, err 
 }
 
 func (_i *service) Store(req request.Order) (orderID uint64, paymentURL string, err error) {
-	// TODO if one of the items was reservation and that is not valid we should not store any thing
-	// TODO we should use db transaction ??
-	req.Status = schema.OrderStatusPending
+	// استفاده از تراکنش دیتابیس برای جلوگیری از ثبت ناقص داده‌ها
+	tx, err := _i.Repo.BeginTransaction()
+	if err != nil {
+		return 0, "", err
+	}
+	defer tx.Rollback() // در صورت بروز خطا، تراکنش لغو شود
 
-	var items = make([]oirequest.ToDomainParams, 0)
-	var OrderReservationRanges = make([][]string, 0)
+	req.Status = schema.OrderStatusPending
+	var (
+		OrderReservationRanges = make([][]string, 0)
+		totalAmt               float64
+		orderItems             = make([]schema.OrderItem, 0, len(req.OrderItems))
+	)
 
 	for _, item := range req.OrderItems {
-		// get product
 		post, err := _i.ProductRepo.GetOne(req.BusinessID, item.PostID)
 		if err != nil {
 			return 0, "", err
 		}
 
-		var product schema.Product
-		for _, p := range post.Products {
-			if p.ID == item.ProductID {
-				product = p
+		var product *schema.Product
+		for i := range post.Products {
+			if post.Products[i].ID == item.ProductID {
+				product = &post.Products[i]
 				break
 			}
 		}
 
+		if product == nil {
+			return 0, "", errors.New("product not found")
+		}
+
 		var reservationID *uint64
 		if product.VariantType != nil && *product.VariantType == schema.ProductVariantTypeWashingMachine {
-			if err = _i.UniService.ValidateReservation(item); err != nil {
+			if err := _i.UniService.ValidateReservation(item); err != nil {
 				return 0, "", err
 			}
-
-			if err = _i.ReserveService.IsReservable(item, req.BusinessID); err != nil {
+			if err := _i.ReserveService.IsReservable(item, req.BusinessID); err != nil {
 				return 0, "", err
 			}
 
@@ -125,30 +135,23 @@ func (_i *service) Store(req request.Order) (orderID uint64, paymentURL string, 
 				return 0, "", err
 			}
 
-			OrderReservationRanges = append(
-				OrderReservationRanges,
-				[]string{item.Date + " " + item.StartTime, item.Date + " " + item.EndTime},
-			)
+			OrderReservationRanges = append(OrderReservationRanges, []string{item.Date + " " + item.StartTime, item.Date + " " + item.EndTime})
 		}
 
-		items = append(items, oirequest.ToDomainParams{
+		domainItem := oirequest.ToDomainParams{
 			Post:          *post,
-			Product:       product,
+			Product:       *product,
 			PostID:        item.PostID,
 			Quantity:      item.Quantity,
 			ReservationID: reservationID,
-		})
-	}
+		}
 
-	var totalAmt float64
-	var orderItems = make([]schema.OrderItem, 0)
-
-	for _, item := range items {
-		i := oirequest.ToDomain(item)
+		i := oirequest.ToDomain(domainItem)
 		totalAmt += i.Subtotal
 		orderItems = append(orderItems, *i)
 	}
 
+	// اعمال کوپن تخفیف در صورت وجود
 	if req.CouponCode != "" {
 		p := couponRequst.ValidateCoupon{
 			OrderTotalAmt:          totalAmt,
@@ -170,49 +173,65 @@ func (_i *service) Store(req request.Order) (orderID uint64, paymentURL string, 
 		req.CouponID = &coupon.ID
 	}
 
-	if int(totalAmt) == 0 {
+	// بررسی مقدار حداقل سفارش
+	if totalAmt == 0 {
 		req.Status = schema.OrderStatusCompleted
-	} else if int(totalAmt) < 100 {
+	} else if totalAmt < 100 {
 		return 0, "", &fiber.Error{
 			Code:    fiber.StatusBadRequest,
-			Message: "ملبغ فاکتور کمتر از حداقل مشخص شده است",
+			Message: "مبلغ فاکتور کمتر از حداقل مشخص شده است",
 		}
 	}
-	orderID, err = _i.Repo.Create(req.ToDomain(&totalAmt, nil))
+
+	// ایجاد سفارش در دیتابیس
+	orderID, err = _i.Repo.Create(req.ToDomain(&totalAmt, nil), tx)
 	if err != nil {
 		return 0, "", err
 	}
 
+	// ایجاد آیتم‌های سفارش
 	for _, item := range orderItems {
-		if err := _i.OrderItemRepo.Create(&item, orderID); err != nil {
+		if err := _i.OrderItemRepo.Create(&item, orderID, tx); err != nil {
 			return 0, "", err
 		}
 	}
 
+	// در صورت تکمیل شدن سفارش، عملیات پس از ثبت انجام شود
 	if req.Status == schema.OrderStatusCompleted {
 		if err = _i.UpdateOrderItemsAfterOrderComplete(orderItems); err != nil {
 			return orderID, "", nil
 		}
 	} else {
-		callbackURL := fmt.Sprintf("%s/v1/user/orders/status?OrderID=%d&UserID=%d",
+		callbackURL := fmt.Sprintf(
+			"%s/v1/user/orders/status?OrderID=%d&UserID=%d",
 			_i.Config.App.BackendDomain,
 			orderID,
-			req.User.ID)
-
-		_paymentURL, _, _, err := _i.ZarinPal.NewPaymentRequest(
-			int(totalAmt), callbackURL,
-			"رزرو ماشین لباسشویی",
-			"",
-			fmt.Sprintf("0%d", req.User.Mobile),
+			req.User.ID,
 		)
-		if err != nil {
-			return 0, "", err
-		}
 
-		paymentURL = _paymentURL
+		if _i.Config.App.Production {
+			paymentURL, _, _, err = _i.ZarinPal.NewPaymentRequest(
+				int(totalAmt), callbackURL,
+				"رزرو ماشین لباسشویی",
+				"",
+				fmt.Sprintf("0%d", req.User.Mobile),
+			)
+			if err != nil {
+				return 0, "", err
+			}
+		} else {
+			callbackURL := fmt.Sprintf("%s&Status=%s", callbackURL, "OK")
+			paymentURL = callbackURL
+		}
 	}
 
+	// اضافه کردن کاربر در سیستم
 	_ = _i.UserService.InsertUser(req.BusinessID, req.User.ID)
+
+	// تأیید تراکنش دیتابیس
+	if err := tx.Commit().Error; err != nil {
+		return 0, "", err
+	}
 
 	return orderID, paymentURL, nil
 }
@@ -223,13 +242,15 @@ func (_i *service) Status(userID uint64, orderID uint64, authority string) (stat
 		return "NOK", err
 	}
 
-	verified, _, _, err := _i.ZarinPal.PaymentVerification(int(order.TotalAmt), authority)
-	if err != nil {
-		return "NOK", err
-	}
+	if _i.Config.App.Production {
+		verified, _, _, err := _i.ZarinPal.PaymentVerification(int(order.TotalAmt), authority)
+		if err != nil {
+			return "NOK", err
+		}
 
-	if !verified {
-		return "NOK", &fiber.Error{Code: fiber.StatusBadRequest, Message: "پرداخت ناموفق بوده است"}
+		if !verified {
+			return "NOK", &fiber.Error{Code: fiber.StatusBadRequest, Message: "پرداخت ناموفق بوده است"}
+		}
 	}
 
 	// if order.Meta.PaymentAuthority == authority {
