@@ -36,7 +36,22 @@ var routes = []route{
 				Child: []response.MenuItem{
 					{Title: "همه", Icon: "pi pi-circle-fill", Href: "/admin/b/:BusinessID/products"},
 					{Title: "دسته بندی ها", Icon: "pi pi-circle-fill", Href: "/admin/b/:BusinessID/products/categories"},
-					{Title: "تگ ها", Icon: "pi pi-circle-fill", Href: "/admin/b/:BusinessID/products/tags"},
+					//{Title: "تگ ها", Icon: "pi pi-circle-fill", Href: "/admin/b/:BusinessID/products/tags"},
+					//{Title: "ویژگی ها", Icon: "pi pi-circle-fill", Href: "/admin/b/:BusinessID/products/attributes"},
+				},
+			},
+		},
+	},
+	{
+		Permissions: []schema.UserRole{schema.URBusinessOwner},
+		MenuItems: menuItems{
+			schema.BTypeWMReservation: {
+				Title: "پست ها",
+				Icon:  "pi pi-box",
+				Child: []response.MenuItem{
+					{Title: "همه", Icon: "pi pi-circle-fill", Href: "/admin/b/:BusinessID/posts"},
+					{Title: "دسته بندی ها", Icon: "pi pi-circle-fill", Href: "/admin/b/:BusinessID/posts/categories"},
+					//{Title: "تگ ها", Icon: "pi pi-circle-fill", Href: "/admin/b/:BusinessID/posts/tags"},
 					//{Title: "ویژگی ها", Icon: "pi pi-circle-fill", Href: "/admin/b/:BusinessID/products/attributes"},
 				},
 			},

@@ -1,9 +1,11 @@
 package response
 
 import (
+	ptime "github.com/yaa110/go-persian-calendar"
 	"go-fiber-starter/app/database/schema"
 	tresponse "go-fiber-starter/app/module/taxonomy/response"
 	"go-fiber-starter/app/module/user/response"
+	"time"
 )
 
 type Post struct {
@@ -17,8 +19,10 @@ type Post struct {
 	Type       schema.PostType   `json:",omitempty"`
 	BusinessID uint64            `json:",omitempty"`
 	//Business   bresponse.Business   `json:",omitempty"`
-	Taxonomies []tresponse.Taxonomy `json:",omitempty"`
-	Meta       schema.PostMeta      `json:",omitempty"`
+	Taxonomies       []tresponse.Taxonomy `json:",omitempty"`
+	Meta             schema.PostMeta      `json:",omitempty"`
+	CreatedAt        time.Time            `json:",omitempty"`
+	CreatedAtDisplay string               `json:",omitempty"`
 }
 
 func FromDomain(item *schema.Post) (res *Post) {
@@ -27,13 +31,16 @@ func FromDomain(item *schema.Post) (res *Post) {
 	}
 
 	p := &Post{
-		ID:      item.ID,
-		Type:    item.Type,
-		Meta:    item.Meta,
-		Title:   item.Title,
-		Status:  item.Status,
-		Content: item.Content,
-		Author:  response.User{ID: item.Author.ID, FullName: item.Author.FullName()},
+		ID:               item.ID,
+		Type:             item.Type,
+		Meta:             item.Meta,
+		Title:            item.Title,
+		Status:           item.Status,
+		Content:          item.Content,
+		Excerpt:          item.Excerpt,
+		CreatedAt:        item.CreatedAt,
+		CreatedAtDisplay: ptime.New(item.CreatedAt).Format("HH:mm - MM/dd"),
+		Author:           response.User{ID: item.Author.ID, FullName: item.Author.FullName()},
 		//Business: bresponse.Business{ID: item.Business.ID, Title: item.Business.Title},
 	}
 

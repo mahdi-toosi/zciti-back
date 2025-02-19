@@ -29,6 +29,10 @@ func (_i *Router) RegisterRoutes(cfg *config.Config) {
 		router.Put("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DPost, mdl.PUpdate), c.Update)
 		router.Delete("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DPost, mdl.PDelete), c.Delete)
 	})
+
+	_i.App.Route("/v1/user/business/:businessID/posts", func(router fiber.Router) {
+		router.Get("/", mdl.ForUser, c.Index)
+	})
 }
 
 func newRouter(fiber *fiber.App, controller *controller.Controller) *Router {

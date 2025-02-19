@@ -120,11 +120,12 @@ func sendErrorToBale(c *fiber.Ctx, resp Response, baleBot *internal.BaleBot) {
 	}
 
 	baleBotMsgPayload.URL = c.Request().URI().String()
-	if len(c.GetReqHeaders()["Authorization"]) > 0 {
-		user, err := getUserFromToken(c.GetReqHeaders()["Authorization"][0])
-		if err != nil {
-			utils.Log(err)
-		}
+	user, err := utils.GetAuthenticatedUser(c)
+	if err == nil {
+		baleBotMsgPayload.UserID = user.ID
+		baleBotMsgPayload.UserFullName = user.FullName()
+	} else if len(c.GetReqHeaders()["Authorization"]) > 0 {
+		user, _ := getUserFromToken(c.GetReqHeaders()["Authorization"][0])
 		baleBotMsgPayload.UserID = user.ID
 		baleBotMsgPayload.UserFullName = user.FullName()
 	}

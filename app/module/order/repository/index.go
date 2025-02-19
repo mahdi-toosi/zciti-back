@@ -5,14 +5,16 @@ import (
 	"go-fiber-starter/app/module/order/request"
 	"go-fiber-starter/internal/bootstrap/database"
 	"go-fiber-starter/utils/paginator"
+	"gorm.io/gorm"
 )
 
 type IRepository interface {
 	GetAll(req request.Orders) (orders []*schema.Order, paging paginator.Pagination, err error)
 	GetOne(userID uint64, id uint64) (order *schema.Order, err error)
-	Create(order *schema.Order) (orderID uint64, err error)
+	Create(order *schema.Order, tx *gorm.DB) (orderID uint64, err error)
 	Update(id uint64, order *schema.Order) (err error)
 	Delete(id uint64) (err error)
+	BeginTransaction() (*gorm.DB, error)
 }
 
 func Repository(db *database.Database) IRepository {
@@ -74,9 +76,15 @@ func (_i *repo) GetOne(userID uint64, id uint64) (order *schema.Order, err error
 	return order, nil
 }
 
-func (_i *repo) Create(order *schema.Order) (orderID uint64, err error) {
-	if err = _i.DB.Main.Create(&order).Error; err != nil {
-		return 0, err
+func (_i *repo) Create(order *schema.Order, tx *gorm.DB) (orderID uint64, err error) {
+	if tx != nil {
+		if err := tx.Create(&order).Error; err != nil {
+			return 0, err
+		}
+	} else {
+		if err := _i.DB.Main.Create(&order).Error; err != nil {
+			return 0, err
+		}
 	}
 	return order.ID, nil
 }
@@ -89,4 +97,12 @@ func (_i *repo) Update(id uint64, order *schema.Order) (err error) {
 
 func (_i *repo) Delete(id uint64) error {
 	return _i.DB.Main.Delete(&schema.Order{}, id).Error
+}
+
+func (_i *repo) BeginTransaction() (*gorm.DB, error) {
+	tx := _i.DB.Main.Begin()
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return tx, nil
 }

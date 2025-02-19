@@ -1,12 +1,13 @@
 package repository
 
 import (
+	"fmt"
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/product/request"
 	"go-fiber-starter/internal/bootstrap/database"
 	"go-fiber-starter/utils/paginator"
-
 	"gorm.io/gorm"
+	"time"
 )
 
 type IRepository interface {
@@ -178,7 +179,21 @@ func (_i *repo) Delete(businessID uint64, id uint64) error {
 }
 
 func (_i *repo) DeleteVariant(businessID uint64, productID uint64, variantID uint64) error {
-	return _i.DB.Main.
-		Where(&schema.Product{PostID: productID, BusinessID: businessID}).
-		Delete(&schema.Product{}, variantID).Error
+	// Check if the product has any future reservations
+	var reservationCount int64
+	err := _i.DB.Main.
+		Model(&schema.Reservation{}).
+		Where("product_id = ? AND start_time > ?", variantID, time.Now()).Debug().
+		Count(&reservationCount).
+		Error
+	if err != nil {
+		return err
+	}
+
+	// If there are future reservations, return an error
+	if reservationCount > 0 {
+		return fmt.Errorf("امکان حذف محصول وجود ندارد: %d رزرو در آینده برای این محصول وجود دارد", reservationCount) // Cannot delete product: it has future reservations
+	}
+
+	return nil
 }

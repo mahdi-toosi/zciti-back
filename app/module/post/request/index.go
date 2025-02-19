@@ -26,6 +26,8 @@ type PostTaxonomies struct {
 type PostsRequest struct {
 	BusinessID uint64
 	Keyword    string
+	Taxonomies string
+	Status     schema.PostStatus
 	Pagination *paginator.Pagination
 }
 

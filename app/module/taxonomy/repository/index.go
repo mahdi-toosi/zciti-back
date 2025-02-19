@@ -46,7 +46,7 @@ func (_i *repo) GetAll(req request.Taxonomies) (taxonomies []*schema.Taxonomy, p
 	q := fmt.Sprintf(`
 		WITH roots AS (
 			SELECT id FROM taxonomies WHERE parent_id IS NULL
-				AND business_id = ? AND %s type = ? AND deleted_at IS NULL 
+				AND business_id = ? AND %s type = ? AND %s deleted_at IS NULL 
 				OFFSET ? LIMIT ?
 		),
 			 recursive AS (
@@ -64,13 +64,10 @@ func (_i *repo) GetAll(req request.Taxonomies) (taxonomies []*schema.Taxonomy, p
 		SELECT r.* FROM recursive r ORDER BY r.created_at DESC;
 		`,
 		utils.InlineCondition(req.Domain != "", "domain = '"+req.Domain+"' AND", ""),
+		utils.InlineCondition(req.Keyword != "", "title Like '%"+req.Keyword+"%' AND", ""),
 	)
 
 	query := _i.DB.Main.Raw(q, req.BusinessID, req.Type, req.Pagination.Offset, req.Pagination.Limit)
-
-	//if req.Keyword != "" {
-	//	query.Where("title Like ?", "%"+req.Keyword+"%")
-	//}
 
 	err = query.Scan(&taxonomies).Error
 	if err != nil {

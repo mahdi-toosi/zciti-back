@@ -75,10 +75,9 @@ func (_i *service) ValidateReservation(req oirequest.OrderItem) error {
 }
 
 func (_i *service) SendCommand(req request.SendCommand, isForUser bool) (err error) {
-	var reservation *schema.Reservation
+	reservation, err := _i.Repo.GetReservation(req)
 
 	if isForUser {
-		reservation, err = _i.Repo.GetReservation(req)
 		if err != nil {
 			return &fiber.Error{
 				Code:    fiber.StatusBadRequest,
@@ -129,7 +128,6 @@ func (_i *service) SendCommand(req request.SendCommand, isForUser bool) (err err
 		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "ارسال دستور با خطا مواجه شد، دوباره امتحان کنید."}
 	}
 
-	// if isForUser {
 	t := time.Now().UTC()
 	reservation.Meta.UniWashLastCommandTime = &t
 	reservation.Meta.UniWashLastCommand = req.Command
@@ -137,7 +135,6 @@ func (_i *service) SendCommand(req request.SendCommand, isForUser bool) (err err
 	if err := _i.Repo.UpdateReservation(reservation); err != nil {
 		return err
 	}
-	//}
 
 	return nil
 }
@@ -199,8 +196,8 @@ var DefaultSetting = schema.ProductMetaReservation{
 			{From: "11:00:00", To: "12:00:00"},
 			{From: "12:00:00", To: "13:00:00"},
 			{From: "13:00:00", To: "14:00:00"},
-			{From: "14:00:00", To: "15:00:00"},
-			{From: "15:00:00", To: "16:00:00"},
+			//{From: "14:00:00", To: "15:00:00"},
+			//{From: "15:00:00", To: "16:00:00"},
 			{From: "16:00:00", To: "17:00:00"},
 			{From: "17:00:00", To: "18:00:00"},
 			{From: "18:00:00", To: "19:00:00"},
@@ -239,8 +236,8 @@ var DefaultSetting = schema.ProductMetaReservation{
 			{From: "11:00:00", To: "12:00:00"},
 			{From: "12:00:00", To: "13:00:00"},
 			{From: "13:00:00", To: "14:00:00"},
-			{From: "14:00:00", To: "15:00:00"},
-			{From: "15:00:00", To: "16:00:00"},
+			//{From: "14:00:00", To: "15:00:00"},
+			//{From: "15:00:00", To: "16:00:00"},
 			{From: "16:00:00", To: "17:00:00"},
 			{From: "17:00:00", To: "18:00:00"},
 			{From: "18:00:00", To: "19:00:00"},
@@ -279,8 +276,8 @@ var DefaultSetting = schema.ProductMetaReservation{
 			{From: "11:00:00", To: "12:00:00"},
 			{From: "12:00:00", To: "13:00:00"},
 			{From: "13:00:00", To: "14:00:00"},
-			{From: "14:00:00", To: "15:00:00"},
-			{From: "15:00:00", To: "16:00:00"},
+			//{From: "14:00:00", To: "15:00:00"},
+			//{From: "15:00:00", To: "16:00:00"},
 			{From: "16:00:00", To: "17:00:00"},
 			{From: "17:00:00", To: "18:00:00"},
 			{From: "18:00:00", To: "19:00:00"},
