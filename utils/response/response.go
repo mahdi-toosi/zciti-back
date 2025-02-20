@@ -8,6 +8,7 @@ import (
 	"go-fiber-starter/app/middleware"
 	"go-fiber-starter/internal"
 	"go-fiber-starter/utils"
+	"golang.org/x/exp/slices"
 	"strings"
 
 	"github.com/go-playground/validator"
@@ -108,8 +109,16 @@ type ErrorLog struct {
 	ErrorMessages Messages `json:",omitempty"`
 }
 
+var bannedUrlsForLog = []string{
+	"http:///",
+	"http://185.231.180.153/",
+	"http://185.231.180.153:8000/",
+	"http://185.231.180.153:8000/login",
+	"http://185.231.180.153:8000/favicon.ico",
+}
+
 func sendErrorToBale(c *fiber.Ctx, resp Response, baleBot *internal.BaleBot) {
-	if !baleBot.Connected {
+	if !baleBot.Connected && IsProduction {
 		return
 	}
 
@@ -120,6 +129,11 @@ func sendErrorToBale(c *fiber.Ctx, resp Response, baleBot *internal.BaleBot) {
 	}
 
 	baleBotMsgPayload.URL = c.Request().URI().String()
+
+	if slices.Contains(bannedUrlsForLog, baleBotMsgPayload.URL) {
+		return
+	}
+
 	user, err := utils.GetAuthenticatedUser(c)
 	if err == nil {
 		baleBotMsgPayload.UserID = user.ID
@@ -130,7 +144,7 @@ func sendErrorToBale(c *fiber.Ctx, resp Response, baleBot *internal.BaleBot) {
 		baleBotMsgPayload.UserFullName = user.FullName()
 	}
 
-	msg := baleBotApi.NewMessage(baleBot.LoggerChatID, utils.PrettyJSON(baleBotMsgPayload))
+	msg := baleBotApi.NewMessage(baleBot.LoggerChatID, "```js \n"+utils.PrettyJSON(baleBotMsgPayload)+"\n ```")
 	if _, err := baleBot.Bot.Send(msg); err != nil {
 		log.Err(err).Msg("fail to send msg to bale bot")
 	}
