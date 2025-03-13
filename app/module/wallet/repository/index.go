@@ -12,7 +12,7 @@ import (
 type IRepository interface {
 	GetAll(req request.Wallets) (wallets []*schema.Wallet, paging paginator.Pagination, err error)
 	GetOne(id *uint64, userID *uint64, businessID *uint64) (wallet *schema.Wallet, err error)
-	Create(wallet schema.Wallet, tx *gorm.DB) (err error)
+	Create(wallet *schema.Wallet, tx *gorm.DB) (err error)
 	Update(id uint64, wallet *schema.Wallet) (err error)
 	Delete(id uint64) (err error)
 }
@@ -73,7 +73,7 @@ func (_i *repo) GetOne(id *uint64, userID *uint64, businessID *uint64) (wallet *
 	return wallet, nil
 }
 
-func (_i *repo) Create(wallet schema.Wallet, tx *gorm.DB) (err error) {
+func (_i *repo) Create(wallet *schema.Wallet, tx *gorm.DB) (err error) {
 	if tx != nil {
 		err = tx.Create(&wallet).Error
 	} else {
