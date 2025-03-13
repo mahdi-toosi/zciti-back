@@ -13,7 +13,7 @@ import (
 type IService interface {
 	Index(req request.Wallets) (wallets []*response.Wallet, paging paginator.Pagination, err error)
 	Show(id *uint64, userID *uint64, businessID *uint64) (wallet *response.Wallet, err error)
-	Store(req schema.Wallet, tx *gorm.DB) (err error)
+	Store(req *schema.Wallet, tx *gorm.DB) (err error)
 	Update(id uint64, req schema.Wallet) (err error)
 	Destroy(id uint64) error
 	GetOrCreateWallet(userID *uint64, businessID *uint64, tx *gorm.DB) (wallet *response.Wallet, err error)
@@ -50,7 +50,7 @@ func (_i *service) Show(id *uint64, userID *uint64, businessID *uint64) (article
 	return response.FromDomain(result), nil
 }
 
-func (_i *service) Store(req schema.Wallet, tx *gorm.DB) (err error) {
+func (_i *service) Store(req *schema.Wallet, tx *gorm.DB) (err error) {
 	return _i.Repo.Create(req, tx)
 }
 
@@ -73,7 +73,7 @@ func (_i *service) GetOrCreateWallet(userID *uint64, businessID *uint64, tx *gor
 			if businessID != nil {
 				walletSchema.BusinessID = businessID
 			}
-			err := _i.Store(walletSchema, tx)
+			err := _i.Store(&walletSchema, tx)
 			if err != nil {
 				return nil, err
 			}
