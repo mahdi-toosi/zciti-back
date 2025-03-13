@@ -17,7 +17,7 @@ type Coupon struct {
 	StartTime   time.Time  `gorm:"not null"`
 	EndTime     time.Time  `gorm:"not null"`
 	TimesUsed   int        ``
-	BusinessID  uint64     `gorm:"index:idx_code"`
+	BusinessID  uint64     `gorm:"index:idx_code; not null"`
 	Business    Business   `gorm:"foreignKey:BusinessID"`
 	Meta        CouponMeta `gorm:"type:jsonb"`
 	Base
