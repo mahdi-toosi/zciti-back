@@ -124,8 +124,13 @@ func (_i *service) SendCommand(req request.SendCommand, isForUser bool) (err err
 		Params:     []string{commandProxy[req.Command]},
 		Mobile:     product.Meta.UniWashMobileNumber,
 	})
+
 	if err != nil {
 		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "ارسال دستور با خطا مواجه شد، دوباره امتحان کنید."}
+	}
+
+	if send.Status == "error" {
+		return &fiber.Error{Code: fiber.StatusServiceUnavailable, Message: "ارسال دستور با خطا مواجه شد کد ۵۰۶، با پشتیبانی در میان بگذارید."}
 	}
 
 	t := time.Now().UTC()
