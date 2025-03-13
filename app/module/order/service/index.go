@@ -14,8 +14,10 @@ import (
 	oirequest "go-fiber-starter/app/module/orderItem/request"
 	prepository "go-fiber-starter/app/module/product/repository"
 	reserveService "go-fiber-starter/app/module/reservation/service"
+	transactionRepo "go-fiber-starter/app/module/transaction/repository"
 	uniService "go-fiber-starter/app/module/uniwash/service"
 	userService "go-fiber-starter/app/module/user/service"
+	walletService "go-fiber-starter/app/module/wallet/service"
 	"go-fiber-starter/internal"
 	"go-fiber-starter/utils/config"
 	"go-fiber-starter/utils/paginator"
@@ -38,8 +40,10 @@ func Service(
 	userService userService.IService,
 	productRepo prepository.IRepository,
 	couponService couponService.IService,
+	walletService walletService.IService,
 	orderItemRepo oirepository.IRepository,
 	reserveService reserveService.IService,
+	transactionRepo transactionRepo.IRepository,
 ) IService {
 	return &service{
 		repo,
@@ -47,23 +51,27 @@ func Service(
 		zarinPal,
 		uniService,
 		userService,
-		productRepo,
+		walletService,
 		couponService,
-		orderItemRepo,
+		productRepo,
 		reserveService,
+		orderItemRepo,
+		transactionRepo,
 	}
 }
 
 type service struct {
-	Repo           repository.IRepository
-	Config         *config.Config
-	ZarinPal       *internal.ZarinPal
-	UniService     uniService.IService
-	UserService    userService.IService
-	ProductRepo    prepository.IRepository
-	CouponService  couponService.IService
-	OrderItemRepo  oirepository.IRepository
-	ReserveService reserveService.IService
+	Repo            repository.IRepository
+	Config          *config.Config
+	ZarinPal        *internal.ZarinPal
+	UniService      uniService.IService
+	UserService     userService.IService
+	WalletService   walletService.IService
+	CouponService   couponService.IService
+	ProductRepo     prepository.IRepository
+	ReserveService  reserveService.IService
+	OrderItemRepo   oirepository.IRepository
+	TransactionRepo transactionRepo.IRepository
 }
 
 func (_i *service) Index(req request.Orders) (orders []*response.Order, paging paginator.Pagination, err error) {
@@ -209,8 +217,9 @@ func (_i *service) Store(req request.Order) (orderID uint64, paymentURL string, 
 			req.User.ID,
 		)
 
+		var authority string
 		if _i.Config.App.Production {
-			paymentURL, _, _, err = _i.ZarinPal.NewPaymentRequest(
+			paymentURL, authority, _, err = _i.ZarinPal.NewPaymentRequest(
 				int(totalAmt), callbackURL,
 				"رزرو ماشین لباسشویی",
 				"",
@@ -222,6 +231,27 @@ func (_i *service) Store(req request.Order) (orderID uint64, paymentURL string, 
 		} else {
 			callbackURL := fmt.Sprintf("%s&Status=%s", callbackURL, "OK")
 			paymentURL = callbackURL
+			authority = "development authority"
+		}
+
+		businessWallet, err := _i.WalletService.GetOrCreateWallet(nil, &req.BusinessID, tx)
+		if err != nil {
+			return 0, "", err
+		}
+
+		err = _i.TransactionRepo.Create(&schema.Transaction{
+			Amount:               totalAmt,
+			OrderID:              &orderID,
+			GatewayTransactionID: &authority,
+			UserID:               req.User.ID,
+			WalletID:             businessWallet.ID,
+			Description:          "رزرو ماشین لباسشویی",
+			OrderPaymentMethod:   schema.OrderPaymentMethodOnline,
+			Status:               schema.TransactionStatusPending,
+		}, tx)
+
+		if err != nil {
+			return 0, "", err
 		}
 	}
 
@@ -237,23 +267,49 @@ func (_i *service) Store(req request.Order) (orderID uint64, paymentURL string, 
 }
 
 func (_i *service) Status(userID uint64, orderID uint64, authority string) (status string, err error) {
+	transaction, err := _i.TransactionRepo.GetOne(nil, &orderID)
+	if err != nil {
+		return "NOK", err
+	}
+
 	order, err := _i.Repo.GetOne(userID, orderID)
 	if err != nil {
+
 		return "NOK", err
 	}
 
 	if _i.Config.App.Production {
 		verified, _, _, err := _i.ZarinPal.PaymentVerification(int(order.TotalAmt), authority)
 		if err != nil {
+			transaction.Status = schema.TransactionStatusFailed
+			_ = _i.TransactionRepo.Update(transaction.ID, transaction)
+
 			return "NOK", err
 		}
 
 		if !verified {
+			transaction.Status = schema.TransactionStatusFailed
+			_ = _i.TransactionRepo.Update(transaction.ID, transaction)
+
 			return "NOK", &fiber.Error{Code: fiber.StatusBadRequest, Message: "پرداخت ناموفق بوده است"}
 		}
 	}
 
-	// if order.Meta.PaymentAuthority == authority {
+	transaction.Status = schema.TransactionStatusSuccess
+	err = _i.TransactionRepo.Update(transaction.ID, transaction)
+	if err != nil {
+		return "", err
+	}
+
+	wallet, err := _i.WalletService.Show(&transaction.WalletID, nil, nil)
+	if err != nil {
+		return "", err
+	}
+	wallet.Amount += transaction.Amount
+	err = _i.WalletService.Update(wallet.ID, schema.Wallet{ID: wallet.ID, Amount: wallet.Amount})
+	if err != nil {
+		return "", err
+	}
 
 	order.Status = schema.OrderStatusCompleted
 	if err := _i.Repo.Update(orderID, order); err != nil {

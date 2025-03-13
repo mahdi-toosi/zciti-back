@@ -18,6 +18,8 @@ func MainDBModels() []any {
 		Coupon{},
 		NotificationTemplate{},
 		Notification{},
+		Wallet{},
+		Transaction{},
 	}
 }
 
