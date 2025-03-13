@@ -59,7 +59,7 @@ func (_i *repo) GetAll(req request.PostsRequest) (posts []*schema.Post, paging p
 	err = query.
 		Preload("Author").
 		Preload("Business").
-		Preload("Taxonomies").Debug().
+		Preload("Taxonomies").
 		Order("created_at desc").Find(&posts).Error
 	if err != nil {
 		return

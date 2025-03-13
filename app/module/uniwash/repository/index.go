@@ -139,7 +139,7 @@ func (_i *repo) IndexReservedMachines(req request.ReservedMachinesRequest) (rese
 	} else if req.UserID > 0 {
 		query.Where(&schema.Reservation{UserID: req.UserID}).
 			Preload("Product.Post").
-			Order("created_at desc")
+			Order("start_time desc")
 	}
 
 	if req.Pagination.Page > 0 {

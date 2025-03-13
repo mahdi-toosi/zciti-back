@@ -118,7 +118,7 @@ var bannedUrlsForLog = []string{
 }
 
 func sendErrorToBale(c *fiber.Ctx, resp Response, baleBot *internal.BaleBot) {
-	if !baleBot.Connected && IsProduction {
+	if !baleBot.Connected && IsProduction || !IsProduction {
 		return
 	}
 

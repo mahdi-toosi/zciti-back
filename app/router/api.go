@@ -15,8 +15,10 @@ import (
 	"go-fiber-starter/app/module/product"
 	"go-fiber-starter/app/module/reservation"
 	"go-fiber-starter/app/module/taxonomy"
+	"go-fiber-starter/app/module/transaction"
 	"go-fiber-starter/app/module/uniwash"
 	"go-fiber-starter/app/module/user"
+	"go-fiber-starter/app/module/wallet"
 	"go-fiber-starter/utils/config"
 )
 
@@ -24,22 +26,24 @@ type Router struct {
 	App fiber.Router
 	Cfg *config.Config
 
-	AuthRouter    *auth.Router
-	UserRouter    *user.Router
-	PostRouter    *post.Router
-	OrderRouter   *order.Router
-	AssetRouter   *asset.Router
-	CouponRouter  *coupon.Router
-	UniWashRouter *uniwash.Router
-	ProductRouter *product.Router
-	//MessageRouter              *message.Router
-	CommentRouter      *comment.Router
-	TaxonomyRouter     *taxonomy.Router
-	BusinessRouter     *business.Router
-	ReservationsRouter *reservation.Router
-	//MessageRoomRouter          *messageRoom.Router
+	AuthRouter                 *auth.Router
+	UserRouter                 *user.Router
+	PostRouter                 *post.Router
+	OrderRouter                *order.Router
+	AssetRouter                *asset.Router
+	WalletRouter               *wallet.Router
+	CouponRouter               *coupon.Router
+	UniWashRouter              *uniwash.Router
+	ProductRouter              *product.Router
+	CommentRouter              *comment.Router
+	TaxonomyRouter             *taxonomy.Router
+	BusinessRouter             *business.Router
+	TransactionRouter          *transaction.Router
+	ReservationsRouter         *reservation.Router
 	NotificationRouter         *notification.Router
 	NotificationTemplateRouter *notificationtemplate.Router
+	//MessageRouter              *message.Router
+	//MessageRoomRouter          *messageRoom.Router
 }
 
 func NewRouter(
@@ -51,17 +55,19 @@ func NewRouter(
 	postRouter *post.Router,
 	orderRouter *order.Router,
 	assetRouter *asset.Router,
+	walletRouter *wallet.Router,
 	couponRouter *coupon.Router,
 	productRouter *product.Router,
 	uniWashRouter *uniwash.Router,
 	commentRouter *comment.Router,
-	//messageRouter *message.Router,
 	taxonomyRouter *taxonomy.Router,
 	businessRouter *business.Router,
+	transactionRouter *transaction.Router,
 	reservationsRouter *reservation.Router,
-	//messageRoomRouter *messageRoom.Router,
 	notificationRouter *notification.Router,
 	notificationTemplateRouter *notificationtemplate.Router,
+	// messageRouter *message.Router,
+	// messageRoomRouter *messageRoom.Router,
 ) *Router {
 	return &Router{
 		App: fiber,
@@ -72,6 +78,7 @@ func NewRouter(
 		PostRouter:    postRouter,
 		OrderRouter:   orderRouter,
 		AssetRouter:   assetRouter,
+		WalletRouter:  walletRouter,
 		CouponRouter:  couponRouter,
 		ProductRouter: productRouter,
 		UniWashRouter: uniWashRouter,
@@ -79,6 +86,7 @@ func NewRouter(
 		//MessageRouter:              messageRouter,
 		TaxonomyRouter:     taxonomyRouter,
 		BusinessRouter:     businessRouter,
+		TransactionRouter:  transactionRouter,
 		ReservationsRouter: reservationsRouter,
 		//MessageRoomRouter:          messageRoomRouter,
 		NotificationRouter:         notificationRouter,
@@ -93,6 +101,7 @@ func (r *Router) Register() { // Register routes of modules
 	r.PostRouter.RegisterRoutes(r.Cfg)
 	r.OrderRouter.RegisterRoutes(r.Cfg)
 	r.AssetRouter.RegisterRoutes(r.Cfg)
+	r.WalletRouter.RegisterRoutes(r.Cfg)
 	r.CouponRouter.RegisterRoutes(r.Cfg)
 	r.ProductRouter.RegisterRoutes(r.Cfg)
 	r.UniWashRouter.RegisterRoutes(r.Cfg)
@@ -100,6 +109,7 @@ func (r *Router) Register() { // Register routes of modules
 	//r.MessageRouter.RegisterRoutes(r.Cfg)
 	r.TaxonomyRouter.RegisterRoutes(r.Cfg)
 	r.BusinessRouter.RegisterRoutes(r.Cfg)
+	r.TransactionRouter.RegisterRoutes(r.Cfg)
 	r.ReservationsRouter.RegisterRoutes(r.Cfg)
 	//r.MessageRoomRouter.RegisterRoutes(r.Cfg)
 	r.NotificationRouter.RegisterRoutes(r.Cfg)

@@ -66,6 +66,12 @@ var routes = []route{
 	{
 		Permissions: []schema.UserRole{schema.URBusinessOwner},
 		MenuItems: menuItems{
+			schema.BTypeWMReservation: {Title: "تراکنش ها", Href: "/admin/b/:BusinessID/transactions", Icon: "pi pi-arrow-right-arrow-left"},
+		},
+	},
+	{
+		Permissions: []schema.UserRole{schema.URBusinessOwner},
+		MenuItems: menuItems{
 			schema.BTypeWMReservation: {Title: "کاربران", Href: "/admin/b/:BusinessID/users", Icon: "pi pi-users"},
 		},
 	},

@@ -16,8 +16,10 @@ import (
 	"go-fiber-starter/app/module/product"
 	"go-fiber-starter/app/module/reservation"
 	"go-fiber-starter/app/module/taxonomy"
+	"go-fiber-starter/app/module/transaction"
 	"go-fiber-starter/app/module/uniwash"
 	"go-fiber-starter/app/module/user"
+	"go-fiber-starter/app/module/wallet"
 	"go-fiber-starter/app/router"
 	"go-fiber-starter/internal"
 	"go-fiber-starter/internal/bootstrap"
@@ -73,6 +75,7 @@ func main() {
 		asset.Module,
 		order.Module,
 		//message.Module,
+		wallet.Module,
 		coupon.Module,
 		comment.Module,
 		product.Module,
@@ -80,6 +83,7 @@ func main() {
 		taxonomy.Module,
 		business.Module,
 		orderItem.Module,
+		transaction.Module,
 		reservation.Module,
 		//messageRoom.Module,
 		notification.Module,
