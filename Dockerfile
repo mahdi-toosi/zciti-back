@@ -10,7 +10,7 @@ COPY . .
 COPY ./config/zcitiProd.toml ./config/zciti.toml
 
 # Build the binary
-RUN go build -mod=vendor -tags musl -o ./tmp/main.o ./cmd/example/main.go
+RUN go build -mod=vendor -tags musl -o ./tmp/main.o ./cmd/main/main.go
 
 ## Use a minimal scratch image for the final stage
 FROM alpine:3.19.1
@@ -21,5 +21,5 @@ COPY --from=builder /app/config/zcitiProd.toml /app/config/zciti.toml
 
 EXPOSE 8000
 # Set the command to run the binary
-#CMD ["go","run","cmd/example/main.go"]
+#CMD ["go","run","cmd/main/main.go"]
 CMD ["./main.o"]

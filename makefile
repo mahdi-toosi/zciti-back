@@ -6,22 +6,22 @@ rebuild:
 	make seed
 
 drop:
-	go run cmd/example/seeder.go --drop-all-tables
+	go run cmd/seeder/seeder.go --drop-all-tables
 
 deleteFilesInStorage:
-	go run cmd/example/seeder.go --delete-files-in-storage
+	go run cmd/seeder/seeder.go --delete-files-in-storage
 
 migrate:
-	go run cmd/example/seeder.go --migrate
+	go run cmd/seeder/seeder.go --migrate
 
 generateNecessaryData:
-	go run cmd/example/seeder.go --generate-necessary-data
+	go run cmd/seeder/seeder.go --generate-necessary-data
 
 seed:
-	go run cmd/example/seeder.go --seed
+	go run cmd/seeder/seeder.go --seed
 
 swag:
-	swag init -g ./cmd/example/main.go --outputTypes "json"
+	swag init -g ./cmd/main/main.go --outputTypes "json"
 
 release:
-	go build -mod=vendor -o ./tmp/main ./cmd/example/main.go
+	go build -mod=vendor -o ./tmp/main ./cmd/main/main.go

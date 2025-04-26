@@ -1,0 +1,12 @@
+{
+    "cSpell.language": "en,fa",
+    "search.exclude": {
+        "**/vendor": true,
+        "**/app/module/example": true
+    },
+    "go.toolsEnvVars": {
+        // "GOFLAGS": "app/module/example",
+        "GOPATH": "/Users/mahditoosi/go"
+    },
+    "cSpell.words": ["uniwash"]
+}

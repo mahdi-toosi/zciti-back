@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/efectn/fx-zerolog"
 	"go-fiber-starter/internal/bootstrap"
 	"go-fiber-starter/internal/bootstrap/database"
 	"go-fiber-starter/utils/config"
+
+	fxzerolog "github.com/efectn/fx-zerolog"
 	_ "go.uber.org/automaxprocs"
 	"go.uber.org/fx"
 )
