@@ -18,7 +18,7 @@ type Taxonomy struct {
 type Taxonomies struct {
 	BusinessID uint64
 	Keyword    string
-	ParentID   uint64
+	ParentID   int64
 	Domain     schema.PostType     `example:"post" validate:"omitempty,oneof=post page product"`
 	Type       schema.TaxonomyType `example:"tag" validate:"omitempty,oneof=category tag"`
 	Pagination *paginator.Pagination

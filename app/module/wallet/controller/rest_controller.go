@@ -59,8 +59,8 @@ func (_i *controller) Show(c *fiber.Ctx) error {
 		return err
 	}
 
-	queryUserID, userErr := utils.GetIntInQueries(c, "UserID")
-	queryBusinessID, businessErr := utils.GetIntInQueries(c, "BusinessID")
+	queryUserID, userErr := utils.GetUintInQueries(c, "UserID")
+	queryBusinessID, businessErr := utils.GetUintInQueries(c, "BusinessID")
 	if userErr != nil && businessErr != nil {
 		return &fiber.Error{
 			Code:    fiber.StatusBadRequest,

@@ -43,10 +43,6 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	user, err := utils.GetAuthenticatedUser(c)
-	if err != nil {
-		return err
-	}
 
 	var req request.Reservations
 	req.Pagination = paginate
@@ -55,18 +51,7 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	req.EndTime = utils.GetDateInQueries(c, "EndTime")
 	req.FullName = strings.TrimSpace(c.Query("FullName"))
 	req.StartTime = utils.GetDateInQueries(c, "StartTime")
-	req.ProductID, _ = utils.GetIntInQueries(c, "ProductID")
-
-	if c.Query("UserID") != "" {
-		userID, err := utils.GetIntInQueries(c, "UserID")
-		if err != nil {
-			return err
-		}
-
-		if user.ID == userID {
-			req.UserID = userID
-		}
-	}
+	req.ProductID, _ = utils.GetUintInQueries(c, "ProductID")
 
 	reservations, paging, err := _i.service.Index(req)
 	if err != nil {

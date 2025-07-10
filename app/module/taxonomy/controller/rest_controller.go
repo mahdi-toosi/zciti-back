@@ -1,13 +1,14 @@
 package controller
 
 import (
-	"github.com/gofiber/fiber/v2"
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/taxonomy/request"
 	"go-fiber-starter/app/module/taxonomy/service"
 	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
 	"go-fiber-starter/utils/response"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type IRestController interface {

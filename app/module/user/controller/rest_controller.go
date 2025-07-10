@@ -392,11 +392,11 @@ func (_i *controller) Orders(c *fiber.Ctx) error {
 // @Param        businessID path int true "Business ID"
 // @Router       /user/orders/status [get]
 func (_i *controller) OrderStatus(c *fiber.Ctx) error {
-	userID, err := utils.GetIntInQueries(c, "UserID")
+	userID, err := utils.GetUintInQueries(c, "UserID")
 	if err != nil {
 		return err
 	}
-	orderID, err := utils.GetIntInQueries(c, "OrderID")
+	orderID, err := utils.GetUintInQueries(c, "OrderID")
 	if err != nil {
 		return err
 	}

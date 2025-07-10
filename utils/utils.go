@@ -4,12 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/disintegration/imaging"
-	"github.com/gofiber/fiber/v2"
-	"github.com/rs/zerolog/log"
 	"go-fiber-starter/app/database/schema"
-	"golang.org/x/exp/slices"
-	"gorm.io/gorm"
 	"io/ioutil"
 	"math/rand"
 	"os"
@@ -18,6 +13,12 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/disintegration/imaging"
+	"github.com/gofiber/fiber/v2"
+	"github.com/rs/zerolog/log"
+	"golang.org/x/exp/slices"
+	"gorm.io/gorm"
 )
 
 func Log(variable any) {
@@ -52,8 +53,12 @@ func GetIntInParams(c *fiber.Ctx, key string) (uint64, error) {
 	return strconv.ParseUint(c.Params(key), 10, 64)
 }
 
-func GetIntInQueries(c *fiber.Ctx, key string) (uint64, error) {
+func GetUintInQueries(c *fiber.Ctx, key string) (uint64, error) {
 	return strconv.ParseUint(c.Query(key), 10, 64)
+}
+
+func GetIntInQueries(c *fiber.Ctx, key string) (int64, error) {
+	return strconv.ParseInt(c.Query(key), 10, 64)
 }
 
 func GetDateInQueries(c *fiber.Ctx, key string) *time.Time {

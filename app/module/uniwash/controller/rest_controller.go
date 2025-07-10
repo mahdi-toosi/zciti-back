@@ -95,7 +95,7 @@ func (_i *controller) IndexReservedMachines(c *fiber.Ctx) error {
 		req.UserID = user.ID
 	}
 	if c.Query("ProductID") != "" {
-		pID, err := utils.GetIntInQueries(c, "ProductID")
+		pID, err := utils.GetUintInQueries(c, "ProductID")
 		if err != nil {
 			return err
 		}
