@@ -96,7 +96,7 @@ func (_i *service) SendCommand(req request.SendCommand, isForUser bool) (err err
 		if !time.Now().Before(reservation.StartTime.Add(10 * time.Minute)) {
 			return &fiber.Error{
 				Code:    fiber.StatusBadRequest,
-				Message: "شما تا نهایاتا 10 دقیقه پس از شروع زمان فرصت داشتید به دستگاه فرمان بدهید.",
+				Message: "شما تا نهایتاً 10 دقیقه پس از شروع زمان فرصت داشتید به دستگاه فرمان بدهید.",
 			}
 		}
 
@@ -118,7 +118,7 @@ func (_i *service) SendCommand(req request.SendCommand, isForUser bool) (err err
 	}
 
 	send, err := _i.MessageWay.Send(MessageWay.Message{
-		Provider:   3, // با سرشماره 9000
+		Provider:   3, // با سر شماره 9000
 		TemplateID: 8698,
 		Method:     "sms",
 		Params:     []string{commandProxy[req.Command]},
