@@ -71,20 +71,13 @@ type ProductMetaSelectedAttribute struct {
 	UseInVariants     bool
 }
 
-type ProductMetaReservationInfoData struct {
+type ProductMetaDeviceHour struct {
+	ID   string
 	To   string // "13:22:00"
 	From string // "13:22:00"
 }
 
-type ProductMetaReservation struct {
-	Quantity int           `json:",omitempty" example:"1"`
-	Duration time.Duration `json:",omitempty" example:"1"`
-
-	EndTime   string `json:",omitempty" example:"1"` // "13:22:00"
-	StartTime string `json:",omitempty" example:"1"` // "13:22:00"
-
-	Info map[time.Weekday] /* week day num*/ []ProductMetaReservationInfoData `json:",omitempty" example:"1"`
-}
+type ProductMetaReservationOptions map[time.Weekday] /* week day num*/ []ProductMetaDeviceHour
 
 type UniWashMachineStatus string
 
@@ -118,7 +111,7 @@ type ProductMeta struct {
 	StockSku      string `json:",omitempty" example:"sku-2f3s" validate:"omitempty,min=2,max=40" faker:"word"`
 	StockQuantity uint64 `json:",omitempty" validate:"omitempty,number"` // The number of units of the product that are currently in stock.
 
-	Reservation ProductMetaReservation `json:",omitempty" faker:"-"`
+	ReservationOptions ProductMetaReservationOptions `json:",omitempty" faker:"-"`
 }
 
 func (pm *ProductMeta) Scan(value any) error {

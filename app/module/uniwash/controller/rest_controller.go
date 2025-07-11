@@ -15,6 +15,7 @@ type IRestController interface {
 	SendCommand(c *fiber.Ctx) error
 	IndexReservedMachines(c *fiber.Ctx) error
 	CheckLastCommandStatus(c *fiber.Ctx) error
+	GetReservationOptions(c *fiber.Ctx) error
 }
 
 func RestController(s service.IService) IRestController {
@@ -118,7 +119,7 @@ func (_i *controller) IndexReservedMachines(c *fiber.Ctx) error {
 // @Tags         UniWash
 // @Param        businessID path int true "Business ID"
 // @Param        reservationID path int true "Reservation ID"
-// @Router       /user/business/:businessID/uni-wash//check-last-command-status/:reservationID [get]
+// @Router       /business/:businessID/uni-wash/check-last-command-status/:reservationID [get]
 func (_i *controller) CheckLastCommandStatus(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")
 	if err != nil {
@@ -136,5 +137,17 @@ func (_i *controller) CheckLastCommandStatus(c *fiber.Ctx) error {
 
 	return response.Resp(c, response.Response{
 		Data: status,
+	})
+}
+
+// GetReservationOptions
+// @Summary      Device reservations options
+// @Tags         UniWash
+// @Param        businessID path int true "Business ID"
+// @Param        reservationID path int true "Reservation ID"
+// @Router       /business/:businessID/uni-wash/device/reservation-options [get]
+func (_i *controller) GetReservationOptions(c *fiber.Ctx) error {
+	return response.Resp(c, response.Response{
+		Data: _i.service.GetReservationOptions(),
 	})
 }
