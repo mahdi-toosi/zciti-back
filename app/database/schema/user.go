@@ -19,6 +19,12 @@ type User struct {
 	SuspenseReason  *string         `gorm:"varchar(500);"`
 	Permissions     UserPermissions `gorm:"type:jsonb;not null"`
 	Password        string          `gorm:"varchar(255);not null"`
+	CityID          *uint64         `gorm:"" faker:"-"`
+	City            *Taxonomy       `gorm:"foreignKey:CityID" faker:"-"`
+	WorkspaceID     *uint64         `gorm:"" faker:"-"`
+	Workspace       *Taxonomy       `gorm:"foreignKey:WorkspaceID" faker:"-"`
+	DormitoryID     *uint64         `gorm:"" faker:"-"`
+	Dormitory       *Taxonomy       `gorm:"foreignKey:DormitoryID" faker:"-"`
 	Businesses      []*Business     `gorm:"many2many:business_users;" faker:"-"`
 	//FullName  string `gorm:"->;type:GENERATED ALWAYS AS (concat(first_name,' ',last_name));default:(-);"`
 	Base

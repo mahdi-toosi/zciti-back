@@ -221,6 +221,30 @@ func (_i *controller) BusinessUsers(c *fiber.Ctx) error {
 	req.Pagination = paginate
 	req.BusinessID = businessID
 	req.Username = c.Query("Username")
+	req.FullName = c.Query("FullName")
+	req.IsSuspended = c.Query("IsSuspended")
+
+	if c.Query("CityID") != "" {
+		CityID, err := utils.GetUintInQueries(c, "CityID")
+		if err != nil {
+			return err
+		}
+		req.CityID = CityID
+	}
+	if c.Query("WorkspaceID") != "" {
+		WorkspaceID, err := utils.GetUintInQueries(c, "WorkspaceID")
+		if err != nil {
+			return err
+		}
+		req.WorkspaceID = WorkspaceID
+	}
+	if c.Query("DormitoryID") != "" {
+		DormitoryID, err := utils.GetUintInQueries(c, "DormitoryID")
+		if err != nil {
+			return err
+		}
+		req.DormitoryID = DormitoryID
+	}
 
 	users, paging, err := _i.service.Users(req)
 	if err != nil {

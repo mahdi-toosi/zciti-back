@@ -16,17 +16,25 @@ type User struct {
 }
 
 type UpdateUserAccount struct {
-	ID        uint64 `example:"1" validate:"required,min=1"`
-	FirstName string `example:"mahdi" validate:"required,min=2,max=255"`
-	LastName  string `example:"lastname" validate:"required,min=2,max=255"`
-	Mobile    uint64 `example:"9380338494" validate:"required,number"`
+	ID          uint64 `example:"1" validate:"required,min=1"`
+	FirstName   string `example:"mahdi" validate:"required,min=2,max=255"`
+	LastName    string `example:"lastname" validate:"required,min=2,max=255"`
+	Mobile      uint64 `example:"9380338494" validate:"required,number"`
+	CityID      uint64 `example:"1" validate:"number"`
+	WorkspaceID uint64 `example:"1" validate:"number"`
+	DormitoryID uint64 `example:"1" validate:"number"`
 }
 
 type BusinessUsers struct {
-	BusinessID uint64
-	Username   string
-	UserIDs    []uint64
-	Pagination *paginator.Pagination
+	BusinessID  uint64
+	Username    string
+	FullName    string
+	CityID      uint64
+	WorkspaceID uint64
+	DormitoryID uint64
+	IsSuspended string
+	UserIDs     []uint64
+	Pagination  *paginator.Pagination
 }
 
 type BusinessUsersStoreRole struct {
@@ -58,10 +66,22 @@ func (req *User) ToDomain() *schema.User {
 }
 
 func (req *UpdateUserAccount) ToDomain() *schema.User {
-	return &schema.User{
+	p := &schema.User{
 		ID:        req.ID,
 		Mobile:    req.Mobile,
 		LastName:  strings.TrimSpace(req.LastName),
 		FirstName: strings.TrimSpace(req.FirstName),
 	}
+
+	if req.CityID != 0 {
+		p.CityID = &req.CityID
+	}
+	if req.WorkspaceID != 0 {
+		p.WorkspaceID = &req.WorkspaceID
+	}
+	if req.DormitoryID != 0 {
+		p.DormitoryID = &req.DormitoryID
+	}
+
+	return p
 }
