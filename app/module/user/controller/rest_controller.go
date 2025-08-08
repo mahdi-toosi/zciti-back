@@ -29,6 +29,7 @@ type IRestController interface {
 	InsertUser(c *fiber.Ctx) error
 	DeleteUser(c *fiber.Ctx) error
 	BusinessUsersAddRole(c *fiber.Ctx) error
+	BusinessUsersToggleSuspense(c *fiber.Ctx) error
 
 	Orders(c *fiber.Ctx) error
 	OrderStore(c *fiber.Ctx) error
@@ -346,6 +347,33 @@ func (_i *controller) BusinessUsersAddRole(c *fiber.Ctx) error {
 	}
 
 	if err := _i.service.BusinessUsersAddRole(*req); err != nil {
+		return err
+	}
+
+	return response.Resp(c, response.Response{
+		Messages: response.Messages{"success"},
+	})
+}
+
+// BusinessUsersToggleSuspense
+// @Summary      BusinessUsersToggleSuspend toggle suspend business user status
+// @Tags         Users
+// @Security     Bearer
+// @Param        businessId path int true "Business ID"
+// @Router       /businesses/:businessID/users-toggle-suspense [post]
+func (_i *controller) BusinessUsersToggleSuspense(c *fiber.Ctx) error {
+	businessID, err := utils.GetIntInParams(c, "businessID")
+	if err != nil {
+		return fiber.ErrBadRequest
+	}
+
+	req := new(request.BusinessUsersToggleSuspense)
+	req.BusinessID = businessID
+	if err := response.ParseAndValidate(c, req); err != nil {
+		return err
+	}
+
+	if err := _i.service.BusinessUsersToggleSuspense(*req); err != nil {
 		return err
 	}
 

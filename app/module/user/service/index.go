@@ -20,6 +20,7 @@ type IService interface {
 	InsertUser(businessID uint64, userID uint64) (err error)
 	DeleteUser(businessID uint64, userID uint64) (err error)
 	BusinessUsersAddRole(req request.BusinessUsersStoreRole) error
+	BusinessUsersToggleSuspense(req request.BusinessUsersToggleSuspense) error
 }
 
 func Service(repo repository.IRepository) IService {
@@ -99,6 +100,7 @@ func (_i *service) DeleteUser(businessID uint64, userID uint64) (err error) {
 
 	return nil
 }
+
 func (_i *service) BusinessUsersAddRole(req request.BusinessUsersStoreRole) error {
 	_, err := _i.Repo.GetUser(req)
 	if err != nil {
@@ -114,6 +116,33 @@ func (_i *service) BusinessUsersAddRole(req request.BusinessUsersStoreRole) erro
 	}
 
 	user.Permissions[req.BusinessID] = req.Roles
+
+	if err = _i.Repo.Update(req.UserID, user); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (_i *service) BusinessUsersToggleSuspense(req request.BusinessUsersToggleSuspense) error {
+	user, err := _i.Repo.GetOne(req.UserID)
+	if err != nil {
+		return err
+	}
+
+	if req.IsSuspended {
+		user.IsSuspended = &req.IsSuspended
+	} else {
+		isSuspended := false
+		user.IsSuspended = &isSuspended
+	}
+
+	if len(req.SuspenseReason) == 0 {
+		var suspenseReason string
+		user.SuspenseReason = &suspenseReason
+	} else {
+		user.SuspenseReason = &req.SuspenseReason
+	}
 
 	if err = _i.Repo.Update(req.UserID, user); err != nil {
 		return err

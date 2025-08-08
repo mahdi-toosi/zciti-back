@@ -11,7 +11,9 @@ type User struct {
 	FullName        string                 `json:",omitempty"`
 	Mobile          uint64                 `json:",omitempty"`
 	MobileConfirmed bool                   `json:",omitempty"`
-	Permissions     schema.UserPermissions ``
+	IsSuspended     bool                   ``
+	SuspenseReason  string                 `json:",omitempty"`
+	Permissions     schema.UserPermissions `json:",omitempty"`
 	Roles           []schema.UserRole      `json:",omitempty"`
 }
 
@@ -26,11 +28,15 @@ func FromDomain(item *schema.User, businessID *uint64) (res *User) {
 		LastName:        item.LastName,
 		FirstName:       item.FirstName,
 		FullName:        item.FullName(),
+		IsSuspended:     *item.IsSuspended,
 		MobileConfirmed: item.MobileConfirmed,
 	}
 
 	if businessID != nil {
 		res.Roles = item.Permissions[*businessID]
+		if item.SuspenseReason != nil {
+			res.SuspenseReason = *item.SuspenseReason
+		}
 	} else {
 		res.Permissions = item.Permissions
 	}

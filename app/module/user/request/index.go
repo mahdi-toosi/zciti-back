@@ -35,6 +35,13 @@ type BusinessUsersStoreRole struct {
 	BusinessID uint64            `example:"1" validate:"required,number,min=1"`
 }
 
+type BusinessUsersToggleSuspense struct {
+	IsSuspended    bool   `example:"true"`
+	SuspenseReason string `example:"reason"`
+	UserID         uint64 `example:"1" validate:"required,number,min=1"`
+	BusinessID     uint64 `example:"1" validate:"required,number,min=1"`
+}
+
 type Users struct {
 	Pagination *paginator.Pagination
 	Keyword    string
