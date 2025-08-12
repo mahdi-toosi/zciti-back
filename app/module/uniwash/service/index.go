@@ -57,7 +57,8 @@ func (_i *service) ValidateReservation(req oirequest.OrderItem) error {
 		Message: "در این بازه زمانی شما اجازه رزرو ندارید",
 	}
 
-	parsedDate, err := time.Parse(time.DateOnly, req.Date)
+	loc, _ := time.LoadLocation("Asia/Tehran")
+	parsedDate, err := time.ParseInLocation(time.DateOnly, req.Date, loc)
 	if err != nil {
 		return invalidErr
 	}

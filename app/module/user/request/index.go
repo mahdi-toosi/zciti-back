@@ -4,6 +4,7 @@ import (
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/utils/paginator"
 	"strings"
+	"time"
 )
 
 type User struct {
@@ -33,7 +34,11 @@ type BusinessUsers struct {
 	WorkspaceID uint64
 	DormitoryID uint64
 	IsSuspended string
+	CountUsing  uint64
+	Export      string
 	UserIDs     []uint64
+	StartTime   *time.Time
+	EndTime     *time.Time
 	Pagination  *paginator.Pagination
 }
 

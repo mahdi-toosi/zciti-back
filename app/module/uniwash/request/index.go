@@ -34,11 +34,13 @@ type StoreUniWash struct {
 }
 
 func (s StoreUniWash) GetStartDateTime() time.Time {
-	startTime, _ := time.Parse(time.DateTime, s.Date+" "+s.StartTime)
-	return startTime.UTC()
+	loc, _ := time.LoadLocation("Asia/Tehran")
+	startTime, _ := time.ParseInLocation(time.DateTime, s.Date+" "+s.StartTime, loc)
+	return startTime
 }
 
 func (s StoreUniWash) GetEndDateTime() time.Time {
-	endTime, _ := time.Parse(time.DateTime, s.Date+" "+s.EndTime)
-	return endTime.UTC()
+	loc, _ := time.LoadLocation("Asia/Tehran")
+	endTime, _ := time.ParseInLocation(time.DateTime, s.Date+" "+s.EndTime, loc)
+	return endTime
 }

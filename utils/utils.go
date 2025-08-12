@@ -65,7 +65,8 @@ func GetDateInQueries(c *fiber.Ctx, key string) *time.Time {
 	if c.Query(key) == "" {
 		return &time.Time{}
 	}
-	date, err := time.Parse(time.DateOnly, c.Query(key))
+	loc, _ := time.LoadLocation("Asia/Tehran")
+	date, err := time.ParseInLocation(time.DateOnly, c.Query(key), loc)
 	if err != nil {
 		return &time.Time{}
 	}
@@ -312,4 +313,8 @@ func PrettyJSON(v interface{}) string {
 
 	// Log the pretty-printed JSON
 	return string(jsonData)
+}
+
+func BoolPtr(val bool) *bool {
+	return &val
 }

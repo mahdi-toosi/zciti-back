@@ -100,7 +100,8 @@ func (_i *service) CouponMessageSend(req request.CouponMessageSend) error {
 		return err
 	}
 
-	gTime, err := time.Parse(time.DateTime, coupon.EndTime)
+	loc, _ := time.LoadLocation("Asia/Tehran")
+	gTime, err := time.ParseInLocation(time.DateTime, coupon.EndTime, loc)
 	if err != nil {
 		return err
 	}

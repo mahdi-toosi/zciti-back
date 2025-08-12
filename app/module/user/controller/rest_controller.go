@@ -1,8 +1,10 @@
 package controller
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/xuri/excelize/v2"
 	"go-fiber-starter/app/database/schema"
 	bService "go-fiber-starter/app/module/business/service"
 	orequest "go-fiber-starter/app/module/order/request"
@@ -220,9 +222,20 @@ func (_i *controller) BusinessUsers(c *fiber.Ctx) error {
 	var req request.BusinessUsers
 	req.Pagination = paginate
 	req.BusinessID = businessID
+	export := c.Query("Export")
 	req.Username = c.Query("Username")
 	req.FullName = c.Query("FullName")
 	req.IsSuspended = c.Query("IsSuspended")
+	req.EndTime = utils.GetDateInQueries(c, "EndTime")
+	req.StartTime = utils.GetDateInQueries(c, "StartTime")
+
+	if c.Query("CountUsing") != "" {
+		CountUsing, err := utils.GetUintInQueries(c, "CountUsing")
+		if err != nil {
+			return err
+		}
+		req.CountUsing = CountUsing
+	}
 
 	if c.Query("CityID") != "" {
 		CityID, err := utils.GetUintInQueries(c, "CityID")
@@ -251,10 +264,74 @@ func (_i *controller) BusinessUsers(c *fiber.Ctx) error {
 		return err
 	}
 
-	return response.Resp(c, response.Response{
-		Data: users,
-		Meta: paging,
-	})
+	if export == "excel" {
+		// Create a new Excel file
+		f := excelize.NewFile()
+		// Create a new sheet
+		sheetName := "Users"
+		index, _ := f.NewSheet(sheetName)
+
+		// Set RTL view
+		f.SetSheetView(sheetName, 0, &excelize.ViewOptions{
+			RightToLeft: utils.BoolPtr(true),
+		})
+		f.SetPanes(sheetName, &excelize.Panes{
+			Freeze:      true,
+			Split:       false,
+			XSplit:      0,
+			YSplit:      1,
+			TopLeftCell: "A2",
+			ActivePane:  "bottomLeft",
+		})
+
+		f.SetColWidth(sheetName, "B", "D", 30)
+		columnsStyles, _ := f.NewStyle(&excelize.Style{
+			Font: &excelize.Font{
+				Family: "IRANSans", // Font name as installed in the OS
+				Size:   16,
+			},
+			Alignment: &excelize.Alignment{
+				Horizontal: "right",
+			},
+		})
+
+		// Headers in Persian
+		f.SetCellValue(sheetName, "A1", "ردیف")
+		f.SetCellValue(sheetName, "B1", "نام کامل")
+		f.SetCellValue(sheetName, "C1", "تلفن همراه ")
+		f.SetCellValue(sheetName, "D1", "تعداد استفاده ")
+		f.SetColStyle(sheetName, "A:D", columnsStyles)
+
+		// Populate data
+		for i, user := range users {
+			row := i + 2 // Start from the second row
+			f.SetCellValue(sheetName, "A"+strconv.Itoa(row), i+1)
+			f.SetCellValue(sheetName, "B"+strconv.Itoa(row), user.FullName)
+			f.SetCellValue(sheetName, "C"+strconv.Itoa(row), fmt.Sprint("0", user.Mobile))
+			f.SetCellInt(sheetName, "D"+strconv.Itoa(row), int64(user.ReservationCount))
+		}
+
+		// Set active sheet
+		f.SetActiveSheet(index)
+
+		// Write the file to a buffer
+		buf := new(bytes.Buffer)
+		if err := f.Write(buf); err != nil {
+			return err
+		}
+
+		// Set the content type and filename
+		c.Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+		c.Set("Content-Disposition", "attachment; filename=users.xlsx")
+
+		// Send the buffer as the response
+		return c.Send(buf.Bytes())
+	} else {
+		return response.Resp(c, response.Response{
+			Data: users,
+			Meta: paging,
+		})
+	}
 }
 
 // InsertUser
