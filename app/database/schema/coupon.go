@@ -32,7 +32,7 @@ const (
 
 type CouponMeta struct {
 	UsedBy                 []uint64 `json:",omitempty"`
-	MaxUsage               int      `json:",omitempty"`
+	MaxUsage               int      `json:",omitempty" validate:"required,min=1"`
 	MinPrice               float64  `json:",omitempty"`
 	MaxPrice               float64  `json:",omitempty"`
 	MaxDiscount            float64  `json:",omitempty"`
