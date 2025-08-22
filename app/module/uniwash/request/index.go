@@ -11,7 +11,7 @@ type SendCommand struct {
 	UserID        uint64
 	ReservationID uint64                `example:"1" validate:"required,number"`
 	ProductID     uint64                `example:"1" validate:"required,number"`
-	Command       schema.UniWashCommand `example:"ON" validate:"required,oneof=ON OFF MORE_WATER"`
+	Command       schema.UniWashCommand `example:"ON" validate:"required,oneof=ON OFF REWASH EVACUATION"`
 }
 
 type ReservedMachinesRequest struct {

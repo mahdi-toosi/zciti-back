@@ -212,7 +212,8 @@ func (_i *service) GetReservationOptions() (reservationOptions schema.ProductMet
 }
 
 var commandProxy = map[schema.UniWashCommand]string{
-	schema.UniWashCommandON:        "on",
-	schema.UniWashCommandOFF:       "off",
-	schema.UniWashCommandMoreWater: "7",
+	schema.UniWashCommandON:         "on",
+	schema.UniWashCommandOFF:        "off",
+	schema.UniWashCommandRewash:     "10",
+	schema.UniWashCommandEvacuation: "9",
 }
