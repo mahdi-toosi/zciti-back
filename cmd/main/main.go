@@ -67,6 +67,8 @@ func main() {
 		fx.Provide(router.NewRouter),
 		// messageWay service
 		fx.Provide(internal.NewMessageWay),
+		// cron job service
+		fx.Provide(internal.NewCronService),
 
 		// provide modules
 		post.Module,
