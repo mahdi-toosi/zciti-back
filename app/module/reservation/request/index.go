@@ -23,6 +23,7 @@ type Reservations struct {
 	ProductID  uint64
 	StartTime  *time.Time
 	EndTime    *time.Time
+	Status     schema.ReservationStatus
 	Pagination *paginator.Pagination
 }
 
