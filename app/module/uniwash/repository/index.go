@@ -51,6 +51,7 @@ func (_i *repo) GetSingleReservation(BusinessID uint64, id uint64) (reservation 
 		Where(&schema.Reservation{
 			BusinessID: BusinessID,
 		}).
+		Preload("Product").
 		First(&reservation, id).Error; err != nil {
 		return nil, err
 	}

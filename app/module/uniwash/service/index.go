@@ -24,6 +24,7 @@ type IService interface {
 	IndexReservedMachines(req request.ReservedMachinesRequest) (reserved []*response.Reservation, paging paginator.Pagination, err error)
 	CheckLastCommandStatus(businessID uint64, reservationID uint64) (status *MessageWay.StatusResponse, err error)
 	GetReservationOptions() (reservationOptions schema.ProductMetaReservationOptions)
+	SendDeviceIsOffMsgToUser(businessID uint64, reservationID uint64) (err error)
 }
 
 func Service(repo repository.IRepository, productRepo prepository.IRepository, messageWay *MessageWay.App) IService {
@@ -182,6 +183,31 @@ func (_i *service) CheckLastCommandStatus(businessID uint64, reservationID uint6
 	}
 
 	return _i.MessageWay.GetStatus(MessageWay.StatusRequest{ReferenceID: reservation.Meta.UniWashLastCommandReferenceID})
+}
+
+func (_i *service) SendDeviceIsOffMsgToUser(businessID uint64, reservationID uint64) (err error) {
+	reservation, err := _i.Repo.GetSingleReservation(businessID, reservationID)
+	if err != nil {
+		return err
+	}
+
+	send, err := _i.MessageWay.Send(MessageWay.Message{
+		Provider:   5, // با سرشماره 5000
+		TemplateID: 16622,
+		Method:     "sms",
+		Params:     []string{reservation.Product.Meta.SKU},
+		Mobile:     fmt.Sprintf("0%d", reservation.User.Mobile),
+	})
+
+	if err != nil {
+		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "ارسال دستور با خطا مواجه شد، دوباره امتحان کنید."}
+	}
+
+	if send.Status == "error" {
+		return &fiber.Error{Code: fiber.StatusServiceUnavailable, Message: "ارسال دستور با خطا مواجه شد کد ۵۰۶، با پشتیبانی در میان بگذارید."}
+	}
+
+	return nil
 }
 
 func (_i *service) GetReservationOptions() (reservationOptions schema.ProductMetaReservationOptions) {
