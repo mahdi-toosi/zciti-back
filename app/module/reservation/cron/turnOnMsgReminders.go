@@ -16,26 +16,26 @@ type TurnOnReminderService struct {
 	cronSpec   string
 	cfg        *config.Config
 	logger     zerolog.Logger
-	smsService *MessageWay.App // Interface for SMS sending
 	repo       repository.IRepository
+	smsService *internal.MessageWayService // Interface for SMS sending
 }
 
 func RunTurnOnMsgReminders(
 	cfg *config.Config,
 	logger zerolog.Logger,
 	Repo repository.IRepository,
-	smsService *MessageWay.App,
 	cronService *internal.CronService,
+	smsService *internal.MessageWayService,
 ) *TurnOnReminderService {
 	service := &TurnOnReminderService{
 		cfg:        cfg,
 		repo:       Repo,
 		logger:     logger,
 		smsService: smsService,
-		cronSpec:   "@every 10s",
+		cronSpec:   "@every 1m",
 	}
 
-	err := cronService.AddJob(service.cronSpec, service.SendReservationReminders)
+	err := cronService.AddJob(service.cronSpec, service.SendTurnOnReminders)
 	if err != nil {
 		service.logger.Fatal().Err(err).Msg("failed to add RunTurnOnMsgReminders job")
 	}
@@ -43,9 +43,9 @@ func RunTurnOnMsgReminders(
 	return service
 }
 
-// SendReservationReminders checks and sends reminders for upcoming reservations
-func (s *TurnOnReminderService) SendReservationReminders() {
-	s.logger.Info().Msg("SendReservationReminders")
+// SendTurnOnReminders checks and sends reminders for upcoming reservations
+func (s *TurnOnReminderService) SendTurnOnReminders() {
+	s.logger.Info().Msg("SendTurnOnReminders")
 
 	// Find reservations within the next 1 hour that haven't been reminded yet
 	reservations, err := s.findReservationsDueForReminder()
@@ -83,6 +83,8 @@ func (s *TurnOnReminderService) findReservationsDueForReminder() ([]*schema.Rese
 	if err != nil {
 		return nil, err
 	}
+
+	s.logger.Info().Msgf("turn on reservations len %d", len(reservations))
 
 	return reservations, err
 }

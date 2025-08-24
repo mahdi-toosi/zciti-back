@@ -16,16 +16,16 @@ type TurnOffReminderService struct {
 	cronSpec   string
 	cfg        *config.Config
 	logger     zerolog.Logger
-	smsService *MessageWay.App // Interface for SMS sending
 	repo       repository.IRepository
+	smsService *internal.MessageWayService // Interface for SMS sending
 }
 
 func RunTurnOffMsgReminders(
 	cfg *config.Config,
 	logger zerolog.Logger,
 	Repo repository.IRepository,
-	smsService *MessageWay.App,
 	cronService *internal.CronService,
+	smsService *internal.MessageWayService,
 ) *TurnOffReminderService {
 	service := &TurnOffReminderService{
 		cfg:        cfg,
@@ -82,7 +82,7 @@ func (s *TurnOffReminderService) findReservationsDueForReminder() ([]*schema.Res
 		Status:    schema.ReservationStatusReserved,
 	})
 
-	s.logger.Info().Msgf("reservations len %d", len(reservations))
+	s.logger.Info().Msgf("turn off reservations len %d", len(reservations))
 
 	if err != nil {
 		return nil, err

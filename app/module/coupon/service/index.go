@@ -11,6 +11,7 @@ import (
 	"go-fiber-starter/app/module/coupon/response"
 	userRequest "go-fiber-starter/app/module/user/request"
 	userService "go-fiber-starter/app/module/user/service"
+	"go-fiber-starter/internal"
 	"go-fiber-starter/utils/paginator"
 	"golang.org/x/exp/slices"
 	"time"
@@ -29,7 +30,7 @@ type IService interface {
 	CalcTotalAmtWithDiscount(coupon *schema.Coupon, totalAmt *float64) (_totalAmt float64)
 }
 
-func Service(Repo repository.IRepository, userService userService.IService, messageWay *MessageWay.App) IService {
+func Service(Repo repository.IRepository, userService userService.IService, messageWay *internal.MessageWayService) IService {
 	return &service{
 		Repo,
 		userService,
@@ -40,7 +41,7 @@ func Service(Repo repository.IRepository, userService userService.IService, mess
 type service struct {
 	Repo        repository.IRepository
 	UserService userService.IService
-	MessageWay  *MessageWay.App
+	MessageWay  *internal.MessageWayService
 }
 
 func (_i *service) Index(req request.Coupons) (coupons []*response.Coupon, paging paginator.Pagination, err error) {

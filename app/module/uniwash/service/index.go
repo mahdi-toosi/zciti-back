@@ -8,6 +8,7 @@ import (
 	"go-fiber-starter/app/module/uniwash/repository"
 	"go-fiber-starter/app/module/uniwash/request"
 	"go-fiber-starter/app/module/uniwash/response"
+	"go-fiber-starter/internal"
 	"go-fiber-starter/utils/paginator"
 	"time"
 
@@ -27,14 +28,14 @@ type IService interface {
 	SendDeviceIsOffMsgToUser(businessID uint64, reservationID uint64) (err error)
 }
 
-func Service(repo repository.IRepository, productRepo prepository.IRepository, messageWay *MessageWay.App) IService {
-	return &service{repo, messageWay, productRepo}
+func Service(repo repository.IRepository, productRepo prepository.IRepository, messageWay *internal.MessageWayService) IService {
+	return &service{repo, productRepo, messageWay}
 }
 
 type service struct {
 	Repo        repository.IRepository
-	MessageWay  *MessageWay.App
 	ProductRepo prepository.IRepository
+	MessageWay  *internal.MessageWayService
 }
 
 func (_i *service) ReserveReservation(req oirequest.OrderItem, userID uint64, businessID uint64) (reservationID *uint64, err error) {
