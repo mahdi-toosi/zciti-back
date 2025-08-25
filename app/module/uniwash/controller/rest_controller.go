@@ -17,6 +17,7 @@ type IRestController interface {
 	CheckLastCommandStatus(c *fiber.Ctx) error
 	GetReservationOptions(c *fiber.Ctx) error
 	SendDeviceIsOffMsgToUser(c *fiber.Ctx) error
+	SendFullCouponToUser(c *fiber.Ctx) error
 }
 
 func RestController(s service.IService) IRestController {
@@ -170,6 +171,30 @@ func (_i *controller) SendDeviceIsOffMsgToUser(c *fiber.Ctx) error {
 	}
 
 	err = _i.service.SendDeviceIsOffMsgToUser(businessID, reservationID)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON("success")
+}
+
+// SendFullCouponToUser
+// @Summary      Send device is off msg to user
+// @Tags         UniWash
+// @Param        businessID path int true "Business ID"
+// @Param        reservationID path int true "Reservation ID"
+// @Router       /business/:businessID/uni-wash/send-full-coupon-to-user/:reservationID [get]
+func (_i *controller) SendFullCouponToUser(c *fiber.Ctx) error {
+	businessID, err := utils.GetIntInParams(c, "businessID")
+	if err != nil {
+		return err
+	}
+	reservationID, err := utils.GetIntInParams(c, "reservationID")
+	if err != nil {
+		return err
+	}
+
+	err = _i.service.SendFullCouponToUser(businessID, reservationID)
 	if err != nil {
 		return err
 	}

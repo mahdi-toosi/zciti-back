@@ -1,15 +1,21 @@
 package service
 
 import (
+	"errors"
 	"fmt"
+	ptime "github.com/yaa110/go-persian-calendar"
 	"go-fiber-starter/app/database/schema"
+	request2 "go-fiber-starter/app/module/coupon/request"
+	cservice "go-fiber-starter/app/module/coupon/service"
 	oirequest "go-fiber-starter/app/module/orderItem/request"
 	prepository "go-fiber-starter/app/module/product/repository"
 	"go-fiber-starter/app/module/uniwash/repository"
 	"go-fiber-starter/app/module/uniwash/request"
 	"go-fiber-starter/app/module/uniwash/response"
 	"go-fiber-starter/internal"
+	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
+	"gorm.io/gorm"
 	"time"
 
 	MessageWay "github.com/MessageWay/MessageWayGolang"
@@ -26,16 +32,28 @@ type IService interface {
 	CheckLastCommandStatus(businessID uint64, reservationID uint64) (status *MessageWay.StatusResponse, err error)
 	GetReservationOptions() (reservationOptions schema.ProductMetaReservationOptions)
 	SendDeviceIsOffMsgToUser(businessID uint64, reservationID uint64) (err error)
+	SendFullCouponToUser(businessID uint64, reservationID uint64) (err error)
 }
 
-func Service(repo repository.IRepository, productRepo prepository.IRepository, messageWay *internal.MessageWayService) IService {
-	return &service{repo, productRepo, messageWay}
+func Service(
+	repo repository.IRepository,
+	couponService cservice.IService,
+	productRepo prepository.IRepository,
+	messageWay *internal.MessageWayService,
+) IService {
+	return &service{
+		repo,
+		productRepo,
+		messageWay,
+		couponService,
+	}
 }
 
 type service struct {
-	Repo        repository.IRepository
-	ProductRepo prepository.IRepository
-	MessageWay  *internal.MessageWayService
+	Repo          repository.IRepository
+	ProductRepo   prepository.IRepository
+	MessageWay    *internal.MessageWayService
+	CouponService cservice.IService
 }
 
 func (_i *service) ReserveReservation(req oirequest.OrderItem, userID uint64, businessID uint64) (reservationID *uint64, err error) {
@@ -198,6 +216,72 @@ func (_i *service) SendDeviceIsOffMsgToUser(businessID uint64, reservationID uin
 		Method:     "sms",
 		Params:     []string{reservation.Product.Meta.SKU},
 		Mobile:     fmt.Sprintf("0%d", reservation.User.Mobile),
+	})
+
+	if err != nil {
+		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "ارسال دستور با خطا مواجه شد، دوباره امتحان کنید."}
+	}
+
+	if send.Status == "error" {
+		return &fiber.Error{Code: fiber.StatusServiceUnavailable, Message: "ارسال دستور با خطا مواجه شد کد ۵۰۶، با پشتیبانی در میان بگذارید."}
+	}
+
+	return nil
+}
+
+func (_i *service) SendFullCouponToUser(businessID uint64, reservationID uint64) (err error) {
+	reservation, err := _i.Repo.GetSingleReservation(businessID, reservationID)
+	if err != nil {
+		return err
+	}
+
+	loc, _ := time.LoadLocation("Asia/Tehran")
+	t := time.Now()
+	startTime := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, loc)
+	endTime := startTime.Add(8 * 24 * time.Hour).Add(-time.Second)
+	code := utils.GenerateRandomString(8)
+
+	for i := 0; i < 30; i++ {
+		_coupon, err := _i.CouponService.Show(reservation.BusinessID, nil, &code)
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
+
+		if _coupon == nil {
+			break
+		} else {
+			code = utils.GenerateRandomString(8)
+		}
+	}
+
+	coupon := request2.Coupon{
+		BusinessID: reservation.BusinessID,
+		Value:      reservation.Product.Price,
+		Type:       schema.CouponTypeFixedAmount,
+		EndTime:    endTime.Format(time.DateTime),
+		StartTime:  startTime.Format(time.DateTime),
+		Code:       code,
+		Title:      fmt.Sprintf("خرابی %s | %s", reservation.Product.Meta.SKU, reservation.User.FullName()),
+		Meta: schema.CouponMeta{
+			MaxUsage: 1,
+		},
+	}
+
+	err = _i.CouponService.Store(coupon)
+	if err != nil {
+		return err
+	}
+
+	send, err := _i.MessageWay.Send(MessageWay.Message{
+		Provider:   5, // با سرشماره 5000
+		TemplateID: 12109,
+		Method:     "sms",
+		Params: []string{
+			reservation.User.FullName(),
+			coupon.Code,
+			ptime.New(endTime).Format("yyyy/MM/dd"),
+		},
+		Mobile: fmt.Sprintf("0%d", reservation.User.Mobile),
 	})
 
 	if err != nil {
