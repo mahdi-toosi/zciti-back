@@ -560,6 +560,9 @@ func (_i *controller) OrderStore(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+	if user.IsSuspended != nil && *user.IsSuspended {
+		return fiber.ErrForbidden
+	}
 
 	req := new(orequest.Order)
 	req.User = user
