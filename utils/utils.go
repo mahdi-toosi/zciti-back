@@ -318,3 +318,13 @@ func PrettyJSON(v interface{}) string {
 func BoolPtr(val bool) *bool {
 	return &val
 }
+
+func GenerateRandomString(length int) string {
+	const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
+	rand.Seed(time.Now().UnixNano())
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[rand.Intn(len(charset))]
+	}
+	return string(b)
+}
