@@ -34,6 +34,10 @@ func (_i *repo) GetAll(req request.Coupons) (coupons []*schema.Coupon, paging pa
 		query.Where("title LIKE ?", "%"+req.Title+"%")
 	}
 
+	if req.Code != "" {
+		query.Where(&schema.Coupon{Code: req.Code})
+	}
+
 	if req.Pagination.Page > 0 {
 		var total int64
 		query.Count(&total)

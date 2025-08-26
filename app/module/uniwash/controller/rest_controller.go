@@ -15,6 +15,9 @@ type IRestController interface {
 	SendCommand(c *fiber.Ctx) error
 	IndexReservedMachines(c *fiber.Ctx) error
 	CheckLastCommandStatus(c *fiber.Ctx) error
+	GetReservationOptions(c *fiber.Ctx) error
+	SendDeviceIsOffMsgToUser(c *fiber.Ctx) error
+	SendFullCouponToUser(c *fiber.Ctx) error
 }
 
 func RestController(s service.IService) IRestController {
@@ -95,7 +98,7 @@ func (_i *controller) IndexReservedMachines(c *fiber.Ctx) error {
 		req.UserID = user.ID
 	}
 	if c.Query("ProductID") != "" {
-		pID, err := utils.GetIntInQueries(c, "ProductID")
+		pID, err := utils.GetUintInQueries(c, "ProductID")
 		if err != nil {
 			return err
 		}
@@ -118,7 +121,7 @@ func (_i *controller) IndexReservedMachines(c *fiber.Ctx) error {
 // @Tags         UniWash
 // @Param        businessID path int true "Business ID"
 // @Param        reservationID path int true "Reservation ID"
-// @Router       /user/business/:businessID/uni-wash//check-last-command-status/:reservationID [get]
+// @Router       /business/:businessID/uni-wash/check-last-command-status/:reservationID [get]
 func (_i *controller) CheckLastCommandStatus(c *fiber.Ctx) error {
 	businessID, err := utils.GetIntInParams(c, "businessID")
 	if err != nil {
@@ -137,4 +140,64 @@ func (_i *controller) CheckLastCommandStatus(c *fiber.Ctx) error {
 	return response.Resp(c, response.Response{
 		Data: status,
 	})
+}
+
+// GetReservationOptions
+// @Summary      Device reservations options
+// @Tags         UniWash
+// @Param        businessID path int true "Business ID"
+// @Param        reservationID path int true "Reservation ID"
+// @Router       /business/:businessID/uni-wash/device/reservation-options [get]
+func (_i *controller) GetReservationOptions(c *fiber.Ctx) error {
+	return response.Resp(c, response.Response{
+		Data: _i.service.GetReservationOptions(),
+	})
+}
+
+// SendDeviceIsOffMsgToUser
+// @Summary      Send device is off msg to user
+// @Tags         UniWash
+// @Param        businessID path int true "Business ID"
+// @Param        reservationID path int true "Reservation ID"
+// @Router       /business/:businessID/uni-wash/send-device-is-off-msg-to-user/:reservationID [get]
+func (_i *controller) SendDeviceIsOffMsgToUser(c *fiber.Ctx) error {
+	businessID, err := utils.GetIntInParams(c, "businessID")
+	if err != nil {
+		return err
+	}
+	reservationID, err := utils.GetIntInParams(c, "reservationID")
+	if err != nil {
+		return err
+	}
+
+	err = _i.service.SendDeviceIsOffMsgToUser(businessID, reservationID)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON("success")
+}
+
+// SendFullCouponToUser
+// @Summary      Send device is off msg to user
+// @Tags         UniWash
+// @Param        businessID path int true "Business ID"
+// @Param        reservationID path int true "Reservation ID"
+// @Router       /business/:businessID/uni-wash/send-full-coupon-to-user/:reservationID [get]
+func (_i *controller) SendFullCouponToUser(c *fiber.Ctx) error {
+	businessID, err := utils.GetIntInParams(c, "businessID")
+	if err != nil {
+		return err
+	}
+	reservationID, err := utils.GetIntInParams(c, "reservationID")
+	if err != nil {
+		return err
+	}
+
+	err = _i.service.SendFullCouponToUser(businessID, reservationID)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON("success")
 }

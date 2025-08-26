@@ -3,12 +3,13 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"github.com/gofiber/fiber/v2"
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/taxonomy/request"
 	"go-fiber-starter/internal/bootstrap/database"
 	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
+
+	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
 
@@ -83,8 +84,7 @@ func (_i *repo) Search(req request.Taxonomies) (taxonomies []*schema.Taxonomy, p
 	query := _i.DB.Main.Model(schema.Taxonomy{}).
 		Where(schema.Taxonomy{BusinessID: req.BusinessID})
 
-	// TODO what if we doesnt want to add parent_id in wheres ?!!!!!!!
-	if req.ParentID == 0 {
+	if req.ParentID == -1 {
 		query.Where("parent_id IS NULL")
 	} else if req.ParentID > 0 {
 		query.Where("parent_id = ?", req.ParentID)

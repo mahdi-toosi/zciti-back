@@ -47,7 +47,7 @@ var routes = []route{
 		MenuItems: menuItems{
 			schema.BTypeWMReservation: {
 				Title: "پست ها",
-				Icon:  "pi pi-box",
+				Icon:  "pi pi-copy",
 				Child: []response.MenuItem{
 					{Title: "همه", Icon: "pi pi-circle-fill", Href: "/admin/b/:BusinessID/posts"},
 					{Title: "دسته بندی ها", Icon: "pi pi-circle-fill", Href: "/admin/b/:BusinessID/posts/categories"},

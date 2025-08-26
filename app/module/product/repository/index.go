@@ -6,8 +6,10 @@ import (
 	"go-fiber-starter/app/module/product/request"
 	"go-fiber-starter/internal/bootstrap/database"
 	"go-fiber-starter/utils/paginator"
-	"gorm.io/gorm"
+	"strings"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type IRepository interface {
@@ -41,9 +43,11 @@ func (_i *repo) GetAll(req request.ProductsRequest, isForUser bool) (products []
 	}
 
 	if req.CategoryID != "" {
+		stringSlice := strings.Split(req.CategoryID, ",")
+
 		query = query.
 			Joins("JOIN posts_taxonomies ON posts_taxonomies.post_id = posts.id").
-			Where("posts_taxonomies.taxonomy_id = ?", req.CategoryID)
+			Where("posts_taxonomies.taxonomy_id in (?)", stringSlice)
 	}
 
 	if req.Keyword != "" {

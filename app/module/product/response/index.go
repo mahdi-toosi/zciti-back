@@ -4,7 +4,6 @@ import (
 	"go-fiber-starter/app/database/schema"
 	presponse "go-fiber-starter/app/module/post/response"
 	tresponse "go-fiber-starter/app/module/taxonomy/response"
-	"go-fiber-starter/app/module/uniwash/service"
 )
 
 type Product struct {
@@ -75,7 +74,6 @@ func FromDomain(item *schema.Post, products []schema.Product, isForUser bool) (r
 				VariantType: product.VariantType,
 				//Attributes:  filterAttributes(product.Taxonomies),
 			}
-			g.Meta.Reservation = service.DefaultSetting
 			p.Variants = append(p.Variants, g)
 		}
 

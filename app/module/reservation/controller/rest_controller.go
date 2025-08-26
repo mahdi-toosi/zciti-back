@@ -4,6 +4,7 @@ import (
 	"go-fiber-starter/utils"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"go-fiber-starter/app/module/reservation/request"
@@ -43,29 +44,25 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	user, err := utils.GetAuthenticatedUser(c)
-	if err != nil {
-		return err
-	}
 
 	var req request.Reservations
 	req.Pagination = paginate
 	req.BusinessID = businessID
 	req.Mobile = strings.TrimSpace(c.Query("Mobile"))
-	req.EndTime = utils.GetDateInQueries(c, "EndTime")
 	req.FullName = strings.TrimSpace(c.Query("FullName"))
+	req.ProductID, _ = utils.GetUintInQueries(c, "ProductID")
+
 	req.StartTime = utils.GetDateInQueries(c, "StartTime")
-	req.ProductID, _ = utils.GetIntInQueries(c, "ProductID")
-
-	if c.Query("UserID") != "" {
-		userID, err := utils.GetIntInQueries(c, "UserID")
-		if err != nil {
-			return err
-		}
-
-		if user.ID == userID {
-			req.UserID = userID
-		}
+	if req.StartTime != nil && !req.StartTime.IsZero() {
+		// start of the start date
+		t := req.StartTime.Truncate(24 * time.Hour)
+		req.StartTime = &t
+	}
+	req.EndTime = utils.GetDateInQueries(c, "EndTime")
+	if req.EndTime != nil && !req.EndTime.IsZero() {
+		// end of the end date
+		t := req.EndTime.Truncate(24 * time.Hour).Add(24 * time.Hour).Add(-time.Second)
+		req.EndTime = &t
 	}
 
 	reservations, paging, err := _i.service.Index(req)

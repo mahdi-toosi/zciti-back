@@ -29,11 +29,11 @@ type controller struct {
 // @Security     Bearer
 // @Router       /message-rooms [get]
 func (_i *controller) Index(c *fiber.Ctx) error {
-	userID, err := utils.GetIntInQueries(c, "userID")
+	userID, err := utils.GetUintInQueries(c, "userID")
 	if err != nil {
 		return err
 	}
-	businessID, err := utils.GetIntInQueries(c, "businessID")
+	businessID, err := utils.GetUintInQueries(c, "businessID")
 	if err != nil {
 		return err
 	}

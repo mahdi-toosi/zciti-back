@@ -4,12 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/disintegration/imaging"
-	"github.com/gofiber/fiber/v2"
-	"github.com/rs/zerolog/log"
 	"go-fiber-starter/app/database/schema"
-	"golang.org/x/exp/slices"
-	"gorm.io/gorm"
 	"io/ioutil"
 	"math/rand"
 	"os"
@@ -18,6 +13,12 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/disintegration/imaging"
+	"github.com/gofiber/fiber/v2"
+	"github.com/rs/zerolog/log"
+	"golang.org/x/exp/slices"
+	"gorm.io/gorm"
 )
 
 func Log(variable any) {
@@ -52,15 +53,20 @@ func GetIntInParams(c *fiber.Ctx, key string) (uint64, error) {
 	return strconv.ParseUint(c.Params(key), 10, 64)
 }
 
-func GetIntInQueries(c *fiber.Ctx, key string) (uint64, error) {
+func GetUintInQueries(c *fiber.Ctx, key string) (uint64, error) {
 	return strconv.ParseUint(c.Query(key), 10, 64)
+}
+
+func GetIntInQueries(c *fiber.Ctx, key string) (int64, error) {
+	return strconv.ParseInt(c.Query(key), 10, 64)
 }
 
 func GetDateInQueries(c *fiber.Ctx, key string) *time.Time {
 	if c.Query(key) == "" {
 		return &time.Time{}
 	}
-	date, err := time.Parse(time.DateOnly, c.Query(key))
+	loc, _ := time.LoadLocation("Asia/Tehran")
+	date, err := time.ParseInLocation(time.DateOnly, c.Query(key), loc)
 	if err != nil {
 		return &time.Time{}
 	}
@@ -307,4 +313,18 @@ func PrettyJSON(v interface{}) string {
 
 	// Log the pretty-printed JSON
 	return string(jsonData)
+}
+
+func BoolPtr(val bool) *bool {
+	return &val
+}
+
+func GenerateRandomString(length int) string {
+	const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
+	rand.Seed(time.Now().UnixNano())
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[rand.Intn(len(charset))]
+	}
+	return string(b)
 }

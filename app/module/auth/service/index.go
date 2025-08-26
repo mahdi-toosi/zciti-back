@@ -10,6 +10,7 @@ import (
 	"go-fiber-starter/app/module/auth/response"
 	usersRepo "go-fiber-starter/app/module/user/repository"
 	userResponse "go-fiber-starter/app/module/user/response"
+	"go-fiber-starter/internal"
 	"go-fiber-starter/utils/config"
 	"go-fiber-starter/utils/helpers"
 	"gorm.io/gorm"
@@ -24,7 +25,7 @@ type IService interface {
 	ResetPass(req *request.ResetPass) error
 }
 
-func Service(Repo usersRepo.IRepository, MessageWay *MessageWay.App) IService {
+func Service(Repo usersRepo.IRepository, MessageWay *internal.MessageWayService) IService {
 	return &service{
 		Repo,
 		MessageWay,
@@ -33,7 +34,7 @@ func Service(Repo usersRepo.IRepository, MessageWay *MessageWay.App) IService {
 
 type service struct {
 	Repo       usersRepo.IRepository
-	MessageWay *MessageWay.App
+	MessageWay *internal.MessageWayService
 }
 
 func (_i *service) Login(req request.Login, jwtConfig config.Jwt) (res response.Auth, err error) {

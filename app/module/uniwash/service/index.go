@@ -1,13 +1,21 @@
 package service
 
 import (
+	"errors"
+	"fmt"
+	ptime "github.com/yaa110/go-persian-calendar"
 	"go-fiber-starter/app/database/schema"
+	request2 "go-fiber-starter/app/module/coupon/request"
+	cservice "go-fiber-starter/app/module/coupon/service"
 	oirequest "go-fiber-starter/app/module/orderItem/request"
 	prepository "go-fiber-starter/app/module/product/repository"
 	"go-fiber-starter/app/module/uniwash/repository"
 	"go-fiber-starter/app/module/uniwash/request"
 	"go-fiber-starter/app/module/uniwash/response"
+	"go-fiber-starter/internal"
+	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
+	"gorm.io/gorm"
 	"time"
 
 	MessageWay "github.com/MessageWay/MessageWayGolang"
@@ -22,16 +30,30 @@ type IService interface {
 	SendCommand(req request.SendCommand, isForUser bool) error
 	IndexReservedMachines(req request.ReservedMachinesRequest) (reserved []*response.Reservation, paging paginator.Pagination, err error)
 	CheckLastCommandStatus(businessID uint64, reservationID uint64) (status *MessageWay.StatusResponse, err error)
+	GetReservationOptions() (reservationOptions schema.ProductMetaReservationOptions)
+	SendDeviceIsOffMsgToUser(businessID uint64, reservationID uint64) (err error)
+	SendFullCouponToUser(businessID uint64, reservationID uint64) (err error)
 }
 
-func Service(repo repository.IRepository, productRepo prepository.IRepository, messageWay *MessageWay.App) IService {
-	return &service{repo, messageWay, productRepo}
+func Service(
+	repo repository.IRepository,
+	couponService cservice.IService,
+	productRepo prepository.IRepository,
+	messageWay *internal.MessageWayService,
+) IService {
+	return &service{
+		repo,
+		productRepo,
+		messageWay,
+		couponService,
+	}
 }
 
 type service struct {
-	Repo        repository.IRepository
-	MessageWay  *MessageWay.App
-	ProductRepo prepository.IRepository
+	Repo          repository.IRepository
+	ProductRepo   prepository.IRepository
+	MessageWay    *internal.MessageWayService
+	CouponService cservice.IService
 }
 
 func (_i *service) ReserveReservation(req oirequest.OrderItem, userID uint64, businessID uint64) (reservationID *uint64, err error) {
@@ -55,7 +77,8 @@ func (_i *service) ValidateReservation(req oirequest.OrderItem) error {
 		Message: "در این بازه زمانی شما اجازه رزرو ندارید",
 	}
 
-	parsedDate, err := time.Parse(time.DateOnly, req.Date)
+	loc, _ := time.LoadLocation("Asia/Tehran")
+	parsedDate, err := time.ParseInLocation(time.DateOnly, req.Date, loc)
 	if err != nil {
 		return invalidErr
 	}
@@ -64,7 +87,8 @@ func (_i *service) ValidateReservation(req oirequest.OrderItem) error {
 		return invalidErr
 	}
 
-	day := DefaultSetting.Info[parsedDate.Weekday()]
+	reservationOptions := _i.GetReservationOptions()
+	day := reservationOptions[parsedDate.Weekday()]
 	for _, hours := range day {
 		if hours.From == req.StartTime && hours.To == req.EndTime {
 			return nil
@@ -96,7 +120,7 @@ func (_i *service) SendCommand(req request.SendCommand, isForUser bool) (err err
 		if !time.Now().Before(reservation.StartTime.Add(10 * time.Minute)) {
 			return &fiber.Error{
 				Code:    fiber.StatusBadRequest,
-				Message: "شما تا نهایاتا 10 دقیقه پس از شروع زمان فرصت داشتید به دستگاه فرمان بدهید.",
+				Message: "شما تا نهایتاً 10 دقیقه پس از شروع زمان فرصت داشتید به دستگاه فرمان بدهید.",
 			}
 		}
 
@@ -118,7 +142,7 @@ func (_i *service) SendCommand(req request.SendCommand, isForUser bool) (err err
 	}
 
 	send, err := _i.MessageWay.Send(MessageWay.Message{
-		Provider:   3, // با سرشماره 9000
+		Provider:   3, // با سر شماره 9000
 		TemplateID: 8698,
 		Method:     "sms",
 		Params:     []string{commandProxy[req.Command]},
@@ -180,157 +204,127 @@ func (_i *service) CheckLastCommandStatus(businessID uint64, reservationID uint6
 	return _i.MessageWay.GetStatus(MessageWay.StatusRequest{ReferenceID: reservation.Meta.UniWashLastCommandReferenceID})
 }
 
-var commandProxy = map[schema.UniWashCommand]string{
-	schema.UniWashCommandON:        "on",
-	schema.UniWashCommandOFF:       "off",
-	schema.UniWashCommandMoreWater: "7",
+func (_i *service) SendDeviceIsOffMsgToUser(businessID uint64, reservationID uint64) (err error) {
+	reservation, err := _i.Repo.GetSingleReservation(businessID, reservationID)
+	if err != nil {
+		return err
+	}
+
+	send, err := _i.MessageWay.Send(MessageWay.Message{
+		Provider:   5, // با سرشماره 5000
+		TemplateID: 16622,
+		Method:     "sms",
+		Params:     []string{reservation.Product.Meta.SKU},
+		Mobile:     fmt.Sprintf("0%d", reservation.User.Mobile),
+	})
+
+	if err != nil {
+		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "ارسال دستور با خطا مواجه شد، دوباره امتحان کنید."}
+	}
+
+	if send.Status == "error" {
+		return &fiber.Error{Code: fiber.StatusServiceUnavailable, Message: "ارسال دستور با خطا مواجه شد کد ۵۰۶، با پشتیبانی در میان بگذارید."}
+	}
+
+	return nil
 }
 
-var DefaultSetting = schema.ProductMetaReservation{
-	Quantity:  1,
-	EndTime:   "00:00:00",
-	StartTime: "00:00:00",
-	Duration:  (60 * time.Minute) / time.Millisecond,
-	Info: map[time.Weekday][]schema.ProductMetaReservationInfoData{
-		0: { // sunday
-			{From: "00:00:00", To: "01:00:00"},
-			{From: "07:00:00", To: "08:00:00"},
-			{From: "08:00:00", To: "09:00:00"},
-			{From: "09:00:00", To: "10:00:00"},
-			{From: "10:00:00", To: "11:00:00"},
-			{From: "11:00:00", To: "12:00:00"},
-			{From: "12:00:00", To: "13:00:00"},
-			{From: "13:00:00", To: "14:00:00"},
-			//{From: "14:00:00", To: "15:00:00"},
-			//{From: "15:00:00", To: "16:00:00"},
-			{From: "16:00:00", To: "17:00:00"},
-			{From: "17:00:00", To: "18:00:00"},
-			{From: "18:00:00", To: "19:00:00"},
-			{From: "19:00:00", To: "20:00:00"},
-			{From: "20:00:00", To: "21:00:00"},
-			{From: "21:00:00", To: "22:00:00"},
-			{From: "22:00:00", To: "23:00:00"},
-			{From: "23:00:00", To: "00:00:00"},
+func (_i *service) SendFullCouponToUser(businessID uint64, reservationID uint64) (err error) {
+	reservation, err := _i.Repo.GetSingleReservation(businessID, reservationID)
+	if err != nil {
+		return err
+	}
+
+	loc, _ := time.LoadLocation("Asia/Tehran")
+	t := time.Now()
+	startTime := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, loc)
+	endTime := startTime.Add(8 * 24 * time.Hour).Add(-time.Second)
+	code := utils.GenerateRandomString(8)
+
+	for i := 0; i < 30; i++ {
+		_coupon, err := _i.CouponService.Show(reservation.BusinessID, nil, &code)
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
+
+		if _coupon == nil {
+			break
+		} else {
+			code = utils.GenerateRandomString(8)
+		}
+	}
+
+	coupon := request2.Coupon{
+		BusinessID: reservation.BusinessID,
+		Value:      reservation.Product.Price,
+		Type:       schema.CouponTypeFixedAmount,
+		EndTime:    endTime.Format(time.DateTime),
+		StartTime:  startTime.Format(time.DateTime),
+		Code:       code,
+		Title:      fmt.Sprintf("خرابی %s | %s", reservation.Product.Meta.SKU, reservation.User.FullName()),
+		Meta: schema.CouponMeta{
+			MaxUsage: 1,
 		},
-		1: { // monday
-			{From: "00:00:00", To: "01:00:00"},
-			{From: "07:00:00", To: "08:00:00"},
-			{From: "08:00:00", To: "09:00:00"},
-			{From: "09:00:00", To: "10:00:00"},
-			{From: "10:00:00", To: "11:00:00"},
-			{From: "11:00:00", To: "12:00:00"},
-			{From: "12:00:00", To: "13:00:00"},
-			{From: "13:00:00", To: "14:00:00"},
-			{From: "14:00:00", To: "15:00:00"},
-			{From: "15:00:00", To: "16:00:00"},
-			{From: "16:00:00", To: "17:00:00"},
-			{From: "17:00:00", To: "18:00:00"},
-			{From: "18:00:00", To: "19:00:00"},
-			{From: "19:00:00", To: "20:00:00"},
-			{From: "20:00:00", To: "21:00:00"},
-			{From: "21:00:00", To: "22:00:00"},
-			{From: "22:00:00", To: "23:00:00"},
-			{From: "23:00:00", To: "00:00:00"},
+	}
+
+	err = _i.CouponService.Store(coupon)
+	if err != nil {
+		return err
+	}
+
+	send, err := _i.MessageWay.Send(MessageWay.Message{
+		Provider:   5, // با سرشماره 5000
+		TemplateID: 12109,
+		Method:     "sms",
+		Params: []string{
+			reservation.User.FullName(),
+			coupon.Code,
+			ptime.New(endTime).Format("yyyy/MM/dd"),
 		},
-		2: { // tuesday
-			{From: "00:00:00", To: "01:00:00"},
-			{From: "07:00:00", To: "08:00:00"},
-			{From: "08:00:00", To: "09:00:00"},
-			{From: "09:00:00", To: "10:00:00"},
-			{From: "10:00:00", To: "11:00:00"},
-			{From: "11:00:00", To: "12:00:00"},
-			{From: "12:00:00", To: "13:00:00"},
-			{From: "13:00:00", To: "14:00:00"},
-			//{From: "14:00:00", To: "15:00:00"},
-			//{From: "15:00:00", To: "16:00:00"},
-			{From: "16:00:00", To: "17:00:00"},
-			{From: "17:00:00", To: "18:00:00"},
-			{From: "18:00:00", To: "19:00:00"},
-			{From: "19:00:00", To: "20:00:00"},
-			{From: "20:00:00", To: "21:00:00"},
-			{From: "21:00:00", To: "22:00:00"},
-			{From: "22:00:00", To: "23:00:00"},
-			{From: "23:00:00", To: "00:00:00"},
-		},
-		3: { // wednesday
-			{From: "00:00:00", To: "01:00:00"},
-			{From: "07:00:00", To: "08:00:00"},
-			{From: "08:00:00", To: "09:00:00"},
-			{From: "09:00:00", To: "10:00:00"},
-			{From: "10:00:00", To: "11:00:00"},
-			{From: "11:00:00", To: "12:00:00"},
-			{From: "12:00:00", To: "13:00:00"},
-			{From: "13:00:00", To: "14:00:00"},
-			{From: "14:00:00", To: "15:00:00"},
-			{From: "15:00:00", To: "16:00:00"},
-			{From: "16:00:00", To: "17:00:00"},
-			{From: "17:00:00", To: "18:00:00"},
-			{From: "18:00:00", To: "19:00:00"},
-			{From: "19:00:00", To: "20:00:00"},
-			{From: "20:00:00", To: "21:00:00"},
-			{From: "21:00:00", To: "22:00:00"},
-			{From: "22:00:00", To: "23:00:00"},
-			{From: "23:00:00", To: "00:00:00"},
-		},
-		4: { // thursday
-			{From: "00:00:00", To: "01:00:00"},
-			{From: "07:00:00", To: "08:00:00"},
-			{From: "08:00:00", To: "09:00:00"},
-			{From: "09:00:00", To: "10:00:00"},
-			{From: "10:00:00", To: "11:00:00"},
-			{From: "11:00:00", To: "12:00:00"},
-			{From: "12:00:00", To: "13:00:00"},
-			{From: "13:00:00", To: "14:00:00"},
-			//{From: "14:00:00", To: "15:00:00"},
-			//{From: "15:00:00", To: "16:00:00"},
-			{From: "16:00:00", To: "17:00:00"},
-			{From: "17:00:00", To: "18:00:00"},
-			{From: "18:00:00", To: "19:00:00"},
-			{From: "19:00:00", To: "20:00:00"},
-			{From: "20:00:00", To: "21:00:00"},
-			{From: "21:00:00", To: "22:00:00"},
-			{From: "22:00:00", To: "23:00:00"},
-			{From: "23:00:00", To: "00:00:00"},
-		},
-		5: { // friday
-			{From: "00:00:00", To: "01:00:00"},
-			{From: "07:00:00", To: "08:00:00"},
-			{From: "08:00:00", To: "09:00:00"},
-			{From: "09:00:00", To: "10:00:00"},
-			{From: "10:00:00", To: "11:00:00"},
-			{From: "11:00:00", To: "12:00:00"},
-			{From: "12:00:00", To: "13:00:00"},
-			{From: "13:00:00", To: "14:00:00"},
-			{From: "14:00:00", To: "15:00:00"},
-			{From: "15:00:00", To: "16:00:00"},
-			{From: "16:00:00", To: "17:00:00"},
-			{From: "17:00:00", To: "18:00:00"},
-			{From: "18:00:00", To: "19:00:00"},
-			{From: "19:00:00", To: "20:00:00"},
-			{From: "20:00:00", To: "21:00:00"},
-			{From: "21:00:00", To: "22:00:00"},
-			{From: "22:00:00", To: "23:00:00"},
-			{From: "23:00:00", To: "00:00:00"},
-		},
-		6: { // saturday
-			{From: "00:00:00", To: "01:00:00"},
-			{From: "07:00:00", To: "08:00:00"},
-			{From: "08:00:00", To: "09:00:00"},
-			{From: "09:00:00", To: "10:00:00"},
-			{From: "10:00:00", To: "11:00:00"},
-			{From: "11:00:00", To: "12:00:00"},
-			{From: "12:00:00", To: "13:00:00"},
-			{From: "13:00:00", To: "14:00:00"},
-			{From: "14:00:00", To: "15:00:00"},
-			{From: "15:00:00", To: "16:00:00"},
-			{From: "16:00:00", To: "17:00:00"},
-			{From: "17:00:00", To: "18:00:00"},
-			{From: "18:00:00", To: "19:00:00"},
-			{From: "19:00:00", To: "20:00:00"},
-			{From: "20:00:00", To: "21:00:00"},
-			{From: "21:00:00", To: "22:00:00"},
-			{From: "22:00:00", To: "23:00:00"},
-			{From: "23:00:00", To: "00:00:00"},
-		},
-	},
+		Mobile: fmt.Sprintf("0%d", reservation.User.Mobile),
+	})
+
+	if err != nil {
+		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "ارسال دستور با خطا مواجه شد، دوباره امتحان کنید."}
+	}
+
+	if send.Status == "error" {
+		return &fiber.Error{Code: fiber.StatusServiceUnavailable, Message: "ارسال دستور با خطا مواجه شد کد ۵۰۶، با پشتیبانی در میان بگذارید."}
+	}
+
+	return nil
+}
+
+func (_i *service) GetReservationOptions() (reservationOptions schema.ProductMetaReservationOptions) {
+	options := schema.ProductMetaReservationOptions{}
+	// Sunday is 0
+	dayNumbers := []time.Weekday{0, 1, 2, 3, 4, 5, 6}
+
+	for _, dayNum := range dayNumbers {
+		options[dayNum] = []schema.ProductMetaDeviceHour{}
+		for hour := 0; hour < 24; hour++ {
+			to := ""
+			if hour+1 == 24 {
+				to = "00:00:00"
+			} else {
+				to = fmt.Sprintf("%02d:00:00", hour+1)
+			}
+
+			deviceHour := schema.ProductMetaDeviceHour{
+				ID:   fmt.Sprintf("%d-%02d", dayNum, hour),
+				From: fmt.Sprintf("%02d:00:00", hour),
+				To:   to,
+			}
+			options[dayNum] = append(options[dayNum], deviceHour)
+		}
+
+	}
+	return options
+}
+
+var commandProxy = map[schema.UniWashCommand]string{
+	schema.UniWashCommandON:         "on",
+	schema.UniWashCommandOFF:        "off",
+	schema.UniWashCommandRewash:     "10",
+	schema.UniWashCommandEvacuation: "9",
 }

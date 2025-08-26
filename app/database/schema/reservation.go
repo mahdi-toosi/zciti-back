@@ -34,10 +34,12 @@ const (
 type UniWashCommand string
 
 const (
-	UniWashCommandON        UniWashCommand = "ON"
-	UniWashCommandOFF       UniWashCommand = "OFF"
-	UniWashCommandOffline   UniWashCommand = "OFFLINE"
-	UniWashCommandMoreWater UniWashCommand = "MORE_WATER"
+	UniWashCommandON         UniWashCommand = "ON"
+	UniWashCommandOFF        UniWashCommand = "OFF"
+	UniWashCommandRewash     UniWashCommand = "REWASH"
+	UniWashCommandOffline    UniWashCommand = "OFFLINE"
+	UniWashCommandMoreWater  UniWashCommand = "MORE_WATER"
+	UniWashCommandEvacuation UniWashCommand = "EVACUATION"
 )
 
 type ReservationMeta struct {

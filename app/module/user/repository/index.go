@@ -5,6 +5,9 @@ import (
 	"go-fiber-starter/app/module/user/request"
 	"go-fiber-starter/internal/bootstrap/database"
 	"go-fiber-starter/utils/paginator"
+	"strconv"
+	"strings"
+	"time"
 )
 
 type IRepository interface {
@@ -92,17 +95,58 @@ func (_i *repo) FindUserByMobile(mobile uint64) (user *schema.User, err error) {
 
 func (_i *repo) GetUsers(req request.BusinessUsers) (users []*schema.User, paging paginator.Pagination, err error) {
 	query := _i.DB.Main.
-		Model(&users).
-		Joins("JOIN business_users ON business_users.user_id = users.id").
-		Where("business_users.business_id = ?", req.BusinessID).
-		Order("created_at ASC")
+		Model(&[]schema.User{}).
+		Select("users.*, COUNT(reservations.id) as reservation_count").
+		Joins("JOIN reservations ON reservations.user_id = users.id").
+		Group("users.id").
+		Order("users.created_at ASC")
+
+	if req.CountUsing != 0 {
+		query.Having("COUNT(reservations.id) > ?", req.CountUsing)
+	}
+
+	if !req.StartTime.IsZero() {
+		query.Where("reservations.start_time >= ?", req.StartTime.Truncate(24*time.Hour))
+	}
+
+	if !req.EndTime.IsZero() {
+		query.Where("reservations.end_time <= ?", req.EndTime.Truncate(24*time.Hour).Add(24*time.Hour).Add(-time.Second))
+	}
 
 	if len(req.UserIDs) > 0 {
 		query.Where("users.id IN (?)", req.UserIDs)
 	}
 
 	if len(req.Username) > 0 {
-		query.Where("users.mobile = ?", req.Username)
+		num, _ := strconv.ParseUint(req.Username, 10, 64)
+		query.Where("users.mobile = ?", num)
+	}
+
+	if len(req.FullName) > 0 {
+		query.Where(
+			"CONCAT(users.first_name, ' ', users.last_name) LIKE ?",
+			"%"+strings.TrimSpace(req.FullName)+"%",
+		)
+	}
+
+	if req.CityID > 0 {
+		query.Where("users.city_id = ?", req.CityID)
+	}
+
+	if req.WorkspaceID > 0 {
+		query.Where("users.workspace_id = ?", req.WorkspaceID)
+	}
+
+	if req.DormitoryID > 0 {
+		query.Where("users.dormitory_id = ?", req.DormitoryID)
+	}
+
+	if req.IsSuspended != "" {
+		isSuspended := false
+		if req.IsSuspended == "1" {
+			isSuspended = true
+		}
+		query.Where("users.is_suspended = ?", isSuspended)
 	}
 
 	if req.Pagination != nil && req.Pagination.Page > 0 {
@@ -114,7 +158,7 @@ func (_i *repo) GetUsers(req request.BusinessUsers) (users []*schema.User, pagin
 		query.Limit(req.Pagination.Limit)
 	}
 
-	err = query.Find(&users).Error
+	err = query.Debug().Preload("Dormitory").Preload("Workspace").Preload("City").Find(&users).Error
 	if err != nil {
 		return
 	}

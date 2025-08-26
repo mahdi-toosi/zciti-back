@@ -79,7 +79,7 @@ func (_i *controller) Show(c *fiber.Ctx) error {
 		return err
 	}
 
-	coupon, err := _i.service.Show(businessID, id)
+	coupon, err := _i.service.Show(businessID, &id, nil)
 	if err != nil {
 		return err
 	}

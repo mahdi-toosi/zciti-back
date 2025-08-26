@@ -44,6 +44,10 @@ func (_i *repo) GetAll(req request.Reservations) (reservations []*schema.Reserva
 		query.Where(&schema.Reservation{BusinessID: req.BusinessID})
 	}
 
+	if req.Status != "" {
+		query.Where(&schema.Reservation{Status: req.Status})
+	}
+
 	if req.FullName != "" || req.Mobile != "" {
 		query.Joins("JOIN users ON reservations.user_id = users.id")
 		if req.FullName != "" {
@@ -57,15 +61,15 @@ func (_i *repo) GetAll(req request.Reservations) (reservations []*schema.Reserva
 		}
 	}
 
-	if !req.StartTime.IsZero() {
-		query.Where("start_time >= ?", req.StartTime.Truncate(24*time.Hour))
+	if req.StartTime != nil && !req.StartTime.IsZero() {
+		query.Where("start_time >= ?", req.StartTime)
 	}
 
-	if !req.EndTime.IsZero() {
-		query.Where("end_time <= ?", req.EndTime.Truncate(24*time.Hour).Add(24*time.Hour).Add(-time.Second))
+	if req.EndTime != nil && !req.EndTime.IsZero() {
+		query.Where("end_time <= ?", req.EndTime)
 	}
 
-	if req.Pagination.Page > 0 {
+	if req.Pagination != nil && req.Pagination.Page > 0 {
 		var total int64
 		query.Count(&total)
 		req.Pagination.Total = total
@@ -87,7 +91,9 @@ func (_i *repo) GetAll(req request.Reservations) (reservations []*schema.Reserva
 		return
 	}
 
-	paging = *req.Pagination
+	if req.Pagination != nil {
+		paging = *req.Pagination
+	}
 
 	return
 }

@@ -1,17 +1,18 @@
 package database //nolint:typecheck
 
 import (
-	"github.com/rs/zerolog"
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/database/seeds"
 	"go-fiber-starter/utils/config"
+
+	"github.com/rs/zerolog"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 type Database struct {
 	Main *gorm.DB
-	//Chat *gorm.DB
+	// Chat *gorm.DB
 	Log zerolog.Logger
 	Cfg *config.Config
 }

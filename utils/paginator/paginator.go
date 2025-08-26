@@ -17,11 +17,11 @@ type Pagination struct {
 }
 
 func Paginate(c *fiber.Ctx) (*Pagination, error) {
-	limit, err := utils.GetIntInQueries(c, "itemPerPage")
+	limit, err := utils.GetUintInQueries(c, "itemPerPage")
 	if err != nil {
 		limit = defaultLimit
 	}
-	page, err := utils.GetIntInQueries(c, "page")
+	page, err := utils.GetUintInQueries(c, "page")
 	if err != nil {
 		page = 0
 		limit = 0

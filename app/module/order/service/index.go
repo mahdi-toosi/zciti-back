@@ -19,7 +19,6 @@ import (
 	userService "go-fiber-starter/app/module/user/service"
 	walletService "go-fiber-starter/app/module/wallet/service"
 	"go-fiber-starter/internal"
-	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/config"
 	"go-fiber-starter/utils/paginator"
 )
@@ -239,8 +238,6 @@ func (_i *service) Store(req request.Order) (orderID uint64, paymentURL string, 
 		if err != nil {
 			return 0, "", err
 		}
-		utils.Log("businessWallet")
-		utils.Log(businessWallet)
 
 		err = _i.TransactionRepo.Create(&schema.Transaction{
 			Amount:               totalAmt,

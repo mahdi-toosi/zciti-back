@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	MessageWay "github.com/MessageWay/MessageWayGolang"
 	"github.com/gofiber/fiber/v2"
@@ -11,14 +12,16 @@ import (
 	"go-fiber-starter/app/module/coupon/response"
 	userRequest "go-fiber-starter/app/module/user/request"
 	userService "go-fiber-starter/app/module/user/service"
+	"go-fiber-starter/internal"
 	"go-fiber-starter/utils/paginator"
 	"golang.org/x/exp/slices"
+	"gorm.io/gorm"
 	"time"
 )
 
 type IService interface {
 	Index(req request.Coupons) (coupons []*response.Coupon, paging paginator.Pagination, err error)
-	Show(businessID uint64, id uint64) (coupon *response.Coupon, err error)
+	Show(businessID uint64, id *uint64, code *string) (coupon *response.Coupon, err error)
 	Store(req request.Coupon) (err error)
 	Update(id uint64, req request.Coupon) (err error)
 	Destroy(id uint64) error
@@ -29,7 +32,7 @@ type IService interface {
 	CalcTotalAmtWithDiscount(coupon *schema.Coupon, totalAmt *float64) (_totalAmt float64)
 }
 
-func Service(Repo repository.IRepository, userService userService.IService, messageWay *MessageWay.App) IService {
+func Service(Repo repository.IRepository, userService userService.IService, messageWay *internal.MessageWayService) IService {
 	return &service{
 		Repo,
 		userService,
@@ -40,7 +43,7 @@ func Service(Repo repository.IRepository, userService userService.IService, mess
 type service struct {
 	Repo        repository.IRepository
 	UserService userService.IService
-	MessageWay  *MessageWay.App
+	MessageWay  *internal.MessageWayService
 }
 
 func (_i *service) Index(req request.Coupons) (coupons []*response.Coupon, paging paginator.Pagination, err error) {
@@ -56,8 +59,8 @@ func (_i *service) Index(req request.Coupons) (coupons []*response.Coupon, pagin
 	return
 }
 
-func (_i *service) Show(businessID uint64, id uint64) (article *response.Coupon, err error) {
-	result, err := _i.Repo.GetOne(businessID, &id, nil)
+func (_i *service) Show(businessID uint64, id *uint64, code *string) (article *response.Coupon, err error) {
+	result, err := _i.Repo.GetOne(businessID, id, code)
 	if err != nil {
 		return nil, err
 	}
@@ -95,12 +98,13 @@ func (_i *service) CouponMessageSend(req request.CouponMessageSend) error {
 		return err
 	}
 
-	coupon, err := _i.Show(req.BusinessID, req.CouponID)
-	if err != nil {
+	coupon, err := _i.Show(req.BusinessID, &req.CouponID, nil)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
 	}
 
-	gTime, err := time.Parse(time.DateTime, coupon.EndTime)
+	loc, _ := time.LoadLocation("Asia/Tehran")
+	gTime, err := time.ParseInLocation(time.DateTime, coupon.EndTime, loc)
 	if err != nil {
 		return err
 	}

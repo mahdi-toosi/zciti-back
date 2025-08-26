@@ -1,0 +1,8 @@
+{
+    "cSpell.language": "en,fa",
+    "search.exclude": {
+        "**/vendor": true,
+        "**/app/module/example": true
+    },
+    "cSpell.words": ["uniwash"]
+}

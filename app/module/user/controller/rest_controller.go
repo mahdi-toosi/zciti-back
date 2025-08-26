@@ -1,8 +1,10 @@
 package controller
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/xuri/excelize/v2"
 	"go-fiber-starter/app/database/schema"
 	bService "go-fiber-starter/app/module/business/service"
 	orequest "go-fiber-starter/app/module/order/request"
@@ -29,6 +31,7 @@ type IRestController interface {
 	InsertUser(c *fiber.Ctx) error
 	DeleteUser(c *fiber.Ctx) error
 	BusinessUsersAddRole(c *fiber.Ctx) error
+	BusinessUsersToggleSuspense(c *fiber.Ctx) error
 
 	Orders(c *fiber.Ctx) error
 	OrderStore(c *fiber.Ctx) error
@@ -219,17 +222,116 @@ func (_i *controller) BusinessUsers(c *fiber.Ctx) error {
 	var req request.BusinessUsers
 	req.Pagination = paginate
 	req.BusinessID = businessID
+	export := c.Query("Export")
 	req.Username = c.Query("Username")
+	req.FullName = c.Query("FullName")
+	req.IsSuspended = c.Query("IsSuspended")
+	req.EndTime = utils.GetDateInQueries(c, "EndTime")
+	req.StartTime = utils.GetDateInQueries(c, "StartTime")
+
+	if c.Query("CountUsing") != "" {
+		CountUsing, err := utils.GetUintInQueries(c, "CountUsing")
+		if err != nil {
+			return err
+		}
+		req.CountUsing = CountUsing
+	}
+
+	if c.Query("CityID") != "" {
+		CityID, err := utils.GetUintInQueries(c, "CityID")
+		if err != nil {
+			return err
+		}
+		req.CityID = CityID
+	}
+	if c.Query("WorkspaceID") != "" {
+		WorkspaceID, err := utils.GetUintInQueries(c, "WorkspaceID")
+		if err != nil {
+			return err
+		}
+		req.WorkspaceID = WorkspaceID
+	}
+	if c.Query("DormitoryID") != "" {
+		DormitoryID, err := utils.GetUintInQueries(c, "DormitoryID")
+		if err != nil {
+			return err
+		}
+		req.DormitoryID = DormitoryID
+	}
 
 	users, paging, err := _i.service.Users(req)
 	if err != nil {
 		return err
 	}
 
-	return response.Resp(c, response.Response{
-		Data: users,
-		Meta: paging,
-	})
+	if export == "excel" {
+		// Create a new Excel file
+		f := excelize.NewFile()
+		// Create a new sheet
+		sheetName := "Users"
+		index, _ := f.NewSheet(sheetName)
+
+		// Set RTL view
+		f.SetSheetView(sheetName, 0, &excelize.ViewOptions{
+			RightToLeft: utils.BoolPtr(true),
+		})
+		f.SetPanes(sheetName, &excelize.Panes{
+			Freeze:      true,
+			Split:       false,
+			XSplit:      0,
+			YSplit:      1,
+			TopLeftCell: "A2",
+			ActivePane:  "bottomLeft",
+		})
+
+		f.SetColWidth(sheetName, "B", "D", 30)
+		columnsStyles, _ := f.NewStyle(&excelize.Style{
+			Font: &excelize.Font{
+				Family: "IRANSans", // Font name as installed in the OS
+				Size:   16,
+			},
+			Alignment: &excelize.Alignment{
+				Horizontal: "right",
+			},
+		})
+
+		// Headers in Persian
+		f.SetCellValue(sheetName, "A1", "ردیف")
+		f.SetCellValue(sheetName, "B1", "نام کامل")
+		f.SetCellValue(sheetName, "C1", "تلفن همراه ")
+		f.SetCellValue(sheetName, "D1", "تعداد استفاده ")
+		f.SetColStyle(sheetName, "A:D", columnsStyles)
+
+		// Populate data
+		for i, user := range users {
+			row := i + 2 // Start from the second row
+			f.SetCellValue(sheetName, "A"+strconv.Itoa(row), i+1)
+			f.SetCellValue(sheetName, "B"+strconv.Itoa(row), user.FullName)
+			f.SetCellValue(sheetName, "C"+strconv.Itoa(row), fmt.Sprint("0", user.Mobile))
+			f.SetCellInt(sheetName, "D"+strconv.Itoa(row), int64(user.ReservationCount))
+		}
+
+		// Set active sheet
+		f.SetActiveSheet(index)
+
+		// Write the file to a buffer
+		buf := new(bytes.Buffer)
+		if err := f.Write(buf); err != nil {
+			return err
+		}
+
+		// Set the content type and filename
+		c.Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+		c.Set("Content-Disposition", "attachment; filename=users.xlsx")
+
+		// Send the buffer as the response
+		return c.Send(buf.Bytes())
+	} else {
+		return response.Resp(c, response.Response{
+			Data: users,
+			Meta: paging,
+		})
+	}
 }
 
 // InsertUser
@@ -354,6 +456,33 @@ func (_i *controller) BusinessUsersAddRole(c *fiber.Ctx) error {
 	})
 }
 
+// BusinessUsersToggleSuspense
+// @Summary      BusinessUsersToggleSuspend toggle suspend business user status
+// @Tags         Users
+// @Security     Bearer
+// @Param        businessId path int true "Business ID"
+// @Router       /businesses/:businessID/users-toggle-suspense [post]
+func (_i *controller) BusinessUsersToggleSuspense(c *fiber.Ctx) error {
+	businessID, err := utils.GetIntInParams(c, "businessID")
+	if err != nil {
+		return fiber.ErrBadRequest
+	}
+
+	req := new(request.BusinessUsersToggleSuspense)
+	req.BusinessID = businessID
+	if err := response.ParseAndValidate(c, req); err != nil {
+		return err
+	}
+
+	if err := _i.service.BusinessUsersToggleSuspense(*req); err != nil {
+		return err
+	}
+
+	return response.Resp(c, response.Response{
+		Messages: response.Messages{"success"},
+	})
+}
+
 // Orders
 // @Summary      Get all orders
 // @Tags         Users
@@ -392,11 +521,11 @@ func (_i *controller) Orders(c *fiber.Ctx) error {
 // @Param        businessID path int true "Business ID"
 // @Router       /user/orders/status [get]
 func (_i *controller) OrderStatus(c *fiber.Ctx) error {
-	userID, err := utils.GetIntInQueries(c, "UserID")
+	userID, err := utils.GetUintInQueries(c, "UserID")
 	if err != nil {
 		return err
 	}
-	orderID, err := utils.GetIntInQueries(c, "OrderID")
+	orderID, err := utils.GetUintInQueries(c, "OrderID")
 	if err != nil {
 		return err
 	}
@@ -430,6 +559,9 @@ func (_i *controller) OrderStore(c *fiber.Ctx) error {
 	user, err := utils.GetAuthenticatedUser(c)
 	if err != nil {
 		return err
+	}
+	if user.IsSuspended != nil && *user.IsSuspended {
+		return fiber.ErrForbidden
 	}
 
 	req := new(orequest.Order)

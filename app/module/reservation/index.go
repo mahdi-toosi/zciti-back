@@ -4,6 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	mdl "go-fiber-starter/app/middleware"
 	"go-fiber-starter/app/module/reservation/controller"
+	"go-fiber-starter/app/module/reservation/cron"
 	"go-fiber-starter/app/module/reservation/repository"
 	"go-fiber-starter/app/module/reservation/service"
 	"go-fiber-starter/utils/config"
@@ -44,4 +45,7 @@ var Module = fx.Options(
 	fx.Provide(controller.Controllers),
 
 	fx.Provide(newRouter),
+
+	fx.Invoke(cron.RunTurnOnMsgReminders),
+	fx.Invoke(cron.RunTurnOffMsgReminders),
 )

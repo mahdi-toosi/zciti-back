@@ -9,15 +9,24 @@ import (
 )
 
 type User struct {
-	ID              uint64          `gorm:"primaryKey" faker:"-"`
-	FirstName       string          `gorm:"varchar(255);" faker:"first_name"`
-	LastName        string          `gorm:"varchar(255);" faker:"last_name"`
-	Mobile          uint64          `gorm:"not null;uniqueIndex"`
-	MobileConfirmed bool            `gorm:"default:false"`
-	ShowMobile      bool            `gorm:"default:false"`
-	Permissions     UserPermissions `gorm:"type:jsonb;not null"`
-	Password        string          `gorm:"varchar(255);not null"`
-	Businesses      []*Business     `gorm:"many2many:business_users;" faker:"-"`
+	ID               uint64          `gorm:"primaryKey" faker:"-"`
+	FirstName        string          `gorm:"varchar(255);" faker:"first_name"`
+	LastName         string          `gorm:"varchar(255);" faker:"last_name"`
+	Mobile           uint64          `gorm:"not null;uniqueIndex"`
+	MobileConfirmed  bool            `gorm:"default:false"`
+	ShowMobile       bool            ``
+	IsSuspended      *bool           `gorm:"default:false"`
+	SuspenseReason   *string         `gorm:"varchar(500);"`
+	Permissions      UserPermissions `gorm:"type:jsonb;not null"`
+	Password         string          `gorm:"varchar(255);not null"`
+	CityID           *uint64         `gorm:"" faker:"-"`
+	City             *Taxonomy       `gorm:"foreignKey:CityID" faker:"-"`
+	WorkspaceID      *uint64         `gorm:"" faker:"-"`
+	Workspace        *Taxonomy       `gorm:"foreignKey:WorkspaceID" faker:"-"`
+	DormitoryID      *uint64         `gorm:"" faker:"-"`
+	Dormitory        *Taxonomy       `gorm:"foreignKey:DormitoryID" faker:"-"`
+	Businesses       []*Business     `gorm:"many2many:business_users;" faker:"-"`
+	ReservationCount uint64          `gorm:"" faker:"-"`
 	//FullName  string `gorm:"->;type:GENERATED ALWAYS AS (concat(first_name,' ',last_name));default:(-);"`
 	Base
 }
