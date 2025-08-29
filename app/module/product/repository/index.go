@@ -187,7 +187,7 @@ func (_i *repo) DeleteVariant(businessID uint64, productID uint64, variantID uin
 	var reservationCount int64
 	err := _i.DB.Main.
 		Model(&schema.Reservation{}).
-		Where("product_id = ? AND start_time > ?", variantID, time.Now()).Debug().
+		Where("product_id = ? AND start_time > ?", variantID, time.Now()).
 		Count(&reservationCount).
 		Error
 	if err != nil {

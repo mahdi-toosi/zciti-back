@@ -97,12 +97,12 @@ func (_i *repo) GetUsers(req request.BusinessUsers) (users []*schema.User, pagin
 	query := _i.DB.Main.
 		Model(&[]schema.User{}).
 		Select("users.*, COUNT(reservations.id) as reservation_count").
-		Joins("JOIN reservations ON reservations.user_id = users.id").
+		Joins("JOIN reservations ON reservations.user_id = users.id AND reservations.deleted_at IS NULL AND reservations.status = 'reserved'").
 		Group("users.id").
 		Order("users.created_at ASC")
 
 	if req.CountUsing != 0 {
-		query.Having("COUNT(reservations.id) > ?", req.CountUsing)
+		query.Having("COUNT(reservations.id) = ?", req.CountUsing)
 	}
 
 	if !req.StartTime.IsZero() {
@@ -158,7 +158,7 @@ func (_i *repo) GetUsers(req request.BusinessUsers) (users []*schema.User, pagin
 		query.Limit(req.Pagination.Limit)
 	}
 
-	err = query.Debug().Preload("Dormitory").Preload("Workspace").Preload("City").Find(&users).Error
+	err = query.Preload("Dormitory").Preload("Workspace").Preload("City").Find(&users).Error
 	if err != nil {
 		return
 	}

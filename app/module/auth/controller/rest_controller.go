@@ -84,8 +84,6 @@ func (_i *controller) SendOtp(c *fiber.Ctx) error {
 	}
 
 	recaptcha.Init(_i.config.Services.GoogleRecaptcha.SecretKey)
-	// get client ip address from fiber
-
 	confirm, err := recaptcha.Confirm(c.IP(), req.Recaptcha)
 	if err != nil {
 		return &fiber.Error{
