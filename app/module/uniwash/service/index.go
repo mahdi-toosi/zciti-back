@@ -197,7 +197,7 @@ func (_i *service) CheckLastCommandStatus(businessID uint64, reservationID uint6
 	if reservation.Meta.UniWashLastCommand == "" {
 		return &MessageWay.StatusResponse{
 			OTPStatus: "دستوری ارسال نشده",
-			Status:    "danger",
+			Status:    "error",
 		}, nil
 	}
 

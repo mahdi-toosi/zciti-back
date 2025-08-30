@@ -105,11 +105,11 @@ func (_i *repo) GetUsers(req request.BusinessUsers) (users []*schema.User, pagin
 		query.Having("COUNT(reservations.id) = ?", req.CountUsing)
 	}
 
-	if !req.StartTime.IsZero() {
+	if req.StartTime != nil && !req.StartTime.IsZero() {
 		query.Where("reservations.start_time >= ?", req.StartTime.Truncate(24*time.Hour))
 	}
 
-	if !req.EndTime.IsZero() {
+	if req.StartTime != nil && !req.EndTime.IsZero() {
 		query.Where("reservations.end_time <= ?", req.EndTime.Truncate(24*time.Hour).Add(24*time.Hour).Add(-time.Second))
 	}
 
