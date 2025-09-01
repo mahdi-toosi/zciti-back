@@ -157,7 +157,7 @@ func (_i *service) SendCommand(req request.SendCommand, isForUser bool) (err err
 		return &fiber.Error{Code: fiber.StatusServiceUnavailable, Message: "ارسال دستور با خطا مواجه شد کد ۵۰۶، با پشتیبانی در میان بگذارید."}
 	}
 
-	t := time.Now().UTC()
+	t := time.Now()
 	reservation.Meta.UniWashLastCommandTime = &t
 	reservation.Meta.UniWashLastCommand = req.Command
 	reservation.Meta.UniWashLastCommandReferenceID = send.ReferenceID

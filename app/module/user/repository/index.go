@@ -158,7 +158,10 @@ func (_i *repo) GetUsers(req request.BusinessUsers) (users []*schema.User, pagin
 		query.Limit(req.Pagination.Limit)
 	}
 
-	err = query.Preload("Dormitory").Preload("Workspace").Preload("City").Find(&users).Error
+	err = query.Preload("Dormitory").
+		Preload("Workspace").
+		Preload("City").
+		Find(&users).Error
 	if err != nil {
 		return
 	}

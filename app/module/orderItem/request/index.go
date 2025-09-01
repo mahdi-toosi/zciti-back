@@ -24,13 +24,19 @@ type OrderItem struct {
 func (req *OrderItem) GetStartDateTime() time.Time {
 	loc, _ := time.LoadLocation("Asia/Tehran")
 	startTime, _ := time.ParseInLocation(time.DateTime, req.Date+" "+req.StartTime, loc)
-	return startTime.UTC()
+	return startTime
 }
 
 func (req *OrderItem) GetEndDateTime() time.Time {
 	loc, _ := time.LoadLocation("Asia/Tehran")
 	endTime, _ := time.ParseInLocation(time.DateTime, req.Date+" "+req.EndTime, loc)
-	return endTime.UTC()
+
+	// if hour is 00 should store in next day
+	if endTime.Hour() == 0 {
+		endTime = endTime.Add(24 * time.Hour)
+	}
+
+	return endTime
 }
 
 type ToDomainParams struct {

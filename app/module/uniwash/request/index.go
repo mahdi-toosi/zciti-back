@@ -42,5 +42,11 @@ func (s StoreUniWash) GetStartDateTime() time.Time {
 func (s StoreUniWash) GetEndDateTime() time.Time {
 	loc, _ := time.LoadLocation("Asia/Tehran")
 	endTime, _ := time.ParseInLocation(time.DateTime, s.Date+" "+s.EndTime, loc)
+
+	// if hour is 00 should store in next day
+	if endTime.Hour() == 0 {
+		endTime = endTime.Add(24 * time.Hour)
+	}
+
 	return endTime
 }
