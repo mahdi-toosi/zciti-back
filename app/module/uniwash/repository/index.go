@@ -5,6 +5,7 @@ import (
 	oirequest "go-fiber-starter/app/module/orderItem/request"
 	"go-fiber-starter/app/module/uniwash/request"
 	"go-fiber-starter/internal/bootstrap/database"
+	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
 	"time"
 
@@ -116,30 +117,15 @@ func (_i *repo) IndexReservedMachines(req request.ReservedMachinesRequest) (rese
 	}
 
 	if !req.Date.IsZero() {
-		loc, _ := time.LoadLocation("Asia/Tehran")
-		startTime := time.Date(req.Date.Year(), req.Date.Month(), req.Date.Day(), 0, 0, 0, 0, loc)
-		endTime := time.Date(req.Date.Year(), req.Date.Month(), req.Date.Day(), 23, 59, 59, 999999999, loc)
+		startTime, _ := utils.StartOfDate(req.Date.Format(time.DateTime), time.DateTime)
+		endTime, _ := utils.EndOfDate(req.Date.Format(time.DateTime), time.DateTime)
 		query.Where("start_time BETWEEN ? AND ?", startTime, endTime)
-
-		//query.Where("start_time::date = ?", req.Date)
-		//utils.Log(err)
-		//utils.Log(reservations)
-		//return
-		//date, err := time.Parse(time.DateOnly, req.Date)
-		//if err != nil {
-		//	return nil, paginator.Pagination{}, err
-		//}
-		//
-		//startTime := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, loc)
-		//endTime := time.Date(date.Year(), date.Month(), date.Day(), 23, 59, 59, 999999999, loc)
-		//d := 24 * time.Hour
-		//query.Where("start_time BETWEEN ? AND ?", req.Date.Truncate(d), req.Date.Truncate(d).Add(d))
 	}
 
 	if req.With == "reservedReservations" {
 		query.Unscoped().Where("deleted_at > ? OR deleted_at IS NULL", time.Now())
 	} else if req.UserID > 0 {
-		query.Where(&schema.Reservation{UserID: req.UserID}).
+		query.Where(&schema.Reservation{UserID: req.UserID}).Unscoped().
 			Preload("Product.Post").
 			Order("start_time desc")
 	}
@@ -153,7 +139,7 @@ func (_i *repo) IndexReservedMachines(req request.ReservedMachinesRequest) (rese
 		query.Limit(req.Pagination.Limit)
 	}
 
-	if err = query.Find(&reservations).Error; err != nil {
+	if err = query.Debug().Find(&reservations).Error; err != nil {
 		return
 	}
 

@@ -53,16 +53,12 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	req.ProductID, _ = utils.GetUintInQueries(c, "ProductID")
 
 	req.StartTime = utils.GetDateInQueries(c, "StartTime")
-	if req.StartTime != nil && !req.StartTime.IsZero() {
-		// start of the start date
-		t := req.StartTime.Truncate(24 * time.Hour)
-		req.StartTime = &t
-	}
 	req.EndTime = utils.GetDateInQueries(c, "EndTime")
 	if req.EndTime != nil && !req.EndTime.IsZero() {
 		// end of the end date
-		t := req.EndTime.Truncate(24 * time.Hour).Add(24 * time.Hour).Add(-time.Second)
-		req.EndTime = &t
+		endOfEndTime, _ := utils.EndOfDate(req.EndTime.Format(time.DateTime), time.DateTime)
+		v, _ := time.Parse(time.DateTime, endOfEndTime)
+		req.EndTime = &v
 	}
 
 	reservations, paging, err := _i.service.Index(req)

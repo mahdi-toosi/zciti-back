@@ -24,4 +24,4 @@ swag:
 	swag init -g ./cmd/main/main.go --outputTypes "json"
 
 release:
-	go build -mod=vendor -o ./tmp/main ./cmd/main/main.go
+	GOPROXY="https://goproxy.io,direct" go build -mod=vendor -o ./tmp/main ./cmd/main/main.go

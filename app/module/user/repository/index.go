@@ -4,6 +4,7 @@ import (
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/user/request"
 	"go-fiber-starter/internal/bootstrap/database"
+	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
 	"strconv"
 	"strings"
@@ -97,7 +98,7 @@ func (_i *repo) GetUsers(req request.BusinessUsers) (users []*schema.User, pagin
 	query := _i.DB.Main.
 		Model(&[]schema.User{}).
 		Select("users.*, COUNT(reservations.id) as reservation_count").
-		Joins("JOIN reservations ON reservations.user_id = users.id AND reservations.deleted_at IS NULL AND reservations.status = 'reserved'").
+		Joins("LEFT JOIN reservations ON reservations.user_id = users.id AND reservations.deleted_at IS NULL AND reservations.status = 'reserved'").
 		Group("users.id").
 		Order("users.created_at ASC")
 
@@ -106,11 +107,13 @@ func (_i *repo) GetUsers(req request.BusinessUsers) (users []*schema.User, pagin
 	}
 
 	if req.StartTime != nil && !req.StartTime.IsZero() {
-		query.Where("reservations.start_time >= ?", req.StartTime.Truncate(24*time.Hour))
+		date, _ := utils.StartOfDate(req.StartTime.Format(time.DateTime), time.DateTime)
+		query.Where("reservations.start_time >= ?", date)
 	}
 
-	if req.StartTime != nil && !req.EndTime.IsZero() {
-		query.Where("reservations.end_time <= ?", req.EndTime.Truncate(24*time.Hour).Add(24*time.Hour).Add(-time.Second))
+	if req.EndTime != nil && !req.EndTime.IsZero() {
+		date, _ := utils.EndOfDate(req.StartTime.Format(time.DateTime), time.DateTime)
+		query.Where("reservations.end_time <= ?", date)
 	}
 
 	if len(req.UserIDs) > 0 {
