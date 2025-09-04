@@ -29,9 +29,6 @@ github.com/dgryski/go-rendezvous
 # github.com/disintegration/imaging v1.6.2
 ## explicit
 github.com/disintegration/imaging
-# github.com/dpapathanasiou/go-recaptcha v0.0.0-20190121160230-be5090b17804
-## explicit
-github.com/dpapathanasiou/go-recaptcha
 # github.com/efectn/fx-zerolog v1.1.0
 ## explicit; go 1.18
 github.com/efectn/fx-zerolog

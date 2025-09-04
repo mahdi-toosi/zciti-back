@@ -8,8 +8,8 @@ require (
 	github.com/MessageWay/MessageWayGolang v1.1.1
 	github.com/bxcodec/faker/v4 v4.0.0-beta.3
 	github.com/disintegration/imaging v1.6.2
-	github.com/dpapathanasiou/go-recaptcha v0.0.0-20190121160230-be5090b17804
 	github.com/efectn/fx-zerolog v1.1.0
+	github.com/ghiac/bale-bot-api v6.1.0+incompatible
 	github.com/go-playground/locales v0.14.1
 	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator v9.31.0+incompatible
@@ -23,7 +23,9 @@ require (
 	github.com/gosimple/slug v1.14.0
 	github.com/lib/pq v1.10.9
 	github.com/pelletier/go-toml/v2 v2.2.1
+	github.com/robfig/cron/v3 v3.0.1
 	github.com/rs/zerolog v1.32.0
+	github.com/xuri/excelize/v2 v2.9.1
 	github.com/yaa110/go-persian-calendar v1.2.1
 	go.uber.org/automaxprocs v1.5.3
 	go.uber.org/fx v1.21.0
@@ -40,7 +42,6 @@ require (
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
-	github.com/ghiac/bale-bot-api v6.1.0+incompatible // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.19.6 // indirect
 	github.com/go-openapi/spec v0.20.4 // indirect
@@ -64,7 +65,6 @@ require (
 	github.com/richardlehane/mscfb v1.0.4 // indirect
 	github.com/richardlehane/msoleps v1.0.4 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
-	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	github.com/swaggo/files/v2 v2.0.0 // indirect
 	github.com/swaggo/swag v1.16.3 // indirect
@@ -75,7 +75,6 @@ require (
 	github.com/valyala/fasthttp v1.51.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	github.com/xuri/efp v0.0.1 // indirect
-	github.com/xuri/excelize/v2 v2.9.1 // indirect
 	github.com/xuri/nfp v0.0.1 // indirect
 	go.uber.org/dig v1.17.1 // indirect
 	go.uber.org/multierr v1.10.0 // indirect

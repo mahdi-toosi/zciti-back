@@ -13,7 +13,8 @@ type Register struct {
 
 type SendOtp struct {
 	Mobile    uint64 `example:"9380338494" validate:"required,number"`
-	Recaptcha string `example:"iasubdi" validate:"required,min=50"`
+	FullName  string `example:""`
+	CSRFToken string `example:"asdadasdwqe2000" validate:"required"`
 }
 
 type ResetPass struct {

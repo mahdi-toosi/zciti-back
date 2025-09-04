@@ -3,6 +3,7 @@ package internal
 import (
 	MessageWay "github.com/MessageWay/MessageWayGolang"
 	"github.com/rs/zerolog"
+	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/config"
 )
 
@@ -18,7 +19,11 @@ func (_s *MessageWayService) Send(req MessageWay.Message) (*MessageWay.SendRespo
 		// sms mode
 		//req.Mobile = "09380338494"
 		// logger mode
-		_s.logger.Warn().Msgf("sending message with this payload => %v", req)
+		utils.Log("sending message with this payload =>")
+		utils.Log(req)
+		//_s.logger.Warn().Msg("sending message with this payload => %v")
+		//_s.logger.Info().Msgf("sending message with this payload => %v", req)
+
 		return nil, nil
 	}
 	return _s.App.Send(req)
@@ -28,5 +33,6 @@ func NewMessageWay(cfg *config.Config, logger zerolog.Logger) *MessageWayService
 	app := MessageWay.New(MessageWay.Config{
 		ApiKey: cfg.Services.MessageWay.ApiKey,
 	})
+
 	return &MessageWayService{App: app, isProduction: cfg.App.Production, logger: logger}
 }

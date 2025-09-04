@@ -1,7 +1,6 @@
 package controller
 
 import (
-	recaptcha "github.com/dpapathanasiou/go-recaptcha"
 	"github.com/gofiber/fiber/v2"
 	"go-fiber-starter/app/module/auth/request"
 	"go-fiber-starter/app/module/auth/service"
@@ -83,27 +82,26 @@ func (_i *controller) SendOtp(c *fiber.Ctx) error {
 		return err
 	}
 
-	recaptcha.Init(_i.config.Services.GoogleRecaptcha.SecretKey)
-	confirm, err := recaptcha.Confirm(c.IP(), req.Recaptcha)
-	if err != nil {
-		return &fiber.Error{
-			Code:    fiber.StatusInternalServerError,
-			Message: "ارور سرور، دوباره تلاش کنید",
-		}
-	}
-
-	if !confirm {
-		return &fiber.Error{
-			Code:    fiber.StatusBadRequest,
-			Message: "سرویس گوگل تشخیص داده است که شما ربات هستید.",
-		}
-	}
-
 	if err := utils.ValidateMobileNumber(strconv.FormatUint(req.Mobile, 10)); err != nil {
 		return err
 	}
 
-	err = _i.service.SendOtp(req)
+	if req.FullName != "" {
+		return &fiber.Error{
+			Code:    fiber.StatusBadRequest,
+			Message: "تعداد درخواست شما به بیش از حد مجاز رسید.",
+		}
+	}
+
+	stringElapsedTime := req.CSRFToken[32:]
+	if elapsedTime, err := strconv.ParseUint(stringElapsedTime, 10, 64); err != nil || elapsedTime < 2000 {
+		return &fiber.Error{
+			Code:    fiber.StatusBadRequest,
+			Message: "csrf معتبر نمی باشد.",
+		}
+	}
+
+	err := _i.service.SendOtp(req)
 	if err != nil {
 		return err
 	}

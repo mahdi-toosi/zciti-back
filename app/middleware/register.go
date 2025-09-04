@@ -52,6 +52,12 @@ func (m *Middleware) Register() {
 		Next:       utils.IsEnabled(m.Cfg.Middleware.Limiter.Enable),
 		Max:        m.Cfg.Middleware.Limiter.Max,
 		Expiration: m.Cfg.Middleware.Limiter.Expiration * time.Second,
+		LimitReached: func(c *fiber.Ctx) error {
+			return &fiber.Error{
+				Code:    fiber.StatusTooManyRequests,
+				Message: "تعداد درخواست شما به بیش از حد مجاز رسید.",
+			}
+		},
 	}))
 
 	m.App.Use(compress.New(compress.Config{

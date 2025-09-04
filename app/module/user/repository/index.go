@@ -1,11 +1,13 @@
 package repository
 
 import (
+	"errors"
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/user/request"
 	"go-fiber-starter/internal/bootstrap/database"
 	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
+	"gorm.io/gorm"
 	"strconv"
 	"strings"
 	"time"
@@ -88,6 +90,9 @@ func (_i *repo) Delete(id uint64) error {
 
 func (_i *repo) FindUserByMobile(mobile uint64) (user *schema.User, err error) {
 	if err := _i.DB.Main.Where("mobile = ?", mobile).First(&user).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("شماره تلفن همراه معتبر نمی باشد.")
+		}
 		return nil, err
 	}
 

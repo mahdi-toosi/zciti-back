@@ -18,12 +18,10 @@ type Database struct {
 }
 
 func NewDatabase(cfg *config.Config, log zerolog.Logger) *Database {
-	db := &Database{
+	return &Database{
 		Cfg: cfg,
 		Log: log,
 	}
-
-	return db
 }
 
 func (_db *Database) ConnectDatabase() {

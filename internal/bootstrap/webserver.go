@@ -42,13 +42,13 @@ func NewFiber(cfg *config.Config, baleBot *internal.BaleBot) *fiber.App {
 }
 
 func Start(
-	lifecycle fx.Lifecycle,
-	cfg *config.Config,
 	fiber *fiber.App,
-	router *router.Router,
-	middlewares *middleware.Middleware,
-	database *database.Database,
+	cfg *config.Config,
 	log zerolog.Logger,
+	router *router.Router,
+	lifecycle fx.Lifecycle,
+	database *database.Database,
+	middlewares *middleware.Middleware,
 ) {
 	lifecycle.Append(
 		fx.Hook{
