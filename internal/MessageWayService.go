@@ -24,7 +24,10 @@ func (_s *MessageWayService) Send(req MessageWay.Message) (*MessageWay.SendRespo
 		//_s.logger.Warn().Msg("sending message with this payload => %v")
 		//_s.logger.Info().Msgf("sending message with this payload => %v", req)
 
-		return nil, nil
+		return &MessageWay.SendResponse{
+			Status:      "success",
+			ReferenceID: "fakeReferenceID",
+		}, nil
 	}
 	return _s.App.Send(req)
 }

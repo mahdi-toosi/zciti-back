@@ -50,7 +50,9 @@ func (_i *controller) SendCommand(c *fiber.Ctx) error {
 		return err
 	}
 
-	req.UserID = user.ID
+	if utils.IsForUser(c) {
+		req.UserID = user.ID
+	}
 	req.BusinessID = businessID
 	err = _i.service.SendCommand(*req, utils.IsForUser(c))
 	if err != nil {

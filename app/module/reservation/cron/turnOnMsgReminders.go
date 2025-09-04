@@ -45,7 +45,7 @@ func RunTurnOnMsgReminders(
 
 // SendTurnOnReminders checks and sends reminders for upcoming reservations
 func (s *TurnOnReminderService) SendTurnOnReminders() {
-	s.logger.Info().Msg("SendTurnOnReminders")
+	//s.logger.Info().Msg("SendTurnOnReminders")
 
 	// Find reservations within the next 1 hour that haven't been reminded yet
 	reservations, err := s.findReservationsDueForReminder()
@@ -84,7 +84,7 @@ func (s *TurnOnReminderService) findReservationsDueForReminder() ([]*schema.Rese
 		return nil, err
 	}
 
-	s.logger.Info().Msgf("turn on reservations len %d", len(reservations))
+	//s.logger.Info().Msgf("turn on reservations len %d", len(reservations))
 
 	return reservations, err
 }

@@ -45,7 +45,7 @@ func RunTurnOffMsgReminders(
 
 // SendTurnOffReminders checks and sends reminders for upcoming reservations
 func (s *TurnOffReminderService) SendTurnOffReminders() {
-	s.logger.Info().Msg("SendTurnOffReminders")
+	//s.logger.Info().Msg("SendTurnOffReminders")
 
 	// Find reservations within the next 1 hour that haven't been reminded yet
 	reservations, err := s.findReservationsDueForReminder()
@@ -82,7 +82,7 @@ func (s *TurnOffReminderService) findReservationsDueForReminder() ([]*schema.Res
 		Status:    schema.ReservationStatusReserved,
 	})
 
-	s.logger.Info().Msgf("turn off reservations len %d", len(reservations))
+	//s.logger.Info().Msgf("turn off reservations len %d", len(reservations))
 
 	if err != nil {
 		return nil, err
