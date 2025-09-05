@@ -26,9 +26,9 @@ func NewDatabase(cfg *config.Config, log zerolog.Logger) *Database {
 
 func (_db *Database) ConnectDatabase() {
 	mainDB, err := gorm.Open(postgres.Open(_db.Cfg.DB.Main.Url), &gorm.Config{
-		QueryFields:            true,
 		PrepareStmt:            true,
 		SkipDefaultTransaction: true,
+		QueryFields:            _db.Cfg.App.Production,
 	})
 	if err != nil {
 		_db.Log.Error().Err(err).Msg("An unknown error occurred when to connect the *Main* database!")

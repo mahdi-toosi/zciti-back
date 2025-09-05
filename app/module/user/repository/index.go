@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/user/request"
 	"go-fiber-starter/internal/bootstrap/database"
@@ -103,7 +104,6 @@ func (_i *repo) GetUsers(req request.BusinessUsers) (users []*schema.User, pagin
 	query := _i.DB.Main.
 		Model(&[]schema.User{}).
 		Select("users.*, COUNT(reservations.id) as reservation_count").
-		Joins("LEFT JOIN reservations ON reservations.user_id = users.id AND reservations.deleted_at IS NULL AND reservations.status = 'reserved'").
 		Group("users.id").
 		Order("users.created_at ASC")
 
@@ -111,15 +111,20 @@ func (_i *repo) GetUsers(req request.BusinessUsers) (users []*schema.User, pagin
 		query.Having("COUNT(reservations.id) = ?", req.CountUsing)
 	}
 
+	// Build the LEFT JOIN condition dynamically
+	joinCondition := "reservations.user_id = users.id AND reservations.deleted_at IS NULL AND reservations.status = 'reserved'"
+
 	if req.StartTime != nil && !req.StartTime.IsZero() {
 		date, _ := utils.StartOfDate(req.StartTime.Format(time.DateTime), time.DateTime)
-		query.Where("reservations.start_time >= ?", date)
+		joinCondition += fmt.Sprintf(" AND reservations.start_time >= '%s'", date)
 	}
 
 	if req.EndTime != nil && !req.EndTime.IsZero() {
-		date, _ := utils.EndOfDate(req.StartTime.Format(time.DateTime), time.DateTime)
-		query.Where("reservations.end_time <= ?", date)
+		date, _ := utils.EndOfDate(req.EndTime.Format(time.DateTime), time.DateTime)
+		joinCondition += fmt.Sprintf(" AND reservations.end_time <= '%s'", date)
 	}
+
+	query.Joins("LEFT JOIN reservations ON " + joinCondition)
 
 	if len(req.UserIDs) > 0 {
 		query.Where("users.id IN (?)", req.UserIDs)
@@ -166,7 +171,7 @@ func (_i *repo) GetUsers(req request.BusinessUsers) (users []*schema.User, pagin
 		query.Limit(req.Pagination.Limit)
 	}
 
-	err = query.Preload("Dormitory").
+	err = query.Debug().Preload("Dormitory").
 		Preload("Workspace").
 		Preload("City").
 		Find(&users).Error
