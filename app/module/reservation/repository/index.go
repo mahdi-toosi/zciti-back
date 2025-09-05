@@ -36,6 +36,21 @@ func (_i *repo) GetAll(req request.Reservations) (reservations []*schema.Reserva
 	query := _i.DB.Main.
 		Model(&schema.Reservation{})
 
+	if req.WithUsageCount == 1 {
+		// || req.UsageCount > 0
+		query.Select(`reservations.*, COUNT(*) OVER (PARTITION BY reservations.user_id) as user_usage_count`)
+	}
+
+	//if req.UsageCount > 0 {
+	//	// Use a subquery to filter by user count
+	//	userSubquery := _i.DB.Main.Model(&schema.Reservation{}).
+	//		Select("user_id").
+	//		Group("user_id").
+	//		Having("COUNT(*) = ?", req.UsageCount)
+	//
+	//	query.Where("reservations.user_id IN (?)", userSubquery)
+	//}
+
 	if req.ProductID != 0 {
 		query.Where(&schema.Reservation{ProductID: req.ProductID})
 	}
@@ -67,6 +82,52 @@ func (_i *repo) GetAll(req request.Reservations) (reservations []*schema.Reserva
 
 	if req.EndTime != nil && !req.EndTime.IsZero() {
 		query.Where("end_time <= ?", req.EndTime)
+	}
+
+	// Handle taxonomy filtering
+	var taxonomyConditions []uint64
+	if req.CityID > 0 {
+		taxonomyConditions = append(taxonomyConditions, req.CityID)
+	}
+	if req.WorkspaceID > 0 {
+		taxonomyConditions = append(taxonomyConditions, req.WorkspaceID)
+	}
+	if req.DormitoryID > 0 {
+		taxonomyConditions = append(taxonomyConditions, req.DormitoryID)
+	}
+
+	//if len(taxonomyConditions) > 0 {
+	//	// Join through: Reservation -> Product -> Post -> Taxonomy
+	//	for i, taxonomyID := range taxonomyConditions {
+	//		alias := fmt.Sprintf("pt%d", i)
+	//		query.Joins(fmt.Sprintf(`
+	//			JOIN products p%d ON p%d.id = reservations.product_id
+	//			JOIN posts post%d ON post%d.id = p%d.post_id
+	//			JOIN posts_taxonomies %s ON %s.post_id = post%d.id AND %s.taxonomy_id = ?`,
+	//			i, i, i, i, i, alias, alias, i, alias), taxonomyID)
+	//	}
+	//
+	//	// Preload the full taxonomy path for the response
+	//	query.Preload("Product.Post.Taxonomies", "id IN ?", taxonomyConditions)
+	//}
+
+	if len(taxonomyConditions) > 0 {
+		// Use EXISTS with correlated subquery
+		existsSubquery := _i.DB.Main.Model(&schema.Post{}).
+			Select("1").
+			Joins("JOIN posts_taxonomies pt ON pt.post_id = posts.id").
+			Where("posts.id = products.post_id").
+			Where("pt.taxonomy_id IN ?", taxonomyConditions).
+			Group("posts.id").
+			Having("COUNT(DISTINCT pt.taxonomy_id) = ?", len(taxonomyConditions))
+
+		productExistsSubquery := _i.DB.Main.Model(&schema.Product{}).
+			Select("1").
+			Where("products.id = reservations.product_id").
+			Where("EXISTS (?)", existsSubquery)
+
+		query.Where("EXISTS (?)", productExistsSubquery)
+		query.Preload("Product.Post.Taxonomies", "id IN ?", taxonomyConditions)
 	}
 
 	if req.Pagination != nil && req.Pagination.Page > 0 {

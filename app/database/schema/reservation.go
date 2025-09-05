@@ -9,17 +9,18 @@ import (
 
 // Reservation TODO add proper index
 type Reservation struct {
-	ID         uint64            `gorm:"primaryKey" faker:"-"`
-	Status     ReservationStatus `gorm:"default:reserved"`
-	StartTime  time.Time         `gorm:"not null" faker:"-"`
-	EndTime    time.Time         `gorm:"not null" faker:"-"`
-	UserID     uint64            `gorm:"not null" faker:"-"`
-	User       User              `gorm:"foreignKey:UserID" faker:"-"`
-	ProductID  uint64            `gorm:"not null;index" faker:"-"`
-	Product    Product           `gorm:"foreignKey:ProductID" faker:"-"`
-	BusinessID uint64            `gorm:"not null" faker:"-"`
-	Business   Business          `gorm:"foreignKey:BusinessID" faker:"-"`
-	Meta       ReservationMeta   `gorm:"type:jsonb"`
+	ID             uint64            `gorm:"primaryKey" faker:"-"`
+	Status         ReservationStatus `gorm:"default:reserved"`
+	StartTime      time.Time         `gorm:"not null" faker:"-"`
+	EndTime        time.Time         `gorm:"not null" faker:"-"`
+	UserID         uint64            `gorm:"not null" faker:"-"`
+	User           User              `gorm:"foreignKey:UserID" faker:"-"`
+	ProductID      uint64            `gorm:"not null;index" faker:"-"`
+	Product        Product           `gorm:"foreignKey:ProductID" faker:"-"`
+	BusinessID     uint64            `gorm:"not null" faker:"-"`
+	Business       Business          `gorm:"foreignKey:BusinessID" faker:"-"`
+	Meta           ReservationMeta   `gorm:"type:jsonb"`
+	UserUsageCount uint64            ``
 	Base
 }
 

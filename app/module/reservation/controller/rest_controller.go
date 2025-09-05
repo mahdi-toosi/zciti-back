@@ -49,8 +49,14 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	req.Pagination = paginate
 	req.BusinessID = businessID
 	req.Mobile = strings.TrimSpace(c.Query("Mobile"))
+	req.CityID, _ = utils.GetUintInQueries(c, "CityID")
 	req.FullName = strings.TrimSpace(c.Query("FullName"))
 	req.ProductID, _ = utils.GetUintInQueries(c, "ProductID")
+	req.WorkspaceID, _ = utils.GetUintInQueries(c, "WorkspaceID")
+	req.DormitoryID, _ = utils.GetUintInQueries(c, "DormitoryID")
+
+	//req.UsageCount, _ = utils.GetUintInQueries(c, "UsageCount")
+	req.WithUsageCount, _ = utils.GetUintInQueries(c, "WithUsageCount")
 
 	req.StartTime = utils.GetDateInQueries(c, "StartTime")
 	req.EndTime = utils.GetDateInQueries(c, "EndTime")

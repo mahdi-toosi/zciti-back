@@ -20,6 +20,7 @@ type Reservation struct {
 	PostID           uint64
 	PostTitle        string
 	ProductSKU       string
+	UserUsageCount   uint64
 	Business         *bresponse.Business
 	Meta             schema.ReservationMeta
 }
@@ -30,15 +31,16 @@ func FromDomain(item *schema.Reservation) (res *Reservation) {
 	}
 
 	res = &Reservation{
-		ID:         item.ID,
-		Meta:       item.Meta,
-		Status:     item.Status,
-		EndTime:    item.EndTime,
-		StartTime:  item.StartTime,
-		ProductID:  item.ProductID,
-		PostID:     item.Product.Post.ID,
-		ProductSKU: item.Product.Meta.SKU,
-		PostTitle:  item.Product.Post.Title,
+		ID:             item.ID,
+		Meta:           item.Meta,
+		Status:         item.Status,
+		EndTime:        item.EndTime,
+		StartTime:      item.StartTime,
+		ProductID:      item.ProductID,
+		UserUsageCount: item.UserUsageCount,
+		PostID:         item.Product.Post.ID,
+		ProductSKU:     item.Product.Meta.SKU,
+		PostTitle:      item.Product.Post.Title,
 	}
 
 	if res.Meta.UniWashLastCommandTime == nil || res.Meta.UniWashLastCommandTime.IsZero() {

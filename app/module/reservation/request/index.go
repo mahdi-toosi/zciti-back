@@ -16,15 +16,20 @@ type Reservation struct {
 }
 
 type Reservations struct {
-	BusinessID uint64
-	UserID     uint64
-	Mobile     string
-	FullName   string
-	ProductID  uint64
-	StartTime  *time.Time
-	EndTime    *time.Time
-	Status     schema.ReservationStatus
-	Pagination *paginator.Pagination
+	BusinessID     uint64
+	UserID         uint64
+	Mobile         string
+	FullName       string
+	ProductID      uint64
+	CityID         uint64
+	WorkspaceID    uint64
+	DormitoryID    uint64
+	WithUsageCount uint64
+	StartTime      *time.Time
+	EndTime        *time.Time
+	Status         schema.ReservationStatus
+	Pagination     *paginator.Pagination
+	//UsageCount     uint64
 }
 
 func (req *Reservation) ToDomain() *schema.Reservation {
