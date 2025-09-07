@@ -39,7 +39,7 @@ func (_i *repo) GetReservation(req request.SendCommand) (reservation *schema.Res
 			BusinessID: req.BusinessID,
 			ID:         req.ReservationID,
 			Status:     schema.ReservationStatusReserved,
-		}).
+		}).Debug().
 		First(&reservation).Error; err != nil {
 		return nil, err
 	}
@@ -125,8 +125,13 @@ func (_i *repo) IndexReservedMachines(req request.ReservedMachinesRequest) (rese
 	if req.With == "reservedReservations" {
 		query.Unscoped().Where("deleted_at > ? OR deleted_at IS NULL", time.Now())
 	} else if req.UserID > 0 {
-		query.Where(&schema.Reservation{UserID: req.UserID}).Unscoped().
-			Preload("Product.Post").
+		query.Where(&schema.Reservation{UserID: req.UserID}).
+			Preload("Product", func(db *gorm.DB) *gorm.DB {
+				return db.Unscoped() // This will include soft-deleted posts
+			}).
+			Preload("Product.Post", func(db *gorm.DB) *gorm.DB {
+				return db.Unscoped() // This will include soft-deleted posts
+			}).
 			Order("start_time desc")
 	}
 
@@ -139,7 +144,7 @@ func (_i *repo) IndexReservedMachines(req request.ReservedMachinesRequest) (rese
 		query.Limit(req.Pagination.Limit)
 	}
 
-	if err = query.Debug().Find(&reservations).Error; err != nil {
+	if err = query.Find(&reservations).Error; err != nil {
 		return
 	}
 

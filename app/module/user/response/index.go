@@ -20,7 +20,7 @@ type User struct {
 	ReservationCount uint64                 `json:",omitempty"`
 	IsSuspended      bool                   ``
 	SuspenseReason   string                 `json:",omitempty"`
-	Permissions      schema.UserPermissions `json:",omitempty"`
+	Permissions      schema.UserPermissions ``
 	Roles            []schema.UserRole      `json:",omitempty"`
 }
 
