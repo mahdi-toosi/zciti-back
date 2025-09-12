@@ -21,9 +21,16 @@ import (
 	"gorm.io/gorm"
 )
 
+func IsChildProcess() bool {
+	return fiber.IsChild()
+}
+
 func Log(variable any) {
-	log.Debug().
-		Interface("", variable).Msg("LOGGER ")
+	if fiber.IsChild() {
+		log.Warn().Msg("IN CHILD PROCESS ")
+	}
+
+	log.Debug().Interface("", variable).Msg("LOGGER ")
 }
 
 func IsEnabled(key bool) func(c *fiber.Ctx) bool {

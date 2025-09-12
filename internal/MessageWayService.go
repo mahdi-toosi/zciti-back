@@ -20,12 +20,12 @@ func (_s *MessageWayService) Send(req MessageWay.Message) (*MessageWay.SendRespo
 
 		// logger mode
 		_s.logger.Warn().Interface("payload", req).Msg("sending message with this")
-
 		return &MessageWay.SendResponse{
 			Status:      "success",
 			ReferenceID: "fakeReferenceID",
 		}, nil
 	}
+
 	return _s.App.Send(req)
 }
 

@@ -53,7 +53,6 @@ func Start(
 	lifecycle.Append(
 		fx.Hook{
 			OnStart: func(ctx context.Context) error {
-
 				// Register middlewares & routes
 				middlewares.Register()
 				router.Register()
