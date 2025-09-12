@@ -44,38 +44,39 @@ func RunTurnOnMsgReminders(
 }
 
 // SendTurnOnReminders checks and sends reminders for upcoming reservations
-func (s *TurnOnReminderService) SendTurnOnReminders() {
-	//s.logger.Info().Msg("SendTurnOnReminders")
+func (_s *TurnOnReminderService) SendTurnOnReminders() {
+	_s.logger.Info().Msg("SendTurnOnReminders")
 
-	// Find reservations within the next 1 hour that haven't been reminded yet
-	reservations, err := s.findReservationsDueForReminder()
+	//Find reservations within the next 1 hour that haven't been reminded yet
+	reservations, err := _s.findReservationsDueForReminder()
 	if err != nil {
-		s.logger.Err(err).Msg("Failed to fetch reservations for reminders")
+		_s.logger.Err(err).Msg("Failed to fetch reservations for reminders")
 		return
 	}
 
 	for _, reservation := range reservations {
+		_s.logger.Info().Msgf("reservation id => %d", reservation.ID)
 		// Send reminder and mark as reminded
 		if reservation.Product.Post.Status == schema.PostStatusPublished &&
 			reservation.Product.Meta.UniWashMachineStatus == schema.UniWashMachineStatusON {
-			err := s.processReservationReminder(*reservation)
+			err := _s.processReservationReminder(*reservation)
 			if err != nil {
-				s.logger.Err(err).Msg("Failed to process reservation reminder")
+				_s.logger.Err(err).Msg("Failed to process reservation reminder")
 			}
 		}
 	}
 }
 
 // findReservationsDueForReminder finds reservations due for reminder
-func (s *TurnOnReminderService) findReservationsDueForReminder() ([]*schema.Reservation, error) {
+func (_s *TurnOnReminderService) findReservationsDueForReminder() ([]*schema.Reservation, error) {
 	loc, _ := time.LoadLocation("Asia/Tehran")
 	t := time.Now().In(loc)
-	//t := time.Date(2025, 8, 9, 10, 00, 5, 0, loc)
+	//t := time.Date(2025, 9, 8, 9, 26, 5, 0, loc)
 
 	startTime := t.Add(60 * time.Minute).Truncate(time.Minute)
 	endTime := startTime.Add(time.Hour)
 
-	reservations, _, err := s.repo.GetAll(request.Reservations{
+	reservations, _, err := _s.repo.GetAll(request.Reservations{
 		EndTime:   &endTime,
 		StartTime: &startTime,
 		Status:    schema.ReservationStatusReserved,
@@ -90,13 +91,10 @@ func (s *TurnOnReminderService) findReservationsDueForReminder() ([]*schema.Rese
 }
 
 // processReservationReminder sends SMS and updates reminder status
-func (s *TurnOnReminderService) processReservationReminder(reservation schema.Reservation) error {
-	if !s.cfg.App.Production {
-		return nil
-	}
-
+func (_s *TurnOnReminderService) processReservationReminder(reservation schema.Reservation) error {
+	_s.logger.Info().Msg("processReservationReminder")
 	// Prepare reminder message
-	_, err := s.smsService.Send(MessageWay.Message{
+	_, err := _s.smsService.Send(MessageWay.Message{
 		Provider:   5, // با سرشماره 5000
 		TemplateID: 16620,
 		Method:     "sms",
