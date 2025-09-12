@@ -118,7 +118,7 @@ var bannedUrlsForLog = []string{
 }
 
 func sendErrorToBale(c *fiber.Ctx, resp Response, baleBot *internal.BaleBot) {
-	if !baleBot.Connected && IsProduction || !IsProduction {
+	if !baleBot.Connected {
 		return
 	}
 
@@ -144,7 +144,7 @@ func sendErrorToBale(c *fiber.Ctx, resp Response, baleBot *internal.BaleBot) {
 		baleBotMsgPayload.UserFullName = user.FullName()
 	}
 
-	msg := baleBotApi.NewMessage(baleBot.LoggerChatID, "```js \n"+utils.PrettyJSON(baleBotMsgPayload)+"\n ```")
+	msg := baleBotApi.NewMessage(baleBot.LoggerChatID, "\n"+utils.PrettyJSON(baleBotMsgPayload)+"\n")
 	if _, err := baleBot.Bot.Send(msg); err != nil {
 		log.Err(err).Msg("fail to send msg to bale bot")
 	}

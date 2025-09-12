@@ -45,7 +45,7 @@ func RunTurnOnMsgReminders(
 
 // SendTurnOnReminders checks and sends reminders for upcoming reservations
 func (_s *TurnOnReminderService) SendTurnOnReminders() {
-	_s.logger.Info().Msg("SendTurnOnReminders")
+	//_s.logger.Info().Msg("SendTurnOnReminders")
 
 	//Find reservations within the next 1 hour that haven't been reminded yet
 	reservations, err := _s.findReservationsDueForReminder()
@@ -55,7 +55,7 @@ func (_s *TurnOnReminderService) SendTurnOnReminders() {
 	}
 
 	for _, reservation := range reservations {
-		_s.logger.Info().Msgf("reservation id => %d", reservation.ID)
+		//_s.logger.Info().Msgf("reservation id => %d", reservation.ID)
 		// Send reminder and mark as reminded
 		if reservation.Product.Post.Status == schema.PostStatusPublished &&
 			reservation.Product.Meta.UniWashMachineStatus == schema.UniWashMachineStatusON {
