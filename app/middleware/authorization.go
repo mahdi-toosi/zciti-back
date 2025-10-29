@@ -121,7 +121,7 @@ var Permissions = map[schema.UserRole]map[Domain]map[Permission]bool{
 		DComment:      {PCreate: true, PReadAll: true, PUpdate: true, PDelete: true},
 		DNotification: {PReadAll: true, PReadSingle: true},
 	},
-	schema.URReservationViewer: {
+	schema.URBusinessPartner: {
 		DProduct:     {PReadAll: true},
 		DBusiness:    {PReadSingle: true},
 		DReservation: {PReadAll: true, PReadSingle: true},

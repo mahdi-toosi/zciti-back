@@ -16,7 +16,7 @@ type route struct {
 
 var routes = []route{
 	{
-		Permissions: []schema.UserRole{schema.URBusinessOwner},
+		Permissions: []schema.UserRole{schema.URBusinessOwner, schema.URBusinessPartner},
 		MenuItems: menuItems{
 			schema.BTypeWMReservation: {Title: "رزرو ها", Href: "/admin/b/:BusinessID/reservations", Icon: "pi pi-clock"},
 		},
@@ -75,6 +75,12 @@ var routes = []route{
 			schema.BTypeWMReservation: {Title: "کاربران", Href: "/admin/b/:BusinessID/users", Icon: "pi pi-users"},
 		},
 	},
+	{
+		Permissions: []schema.UserRole{schema.URBusinessOwner},
+		MenuItems: menuItems{
+			schema.BTypeWMReservation: {Title: "تنظیمات", Href: "/admin/b/:BusinessID/settings", Icon: "pi pi-cog"},
+		},
+	},
 }
 
 // GenerateMenuItems generates menu items based on business ID, type, and user permissions.
@@ -90,7 +96,6 @@ func GenerateMenuItems(businessID uint64, businessType schema.BusinessType, user
 			menuItems = append(menuItems, menuItem)
 		}
 	}
-
 	return menuItems
 }
 

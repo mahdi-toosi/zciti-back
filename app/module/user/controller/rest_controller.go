@@ -438,7 +438,7 @@ func (_i *controller) BusinessUsersAddRole(c *fiber.Ctx) error {
 		schema.URUser,
 		schema.URAdmin,
 		schema.URBusinessOwner,
-		schema.URReservationViewer,
+		schema.URBusinessPartner,
 	}
 
 	for _, role := range req.Roles {
