@@ -47,6 +47,7 @@ func GenerateTokenAccess(user schema.User, jwtConfig config.Jwt) (token string, 
 	jwtCustomClaim := JWTCustomClaim{
 		User: schema.User{
 			ID:              user.ID,
+			Meta:            user.Meta,
 			Mobile:          user.Mobile,
 			LastName:        user.LastName,
 			FirstName:       user.FirstName,

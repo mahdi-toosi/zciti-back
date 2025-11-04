@@ -22,6 +22,7 @@ type User struct {
 	SuspenseReason   string                 `json:",omitempty"`
 	Permissions      schema.UserPermissions ``
 	Roles            []schema.UserRole      `json:",omitempty"`
+	Meta             schema.UserMeta        `json:",omitempty"`
 }
 
 func FromDomain(item *schema.User, businessID *uint64) (res *User) {
@@ -69,6 +70,10 @@ func FromDomain(item *schema.User, businessID *uint64) (res *User) {
 		if item.Dormitory != nil {
 			res.DormitoryTitle = item.Dormitory.Title
 			res.DormitoryID = item.Dormitory.ID
+		}
+
+		if item.Meta != nil {
+			res.Meta = *item.Meta
 		}
 	} else {
 		res.Permissions = item.Permissions

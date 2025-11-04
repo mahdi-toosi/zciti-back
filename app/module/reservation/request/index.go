@@ -25,6 +25,7 @@ type Reservations struct {
 	WorkspaceID    uint64
 	DormitoryID    uint64
 	WithUsageCount uint64
+	Posts          []uint64
 	StartTime      *time.Time
 	EndTime        *time.Time
 	Status         schema.ReservationStatus

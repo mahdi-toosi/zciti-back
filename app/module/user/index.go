@@ -36,6 +36,11 @@ func (_i *Router) RegisterRoutes(cfg *config.Config) {
 		router.Post("/users-add-role", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PUpdate), c.BusinessUsersAddRole)
 		router.Post("/users-toggle-suspense", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PUpdate), c.BusinessUsersToggleSuspense)
 		router.Delete("/users/:userID", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PDelete), c.DeleteUser)
+		router.Post("/users/:userID/post/:postID/toggle-post-to-observe",
+			mdl.Protected(cfg),
+			mdl.BusinessPermission(mdl.DBusiness, mdl.PUpdate),
+			c.BusinessUsersTogglePostToObserve,
+		)
 	})
 
 	// TODO move it to orders module

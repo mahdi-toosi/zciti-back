@@ -24,6 +24,7 @@ type IRepository interface {
 	FindUserByMobile(mobile uint64) (user *schema.User, err error)
 
 	GetUsers(req request.BusinessUsers) (users []*schema.User, paging paginator.Pagination, err error)
+	GetPostObservers(postID uint64) (users []*schema.User, err error)
 	GetUser(req request.BusinessUsersStoreRole) (user *schema.User, err error)
 	InsertUser(businessID uint64, userID uint64) (err error)
 	DeleteUser(businessID uint64, userID uint64) (err error)
@@ -111,6 +112,10 @@ func (_i *repo) GetUsers(req request.BusinessUsers) (users []*schema.User, pagin
 		query.Having("COUNT(reservations.id) = ?", req.CountUsing)
 	}
 
+	if req.Role != "" {
+		query.Where(`permissions -> '2' ? 'businessObserver'`)
+	}
+
 	// Build the LEFT JOIN condition dynamically
 	joinCondition := "reservations.user_id = users.id AND reservations.deleted_at IS NULL AND reservations.status = 'reserved'"
 
@@ -184,6 +189,18 @@ func (_i *repo) GetUsers(req request.BusinessUsers) (users []*schema.User, pagin
 	}
 
 	return
+}
+
+func (_i *repo) GetPostObservers(postID uint64) (users []*schema.User, err error) {
+	err = _i.DB.Main.
+		Model(&[]schema.User{}).
+		Where(`meta->'PostsToObserve' @> ?::jsonb`, []uint64{postID}).
+		Find(&users).Error
+	if err != nil {
+		// Handle error
+	}
+
+	return users, nil
 }
 
 func (_i *repo) GetUser(req request.BusinessUsersStoreRole) (user *schema.User, err error) {

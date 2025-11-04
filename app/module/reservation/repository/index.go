@@ -84,50 +84,20 @@ func (_i *repo) GetAll(req request.Reservations) (reservations []*schema.Reserva
 		query.Where("end_time <= ?", req.EndTime)
 	}
 
-	// Handle taxonomy filtering
-	var taxonomyConditions []uint64
-	if req.CityID > 0 {
-		taxonomyConditions = append(taxonomyConditions, req.CityID)
-	}
-	if req.WorkspaceID > 0 {
-		taxonomyConditions = append(taxonomyConditions, req.WorkspaceID)
-	}
-	if req.DormitoryID > 0 {
-		taxonomyConditions = append(taxonomyConditions, req.DormitoryID)
+	if req.CityID > 0 || req.WorkspaceID > 0 || req.DormitoryID > 0 {
+		query.Joins("JOIN products ON reservations.product_id = products.id")
+		query.Joins("JOIN posts_taxonomies ON posts_taxonomies.post_id = products.post_id")
+		query.Where("posts_taxonomies.taxonomy_id IN (?)", []uint64{req.CityID, req.WorkspaceID, req.DormitoryID})
+		query.Preload("Product.Post.Taxonomies")
+		query.Group("reservations.id")
 	}
 
-	//if len(taxonomyConditions) > 0 {
-	//	// Join through: Reservation -> Product -> Post -> Taxonomy
-	//	for i, taxonomyID := range taxonomyConditions {
-	//		alias := fmt.Sprintf("pt%d", i)
-	//		query.Joins(fmt.Sprintf(`
-	//			JOIN products p%d ON p%d.id = reservations.product_id
-	//			JOIN posts post%d ON post%d.id = p%d.post_id
-	//			JOIN posts_taxonomies %s ON %s.post_id = post%d.id AND %s.taxonomy_id = ?`,
-	//			i, i, i, i, i, alias, alias, i, alias), taxonomyID)
-	//	}
-	//
-	//	// Preload the full taxonomy path for the response
-	//	query.Preload("Product.Post.Taxonomies", "id IN ?", taxonomyConditions)
-	//}
-
-	if len(taxonomyConditions) > 0 {
-		// Use EXISTS with correlated subquery
-		existsSubquery := _i.DB.Main.Model(&schema.Post{}).
-			Select("1").
-			Joins("JOIN posts_taxonomies pt ON pt.post_id = posts.id").
-			Where("posts.id = products.post_id").
-			Where("pt.taxonomy_id IN ?", taxonomyConditions).
-			Group("posts.id").
-			Having("COUNT(DISTINCT pt.taxonomy_id) = ?", len(taxonomyConditions))
-
-		productExistsSubquery := _i.DB.Main.Model(&schema.Product{}).
-			Select("1").
-			Where("products.id = reservations.product_id").
-			Where("EXISTS (?)", existsSubquery)
-
-		query.Where("EXISTS (?)", productExistsSubquery)
-		query.Preload("Product.Post.Taxonomies", "id IN ?", taxonomyConditions)
+	if len(req.Posts) > 0 {
+		if req.CityID == 0 && req.WorkspaceID == 0 && req.DormitoryID == 0 {
+			query.Joins("JOIN products ON reservations.product_id = products.id")
+			query.Group("reservations.id")
+		}
+		query.Where("products.post_id IN (?)", req.Posts)
 	}
 
 	if req.Pagination != nil && req.Pagination.Page > 0 {

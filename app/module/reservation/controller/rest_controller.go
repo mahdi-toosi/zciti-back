@@ -44,6 +44,10 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+	user, err := utils.GetAuthenticatedUser(c)
+	if err != nil {
+		return err
+	}
 
 	var req request.Reservations
 	req.Pagination = paginate
@@ -65,6 +69,16 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 		endOfEndTime, _ := utils.EndOfDate(req.EndTime.Format(time.DateTime), time.DateTime)
 		v, _ := time.Parse(time.DateTime, endOfEndTime)
 		req.EndTime = &v
+	}
+
+	if user.IsObserver(businessID) {
+		if user.Meta == nil {
+			return &fiber.Error{
+				Code:    fiber.StatusForbidden,
+				Message: "برای شما سطح دسترسی مشخص نشده است.",
+			}
+		}
+		req.Posts = user.Meta.PostsToObserve
 	}
 
 	reservations, paging, err := _i.service.Index(req)

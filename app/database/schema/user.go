@@ -27,6 +27,7 @@ type User struct {
 	Dormitory        *Taxonomy       `gorm:"foreignKey:DormitoryID" faker:"-"`
 	Businesses       []*Business     `gorm:"many2many:business_users;" faker:"-"`
 	ReservationCount uint64          `gorm:"" faker:"-"`
+	Meta             *UserMeta       `gorm:"type:jsonb" faker:"-"`
 	//FullName  string `gorm:"->;type:GENERATED ALWAYS AS (concat(first_name,' ',last_name));default:(-);"`
 	Base
 }
@@ -56,17 +57,58 @@ func (u *User) FullName() string {
 type UserRole string
 
 const (
-	URUser            UserRole = "user"
-	URAdmin           UserRole = "admin"
-	URBusinessOwner   UserRole = "businessOwner"
-	URBusinessPartner UserRole = "businessPartner"
+	URUser             UserRole = "user"
+	URAdmin            UserRole = "admin"
+	URBusinessOwner    UserRole = "businessOwner"
+	URBusinessObserver UserRole = "businessObserver"
 )
 
 func (u *User) IsAdmin() bool {
 	return slices.Contains(u.Permissions[ROOT_BUSINESS_ID], URAdmin)
 }
 
+func (u *User) IsObserver(BusinessID uint64) bool {
+	return slices.Contains(u.Permissions[BusinessID], URBusinessObserver)
+}
+
 func (u *User) IsBusinessOwner(businessID uint64) bool {
 	roles := u.Permissions[businessID]
 	return u.IsAdmin() || slices.Contains(roles, URBusinessOwner)
+}
+
+type UserMetaTaxonomiesToObserve map[uint64]struct {
+	Checked        bool `json:"checked"`
+	PartialChecked bool `json:"partialChecked"`
+}
+
+type UserMeta struct {
+	PostsToObserve      []uint64                    `json:",omitempty" example:"[1,2,3]"`
+	TaxonomiesToObserve UserMetaTaxonomiesToObserve `json:",omitempty" example:"{1: { checked: true; partialChecked: false }}"`
+}
+
+func (um *UserMeta) Scan(value any) error {
+	byteValue, ok := value.([]byte)
+	if !ok {
+		return fmt.Errorf("failed to unmarshal OrderItemMeta with value %v", value)
+	}
+	return json.Unmarshal(byteValue, um)
+}
+
+func (um UserMeta) Value() (driver.Value, error) {
+	return json.Marshal(um)
+}
+
+func (um UserMeta) GetTaxonomiesToObserve(checked bool, partial bool) (arr []uint64) {
+	if len(um.TaxonomiesToObserve) == 0 {
+		return arr
+	}
+	for id, t := range um.TaxonomiesToObserve {
+		if checked && t.Checked {
+			arr = append(arr, id)
+		}
+		if partial && t.PartialChecked {
+			arr = append(arr, id)
+		}
+	}
+	return arr
 }
