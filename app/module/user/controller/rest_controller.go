@@ -32,6 +32,7 @@ type IRestController interface {
 	InsertUser(c *fiber.Ctx) error
 	DeleteUser(c *fiber.Ctx) error
 	BusinessUsersAddRole(c *fiber.Ctx) error
+	BusinessUsersTogglePostToObserve(c *fiber.Ctx) error
 	BusinessUsersToggleSuspense(c *fiber.Ctx) error
 
 	Orders(c *fiber.Ctx) error
@@ -223,6 +224,7 @@ func (_i *controller) BusinessUsers(c *fiber.Ctx) error {
 	var req request.BusinessUsers
 	req.Pagination = paginate
 	req.BusinessID = businessID
+	req.Role = c.Query("Role")
 	export := c.Query("Export")
 	req.Username = c.Query("Username")
 	req.FullName = c.Query("FullName")
@@ -417,6 +419,31 @@ func (_i *controller) DeleteUser(c *fiber.Ctx) error {
 	})
 }
 
+// BusinessUsersTogglePostToObserve
+// @Summary      BusinessUsersTogglePostToObserve toggle post to observe
+// @Tags         Users
+// @Security     Bearer
+// @Param        businessId path int true "Business ID"
+// @Router       /business/:businessID/users/:userID/post/:postID/toggle-post-to-observe [post]
+func (_i *controller) BusinessUsersTogglePostToObserve(c *fiber.Ctx) error {
+	userID, err := utils.GetIntInParams(c, "userID")
+	if err != nil {
+		return fiber.ErrBadRequest
+	}
+	postID, err := utils.GetIntInParams(c, "postID")
+	if err != nil {
+		return fiber.ErrBadRequest
+	}
+
+	if err := _i.service.BusinessUsersTogglePostToObserve(userID, postID); err != nil {
+		return err
+	}
+
+	return response.Resp(c, response.Response{
+		Messages: response.Messages{"success"},
+	})
+}
+
 // BusinessUsersAddRole
 // @Summary      BusinessUsersAddRole add role to business user
 // @Tags         Users
@@ -439,7 +466,7 @@ func (_i *controller) BusinessUsersAddRole(c *fiber.Ctx) error {
 		schema.URUser,
 		schema.URAdmin,
 		schema.URBusinessOwner,
-		schema.URBusinessPartner,
+		schema.URBusinessObserver,
 	}
 
 	for _, role := range req.Roles {

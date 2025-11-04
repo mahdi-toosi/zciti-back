@@ -16,7 +16,7 @@ type route struct {
 
 var routes = []route{
 	{
-		Permissions: []schema.UserRole{schema.URBusinessOwner, schema.URBusinessPartner},
+		Permissions: []schema.UserRole{schema.URBusinessOwner, schema.URBusinessObserver},
 		MenuItems: menuItems{
 			schema.BTypeWMReservation: {Title: "رزرو ها", Href: "/admin/b/:BusinessID/reservations", Icon: "pi pi-clock"},
 		},

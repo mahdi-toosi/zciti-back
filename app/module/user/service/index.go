@@ -1,11 +1,12 @@
 package service
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/user/repository"
 	"go-fiber-starter/app/module/user/request"
 	"go-fiber-starter/app/module/user/response"
 	"go-fiber-starter/utils/paginator"
+	"slices"
 )
 
 type IService interface {
@@ -16,10 +17,12 @@ type IService interface {
 	UpdateAccount(req request.UpdateUserAccount) (err error)
 	Destroy(id uint64) error
 
+	GetPostObservers(postId uint64) (users []*response.User, err error)
 	Users(req request.BusinessUsers) (users []*response.User, paging paginator.Pagination, err error)
 	InsertUser(businessID uint64, userID uint64) (err error)
 	DeleteUser(businessID uint64, userID uint64) (err error)
 	BusinessUsersAddRole(req request.BusinessUsersStoreRole) error
+	BusinessUsersTogglePostToObserve(userID uint64, postID uint64) (err error)
 	BusinessUsersToggleSuspense(req request.BusinessUsersToggleSuspense) error
 }
 
@@ -70,6 +73,19 @@ func (_i *service) Destroy(id uint64) error {
 	return _i.Repo.Delete(id)
 }
 
+func (_i *service) GetPostObservers(postId uint64) (users []*response.User, err error) {
+	results, err := _i.Repo.GetPostObservers(postId)
+	if err != nil {
+		return
+	}
+
+	for _, result := range results {
+		users = append(users, response.FromDomain(result, nil))
+	}
+
+	return
+}
+
 func (_i *service) Users(req request.BusinessUsers) (users []*response.User, paging paginator.Pagination, err error) {
 	results, paging, err := _i.Repo.GetUsers(req)
 	if err != nil {
@@ -101,14 +117,34 @@ func (_i *service) DeleteUser(businessID uint64, userID uint64) (err error) {
 	return nil
 }
 
-func (_i *service) BusinessUsersAddRole(req request.BusinessUsersStoreRole) error {
-	_, err := _i.Repo.GetUser(req)
+func (_i *service) BusinessUsersTogglePostToObserve(userID uint64, postID uint64) (err error) {
+	user, err := _i.Repo.GetOne(userID)
 	if err != nil {
-		return &fiber.Error{
-			Code:    fiber.StatusBadRequest,
-			Message: "فقط برای کاربر خود میتوانید نقش مشخص کنید",
-		}
+		return
 	}
+	if slices.Contains(user.Meta.PostsToObserve, postID) {
+		index := slices.Index(user.Meta.PostsToObserve, postID)
+		user.Meta.PostsToObserve = slices.Delete(user.Meta.PostsToObserve, index, 1)
+	} else {
+		user.Meta.PostsToObserve = append(user.Meta.PostsToObserve, postID)
+	}
+
+	err = _i.Repo.Update(userID, user)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (_i *service) BusinessUsersAddRole(req request.BusinessUsersStoreRole) error {
+	//_, err := _i.Repo.GetUser(req)
+	//if err != nil {
+	//	return &fiber.Error{
+	//		Code:    fiber.StatusBadRequest,
+	//		Message: "فقط برای کاربر خود میتوانید نقش مشخص کنید",
+	//	}
+	//}
 
 	user, err := _i.Repo.GetOne(req.UserID)
 	if err != nil {
@@ -116,6 +152,15 @@ func (_i *service) BusinessUsersAddRole(req request.BusinessUsersStoreRole) erro
 	}
 
 	user.Permissions[req.BusinessID] = req.Roles
+	if user.Meta == nil {
+		user.Meta = &schema.UserMeta{
+			PostsToObserve:      req.PostsToObserve,
+			TaxonomiesToObserve: req.TaxonomiesToObserve,
+		}
+	} else {
+		user.Meta.PostsToObserve = req.PostsToObserve
+		user.Meta.TaxonomiesToObserve = req.TaxonomiesToObserve
+	}
 
 	if err = _i.Repo.Update(req.UserID, user); err != nil {
 		return err

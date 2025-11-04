@@ -4,6 +4,7 @@ import (
 	"go-fiber-starter/app/database/schema"
 	presponse "go-fiber-starter/app/module/post/response"
 	tresponse "go-fiber-starter/app/module/taxonomy/response"
+	"go-fiber-starter/app/module/user/response"
 )
 
 type Product struct {
@@ -24,7 +25,7 @@ type ProductInPost struct {
 	Attributes  []tresponse.Taxonomy       `json:",omitempty"`
 }
 
-func FromDomain(item *schema.Post, products []schema.Product, isForUser bool) (res *Product) {
+func FromDomain(item *schema.Post, products []schema.Product, observers []*response.User, isForUser bool) (res *Product) {
 	if item == nil {
 		return res
 	}
@@ -92,6 +93,12 @@ func FromDomain(item *schema.Post, products []schema.Product, isForUser bool) (r
 			//Business: bresponse.Business{ID: item.Business.ID, Title: item.Business.Title},
 		},
 		Variants: []ProductInPost{},
+	}
+
+	if len(observers) == 0 {
+		p.Post.Observers = []*response.User{}
+	} else {
+		p.Post.Observers = observers
 	}
 
 	for _, taxonomy := range item.Taxonomies {

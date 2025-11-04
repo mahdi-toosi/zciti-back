@@ -39,13 +39,16 @@ type BusinessUsers struct {
 	UserIDs     []uint64
 	StartTime   *time.Time
 	EndTime     *time.Time
+	Role        string
 	Pagination  *paginator.Pagination
 }
 
 type BusinessUsersStoreRole struct {
-	Roles      []schema.UserRole `example:"[user]" validate:"required"`
-	UserID     uint64            `example:"1" validate:"required,number,min=1"`
-	BusinessID uint64            `example:"1" validate:"required,number,min=1"`
+	Roles               []schema.UserRole                  `example:"[user]" validate:"required"`
+	UserID              uint64                             `example:"1" validate:"required,number,min=1"`
+	BusinessID          uint64                             `example:"1" validate:"required,number,min=1"`
+	PostsToObserve      []uint64                           `json:",omitempty" example:"[1,2,3]"`
+	TaxonomiesToObserve schema.UserMetaTaxonomiesToObserve `json:",omitempty" example:"{1: { checked: true; partialChecked: false }}"`
 }
 
 type BusinessUsersToggleSuspense struct {

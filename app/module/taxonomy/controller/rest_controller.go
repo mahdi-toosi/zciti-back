@@ -98,7 +98,15 @@ func (_i *controller) Search(c *fiber.Ctx) error {
 		req.Domain = schema.PostType(c.Query("Domain"))
 	}
 
-	taxonomies, paging, err := _i.service.Search(*req, utils.IsForUser(c))
+	user := schema.User{}
+	if !utils.IsForUser(c) {
+		user, err = utils.GetAuthenticatedUser(c)
+		if err != nil {
+			return err
+		}
+	}
+
+	taxonomies, paging, err := _i.service.Search(*req, utils.IsForUser(c), &user)
 	if err != nil {
 		return err
 	}

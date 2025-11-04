@@ -6,6 +6,8 @@ import (
 	"go-fiber-starter/app/module/product/repository"
 	"go-fiber-starter/app/module/product/request"
 	"go-fiber-starter/app/module/product/response"
+	uresponse "go-fiber-starter/app/module/user/response"
+	userService "go-fiber-starter/app/module/user/service"
 	"go-fiber-starter/utils/paginator"
 )
 
@@ -20,15 +22,16 @@ type IService interface {
 	DeleteVariant(businessID uint64, productID uint64, variantID uint64) error
 }
 
-func Service(repo repository.IRepository, pService postService.IService) IService {
+func Service(repo repository.IRepository, pService postService.IService, uService userService.IService) IService {
 	return &service{
-		repo, pService,
+		repo, pService, uService,
 	}
 }
 
 type service struct {
 	Repo     repository.IRepository
 	PService postService.IService
+	uService userService.IService
 }
 
 func (_i *service) Index(req request.ProductsRequest, isForUser bool) (products []*response.Product, paging paginator.Pagination, err error) {
@@ -37,8 +40,10 @@ func (_i *service) Index(req request.ProductsRequest, isForUser bool) (products 
 		return
 	}
 
+	var observers []*uresponse.User
+
 	for _, result := range results {
-		products = append(products, response.FromDomain(result, result.Products, isForUser))
+		products = append(products, response.FromDomain(result, result.Products, observers, isForUser))
 	}
 
 	return
@@ -50,7 +55,12 @@ func (_i *service) Show(businessID uint64, id uint64) (product *response.Product
 		return nil, err
 	}
 
-	return response.FromDomain(result, result.Products, false), nil
+	observers, err := _i.uService.GetPostObservers(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return response.FromDomain(result, result.Products, observers, false), nil
 }
 
 func (_i *service) Store(req request.Product) (postID *uint64, err error) {

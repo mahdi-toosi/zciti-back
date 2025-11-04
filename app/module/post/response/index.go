@@ -9,20 +9,21 @@ import (
 )
 
 type Post struct {
-	ID         uint64            `json:",omitempty"`
-	Title      string            `json:",omitempty"`
-	AuthorID   uint64            `json:",omitempty"`
-	Excerpt    string            `json:",omitempty"`
-	Author     response.User     `json:",omitempty"`
-	Content    string            `json:",omitempty"`
-	Status     schema.PostStatus `json:",omitempty"`
-	Type       schema.PostType   `json:",omitempty"`
-	BusinessID uint64            `json:",omitempty"`
-	//Business   bresponse.Business   `json:",omitempty"`
+	ID               uint64               `json:",omitempty"`
+	Title            string               `json:",omitempty"`
+	AuthorID         uint64               `json:",omitempty"`
+	Excerpt          string               `json:",omitempty"`
+	Author           response.User        `json:",omitempty"`
+	Content          string               `json:",omitempty"`
+	Status           schema.PostStatus    `json:",omitempty"`
+	Type             schema.PostType      `json:",omitempty"`
+	BusinessID       uint64               `json:",omitempty"`
 	Taxonomies       []tresponse.Taxonomy `json:",omitempty"`
 	Meta             schema.PostMeta      `json:",omitempty"`
 	CreatedAt        time.Time            `json:",omitempty"`
 	CreatedAtDisplay string               `json:",omitempty"`
+	Observers        []*response.User     ``
+	//Business   bresponse.Business   `json:",omitempty"`
 }
 
 func FromDomain(item *schema.Post) (res *Post) {

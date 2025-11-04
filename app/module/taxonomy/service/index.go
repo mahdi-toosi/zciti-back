@@ -1,15 +1,17 @@
 package service
 
 import (
+	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/taxonomy/repository"
 	"go-fiber-starter/app/module/taxonomy/request"
 	"go-fiber-starter/app/module/taxonomy/response"
 	"go-fiber-starter/utils/paginator"
+	"slices"
 )
 
 type IService interface {
 	Index(req request.Taxonomies, forUser bool) (taxonomies []*response.Taxonomy, paging paginator.Pagination, err error)
-	Search(req request.Taxonomies, forUser bool) (taxonomies []*response.Taxonomy, paging paginator.Pagination, err error)
+	Search(req request.Taxonomies, forUser bool, user *schema.User) (taxonomies []*response.Taxonomy, paging paginator.Pagination, err error)
 	Show(BusinessID uint64, id uint64) (taxonomy *response.Taxonomy, err error)
 	Store(req request.Taxonomy) (err error)
 	Update(id uint64, req request.Taxonomy) (err error)
@@ -39,18 +41,32 @@ func (_i *service) Index(req request.Taxonomies, forUser bool) (taxonomies []*re
 	return
 }
 
-func (_i *service) Search(req request.Taxonomies, forUser bool) (taxonomies []*response.Taxonomy, paging paginator.Pagination, err error) {
+func (_i *service) Search(req request.Taxonomies, forUser bool, user *schema.User) (taxonomies []*response.Taxonomy, paging paginator.Pagination, err error) {
 	results, paging, err := _i.Repo.Search(req)
 	if err != nil {
 		return
 	}
 
+	isObserver := false
+	var taxonomiesToObserve []uint64
+	if user != nil && user.Meta != nil {
+		isObserver = slices.Contains(user.Permissions[req.BusinessID], schema.URBusinessObserver)
+		taxonomiesToObserve = user.Meta.GetTaxonomiesToObserve(true, true)
+	}
+
 	for _, result := range results {
-		taxonomies = append(taxonomies, response.FromDomain(result, forUser))
+		if user != nil && isObserver && user.Meta != nil {
+			if slices.Contains(taxonomiesToObserve, result.ID) {
+				taxonomies = append(taxonomies, response.FromDomain(result, forUser))
+			}
+		} else {
+			taxonomies = append(taxonomies, response.FromDomain(result, forUser))
+		}
 	}
 
 	return
 }
+
 func (_i *service) Show(businessID uint64, id uint64) (taxonomy *response.Taxonomy, err error) {
 	result, err := _i.Repo.GetOne(businessID, id)
 	if err != nil {

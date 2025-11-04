@@ -13,6 +13,14 @@ type BaleBot struct {
 }
 
 func NewBaleBotLogger(cfg *config.Config) *BaleBot {
+	if !cfg.App.Production {
+		return &BaleBot{
+			Bot:          nil,
+			Connected:    false,
+			LoggerChatID: cfg.Services.BaleBot.LoggerChatID,
+		}
+	}
+
 	bot, err := baleBotApi.NewBaleBotAPI(cfg.Services.BaleBot.LoggerBotToken)
 	if err != nil {
 		log.Err(err).Msg("Error creating new BaleBot")
