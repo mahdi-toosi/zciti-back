@@ -24,10 +24,10 @@ type Reservations struct {
 	CityID         uint64
 	WorkspaceID    uint64
 	DormitoryID    uint64
-	WithUsageCount uint64
-	Posts          []uint64
 	StartTime      *time.Time
 	EndTime        *time.Time
+	WithUsageCount uint64
+	Posts          []uint64
 	Status         schema.ReservationStatus
 	Pagination     *paginator.Pagination
 	//UsageCount     uint64

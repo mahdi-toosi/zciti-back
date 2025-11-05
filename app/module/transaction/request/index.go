@@ -2,6 +2,7 @@ package request
 
 import (
 	"go-fiber-starter/utils/paginator"
+	"time"
 )
 
 //type Transaction struct {
@@ -14,8 +15,14 @@ import (
 //}
 
 type Transactions struct {
-	WalletID   uint64
-	Pagination *paginator.Pagination
+	WalletID    uint64
+	ProductID   uint64
+	CityID      uint64
+	WorkspaceID uint64
+	DormitoryID uint64
+	StartTime   *time.Time
+	EndTime     *time.Time
+	Pagination  *paginator.Pagination
 }
 
 //

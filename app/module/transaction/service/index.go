@@ -9,7 +9,7 @@ import (
 )
 
 type IService interface {
-	Index(req request.Transactions) (transactions []*response.Transaction, paging paginator.Pagination, err error)
+	Index(req request.Transactions) (transactions []*response.Transaction, totalAmount uint64, paging paginator.Pagination, err error)
 	Show(id uint64) (transaction *response.Transaction, err error)
 	Store(req *schema.Transaction) (err error)
 	Update(id uint64, req *schema.Transaction) (err error)
@@ -26,8 +26,8 @@ type service struct {
 	Repo repository.IRepository
 }
 
-func (_i *service) Index(req request.Transactions) (transactions []*response.Transaction, paging paginator.Pagination, err error) {
-	results, paging, err := _i.Repo.GetAll(req)
+func (_i *service) Index(req request.Transactions) (transactions []*response.Transaction, totalAmount uint64, paging paginator.Pagination, err error) {
+	results, totalAmount, paging, err := _i.Repo.GetAll(req)
 	if err != nil {
 		return
 	}

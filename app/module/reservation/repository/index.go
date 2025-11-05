@@ -85,9 +85,18 @@ func (_i *repo) GetAll(req request.Reservations) (reservations []*schema.Reserva
 	}
 
 	if req.CityID > 0 || req.WorkspaceID > 0 || req.DormitoryID > 0 {
+		var filters []uint64
+		if req.DormitoryID > 0 {
+			filters = append(filters, req.DormitoryID)
+		} else if req.WorkspaceID > 0 {
+			filters = append(filters, req.WorkspaceID)
+		} else if req.CityID > 0 {
+			filters = append(filters, req.CityID)
+		}
+
 		query.Joins("JOIN products ON reservations.product_id = products.id")
 		query.Joins("JOIN posts_taxonomies ON posts_taxonomies.post_id = products.post_id")
-		query.Where("posts_taxonomies.taxonomy_id IN (?)", []uint64{req.CityID, req.WorkspaceID, req.DormitoryID})
+		query.Where("posts_taxonomies.taxonomy_id IN (?)", filters)
 		query.Preload("Product.Post.Taxonomies")
 		query.Group("reservations.id")
 	}

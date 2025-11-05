@@ -1,13 +1,20 @@
 package controller
 
 import (
+	"bytes"
 	"github.com/gofiber/fiber/v2"
+	"github.com/xuri/excelize/v2"
+	ptime "github.com/yaa110/go-persian-calendar"
+	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/transaction/request"
+	transactionResponse "go-fiber-starter/app/module/transaction/response"
 	"go-fiber-starter/app/module/transaction/service"
 	walletService "go-fiber-starter/app/module/wallet/service"
 	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
 	"go-fiber-starter/utils/response"
+	"strconv"
+	"time"
 )
 
 type IRestController interface {
@@ -46,6 +53,20 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	var req request.Transactions
 	req.WalletID = walletID
 	req.Pagination = paginate
+	export := c.Query("Export")
+	req.CityID, _ = utils.GetUintInQueries(c, "CityID")
+	req.ProductID, _ = utils.GetUintInQueries(c, "ProductID")
+	req.WorkspaceID, _ = utils.GetUintInQueries(c, "WorkspaceID")
+	req.DormitoryID, _ = utils.GetUintInQueries(c, "DormitoryID")
+
+	req.StartTime = utils.GetDateInQueries(c, "StartTime")
+	req.EndTime = utils.GetDateInQueries(c, "EndTime")
+	if req.EndTime != nil && !req.EndTime.IsZero() {
+		// end of the end date
+		endOfEndTime, _ := utils.EndOfDate(req.EndTime.Format(time.DateTime), time.DateTime)
+		v, _ := time.Parse(time.DateTime, endOfEndTime)
+		req.EndTime = &v
+	}
 
 	// get Wallet and check the owner
 	wallet, err := _i.walletService.Show(&walletID, nil, nil)
@@ -70,13 +91,122 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 		}
 	}
 
-	transactions, paging, err := _i.service.Index(req)
+	transactions, totalAmount, paging, err := _i.service.Index(req)
 	if err != nil {
 		return err
 	}
 
-	return response.Resp(c, response.Response{
-		Data: transactions,
-		Meta: paging,
-	})
+	//return response.Resp(c, response.Response{
+	//	Data: transactions,
+	//	Meta: paging,
+	//})
+
+	if export == "excel" {
+		// Create a new Excel file
+		f := excelize.NewFile()
+		// Create a new sheet
+		sheetName := "تراکنش ها"
+		index, _ := f.NewSheet(sheetName)
+
+		// Set RTL view
+		f.SetSheetView(sheetName, 0, &excelize.ViewOptions{
+			RightToLeft: utils.BoolPtr(true),
+		})
+		f.SetPanes(sheetName, &excelize.Panes{
+			Freeze:      true,
+			Split:       false,
+			XSplit:      0,
+			YSplit:      1,
+			TopLeftCell: "A2",
+			ActivePane:  "bottomLeft",
+		})
+
+		f.SetColWidth(sheetName, "B", "D", 30)
+		columnsStyles, _ := f.NewStyle(&excelize.Style{
+			Font: &excelize.Font{
+				Family: "IRANSans", // Font name as installed in the OS
+				Size:   16,
+			},
+			Alignment: &excelize.Alignment{
+				Horizontal: "right",
+			},
+		})
+
+		// Headers in Persian
+		f.SetCellValue(sheetName, "B1", "مجموع تراکنش های موفق")
+		f.SetCellInt(sheetName, "C1", int64(totalAmount))
+
+		f.SetCellValue(sheetName, "A3", "ردیف")
+		f.SetCellValue(sheetName, "B3", "نام کامل")
+		f.SetCellValue(sheetName, "C3", "مبلغ (تومان)")
+		f.SetCellValue(sheetName, "D3", "تاریخ ")
+		f.SetCellValue(sheetName, "E3", "وضعیت ")
+		f.SetColStyle(sheetName, "A:P", columnsStyles)
+
+		// Populate data
+		for i, transaction := range transactions {
+			row := i + 4 // Start from the second row
+			f.SetCellValue(sheetName, "A"+strconv.Itoa(row), i+1)
+			f.SetCellValue(sheetName, "B"+strconv.Itoa(row), transaction.User.FullName)
+			f.SetCellInt(sheetName, "C"+strconv.Itoa(row), int64(transaction.Amount))
+			f.SetCellValue(sheetName, "D"+strconv.Itoa(row), ptime.New(transaction.UpdatedAt).Format("HH:mm - yyyy/MM/dd"))
+
+			f.SetCellValue(sheetName, "E"+strconv.Itoa(row), schema.TransactionStatusProxy[transaction.Status])
+			// Define background color by status
+			var bgColor string
+			switch transaction.Status {
+			case "success":
+				bgColor = "#C6EFCE" // Light green
+			case "failed":
+				bgColor = "#FFC7CE" // Light red
+			case "pending":
+				bgColor = "#FFEB9C" // Light yellow
+			default:
+				bgColor = "#D9D9D9" // Light gray
+			}
+			// Create style with background color
+			statusStyle, _ := f.NewStyle(&excelize.Style{
+				Fill: excelize.Fill{
+					Pattern: 1,
+					Type:    "pattern",
+					Color:   []string{bgColor},
+				},
+				Alignment: &excelize.Alignment{
+					Horizontal: "right",
+					Vertical:   "center",
+				},
+				Font: &excelize.Font{
+					Family: "IRANSans", // Font name as installed in the OS
+					Size:   16,
+				},
+			})
+			// Apply the style to the status cell
+			cell := "E" + strconv.Itoa(row)
+			f.SetCellStyle(sheetName, cell, cell, statusStyle)
+		}
+
+		// Set active sheet
+		f.SetActiveSheet(index)
+
+		// Write the file to a buffer
+		buf := new(bytes.Buffer)
+		if err := f.Write(buf); err != nil {
+			return err
+		}
+
+		// Set the content type and filename
+		c.Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+		c.Set("Content-Disposition", "attachment; filename=users.xlsx")
+
+		// Send the buffer as the response
+		return c.Send(buf.Bytes())
+	} else {
+		return response.Resp(c, response.Response{
+			Data: transactions,
+			Meta: transactionResponse.Transactions{
+				Meta:        paging,
+				TotalAmount: totalAmount,
+			},
+		})
+	}
 }
