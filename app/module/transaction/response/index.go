@@ -3,6 +3,7 @@ package response
 import (
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/user/response"
+	"go-fiber-starter/utils/paginator"
 	"time"
 )
 
@@ -15,6 +16,12 @@ type Transaction struct {
 	UpdatedAt          time.Time
 	Description        string
 	OrderPaymentMethod schema.OrderPaymentMethod
+}
+
+type Transactions struct {
+	Data        []*Transaction `json:",omitempty"`
+	TotalAmount uint64
+	Meta        paginator.Pagination `json:",omitempty"`
 }
 
 func FromDomain(item *schema.Transaction) (res *Transaction) {

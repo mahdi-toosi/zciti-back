@@ -9,7 +9,7 @@ import (
 )
 
 type IRepository interface {
-	GetAll(req request.Transactions) (transactions []*schema.Transaction, paging paginator.Pagination, err error)
+	GetAll(req request.Transactions) (transactions []*schema.Transaction, totalAmount uint64, paging paginator.Pagination, err error)
 	GetOne(id *uint64, orderID *uint64) (transaction *schema.Transaction, err error)
 	Create(transaction *schema.Transaction, tx *gorm.DB) (err error)
 	Update(id uint64, transaction *schema.Transaction) (err error)
@@ -26,27 +26,65 @@ type repo struct {
 	DB *database.Database
 }
 
-func (_i *repo) GetAll(req request.Transactions) (transactions []*schema.Transaction, paging paginator.Pagination, err error) {
-	query := _i.DB.Main.
+func (_i *repo) GetAll(req request.Transactions) (transactions []*schema.Transaction, totalAmount uint64, paging paginator.Pagination, err error) {
+	baseQuery := _i.DB.Main.
 		Model(&schema.Transaction{}).
 		Where(&schema.Transaction{WalletID: req.WalletID})
 
-	if req.Pagination.Page > 0 {
-		var total int64
-		query.Count(&total)
-		req.Pagination.Total = total
-
-		query.Offset(req.Pagination.Offset)
-		query.Limit(req.Pagination.Limit)
+	if req.StartTime != nil && !req.StartTime.IsZero() {
+		baseQuery = baseQuery.Where("start_time >= ?", req.StartTime)
 	}
 
-	err = query.Preload("User").Order("created_at desc").Find(&transactions).Error
+	if req.EndTime != nil && !req.EndTime.IsZero() {
+		baseQuery = baseQuery.Where("end_time <= ?", req.EndTime)
+	}
+
+	// Apply filters (CityID / WorkspaceID / DormitoryID)
+	if req.CityID > 0 || req.WorkspaceID > 0 || req.DormitoryID > 0 {
+		var filters []uint64
+		if req.DormitoryID > 0 {
+			filters = append(filters, req.DormitoryID)
+		} else if req.WorkspaceID > 0 {
+			filters = append(filters, req.WorkspaceID)
+		} else if req.CityID > 0 {
+			filters = append(filters, req.CityID)
+		}
+
+		baseQuery = baseQuery.
+			Joins("JOIN order_items ON transactions.order_id = order_items.order_id").
+			Joins("JOIN posts_taxonomies ON posts_taxonomies.post_id = order_items.post_id").
+			Where("posts_taxonomies.taxonomy_id IN (?)", filters)
+	}
+
+	// ✅ Clone safely for SUM
+	sumQuery := baseQuery.Session(&gorm.Session{}) // new session, same model and conditions
+	if err = sumQuery.
+		Where(&schema.Transaction{Status: schema.TransactionStatusSuccess}).
+		Select("COALESCE(SUM(amount), 0)").
+		Scan(&totalAmount).Error; err != nil {
+		return
+	}
+
+	// ✅ Build list query (add group/pagination only here)
+	listQuery := baseQuery.Group("transactions.id")
+
+	if req.Pagination.Page > 0 {
+		var total int64
+		listQuery.Count(&total)
+		req.Pagination.Total = total
+
+		listQuery = listQuery.Offset(req.Pagination.Offset).Limit(req.Pagination.Limit)
+	}
+
+	err = listQuery.
+		Preload("User").
+		Order("created_at desc").
+		Find(&transactions).Error
 	if err != nil {
 		return
 	}
 
 	paging = *req.Pagination
-
 	return
 }
 

@@ -25,3 +25,11 @@ const (
 	TransactionStatusRefunded  TransactionStatus = "refunded"  // The transaction has been refunded to the customer.
 	TransactionStatusCancelled TransactionStatus = "cancelled" // The transaction has been cancelled by the customer or the administrator.
 )
+
+var TransactionStatusProxy = map[TransactionStatus]string{
+	TransactionStatusPending:   "در حال پردازش",
+	TransactionStatusSuccess:   "موفق",
+	TransactionStatusFailed:    "نا موفق",
+	TransactionStatusRefunded:  "بازگشت وجه",
+	TransactionStatusCancelled: "منتفی شده",
+}

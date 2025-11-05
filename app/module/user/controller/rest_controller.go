@@ -271,7 +271,7 @@ func (_i *controller) BusinessUsers(c *fiber.Ctx) error {
 		// Create a new Excel file
 		f := excelize.NewFile()
 		// Create a new sheet
-		sheetName := "Users"
+		sheetName := "کاربران"
 		index, _ := f.NewSheet(sheetName)
 
 		// Set RTL view
