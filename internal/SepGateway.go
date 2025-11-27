@@ -2,7 +2,6 @@ package internal
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"go-fiber-starter/utils/config"
@@ -165,12 +164,12 @@ func (ps *PaymentService) SendRequest(amount int, resNum, cellNumber, redirectUR
 	return paymentURL, nil
 }
 
-func (ps *PaymentService) Verify(ctx context.Context, refNum string) (*VerifyResponse, error) {
+func (ps *PaymentService) Verify(refNum string) (*VerifyResponse, error) {
 	data := url.Values{}
 	data.Set("TerminalNumber", ps.TerminalID)
 	data.Set("RefNum", refNum)
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, verifyURL, strings.NewReader(data.Encode()))
+	req, err := http.NewRequest(http.MethodPost, verifyURL, strings.NewReader(data.Encode()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}

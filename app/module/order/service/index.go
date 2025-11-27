@@ -1,7 +1,6 @@
 package service
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"go-fiber-starter/app/database/schema"
@@ -279,33 +278,33 @@ func (_i *service) Store(req request.Order) (orderID uint64, paymentURL string, 
 	return orderID, paymentURL, nil
 }
 
-func (_i *service) Status(userID uint64, orderID uint64, authority string) (status string, err error) {
+func (_i *service) Status(userID uint64, orderID uint64, refNum string) (status string, err error) {
 	transaction, err := _i.TransactionRepo.GetOne(nil, &orderID)
 	if err != nil {
-		return "NOK", err
+		return "Failed", err
 	}
 
 	order, err := _i.Repo.GetOne(userID, orderID)
 	if err != nil {
 
-		return "NOK", err
+		return "Failed", err
 	}
 
 	if _i.Config.App.Production {
 		// verified, _, _, err := _i.ZarinPal.PaymentVerification(int(order.TotalAmt), authority)
-		verified, err := _i.SepGateway.PaymentService.Verify(context.Background(), authority)
+		verified, err := _i.SepGateway.PaymentService.Verify(refNum)
 		if err != nil {
 			transaction.Status = schema.TransactionStatusFailed
 			_ = _i.TransactionRepo.Update(transaction.ID, transaction)
 
-			return "NOK", err
+			return "Failed", err
 		}
 
-		if verified.ResultCode != 2 {
+		if verified.ResultCode != 0 {
 			transaction.Status = schema.TransactionStatusFailed
 			_ = _i.TransactionRepo.Update(transaction.ID, transaction)
 
-			return "NOK", &fiber.Error{Code: fiber.StatusBadRequest, Message: "پرداخت ناموفق بوده است"}
+			return "Failed", &fiber.Error{Code: fiber.StatusBadRequest, Message: "پرداخت ناموفق بوده است"}
 		}
 	}
 
