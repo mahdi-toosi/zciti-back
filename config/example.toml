@@ -23,6 +23,9 @@ url = ""  # <driver>://<username>:<password>@<host>:<port>/<database>
 [services.messageWay]
 apiKey = ""
 
+[services.saman]
+terminalID = ""
+
 [services.googleRecaptcha]
 secretKey = ""
 

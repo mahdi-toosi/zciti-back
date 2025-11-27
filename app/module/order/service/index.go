@@ -1,9 +1,9 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"github.com/gofiber/fiber/v2"
 	"go-fiber-starter/app/database/schema"
 	couponRequst "go-fiber-starter/app/module/coupon/request"
 	couponService "go-fiber-starter/app/module/coupon/service"
@@ -21,6 +21,9 @@ import (
 	"go-fiber-starter/internal"
 	"go-fiber-starter/utils/config"
 	"go-fiber-starter/utils/paginator"
+	"strconv"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type IService interface {
@@ -36,6 +39,7 @@ func Service(
 	config *config.Config,
 	repo repository.IRepository,
 	zarinPal *internal.ZarinPal,
+	sepGateway *internal.SepGateway,
 	uniService uniService.IService,
 	userService userService.IService,
 	productRepo prepository.IRepository,
@@ -49,6 +53,7 @@ func Service(
 		repo,
 		config,
 		zarinPal,
+		sepGateway,
 		uniService,
 		userService,
 		walletService,
@@ -64,6 +69,7 @@ type service struct {
 	Repo            repository.IRepository
 	Config          *config.Config
 	ZarinPal        *internal.ZarinPal
+	SepGateway      *internal.SepGateway
 	UniService      uniService.IService
 	UserService     userService.IService
 	WalletService   walletService.IService
@@ -219,12 +225,19 @@ func (_i *service) Store(req request.Order) (orderID uint64, paymentURL string, 
 
 		var authority string
 		if _i.Config.App.Production {
-			paymentURL, authority, _, err = _i.ZarinPal.NewPaymentRequest(
-				int(totalAmt), callbackURL,
-				"رزرو ماشین لباسشویی",
-				"",
+			// paymentURL, authority, _, err = _i.ZarinPal.NewPaymentRequest(
+			// 	int(totalAmt), callbackURL,
+			// 	"رزرو ماشین لباسشویی",
+			// 	"",
+			// 	fmt.Sprintf("0%d", req.User.Mobile),
+			// )
+			paymentURL, err = _i.SepGateway.PaymentService.SendRequest(
+				int(totalAmt),
+				"رزرو ماشین لباسشویی-"+strconv.FormatUint(orderID, 10),
 				fmt.Sprintf("0%d", req.User.Mobile),
+				callbackURL,
 			)
+
 			if err != nil {
 				return 0, "", err
 			}
@@ -279,7 +292,8 @@ func (_i *service) Status(userID uint64, orderID uint64, authority string) (stat
 	}
 
 	if _i.Config.App.Production {
-		verified, _, _, err := _i.ZarinPal.PaymentVerification(int(order.TotalAmt), authority)
+		// verified, _, _, err := _i.ZarinPal.PaymentVerification(int(order.TotalAmt), authority)
+		verified, err := _i.SepGateway.PaymentService.Verify(context.Background(), authority)
 		if err != nil {
 			transaction.Status = schema.TransactionStatusFailed
 			_ = _i.TransactionRepo.Update(transaction.ID, transaction)
@@ -287,7 +301,7 @@ func (_i *service) Status(userID uint64, orderID uint64, authority string) (stat
 			return "NOK", err
 		}
 
-		if !verified {
+		if verified.ResultCode != 2 {
 			transaction.Status = schema.TransactionStatusFailed
 			_ = _i.TransactionRepo.Update(transaction.ID, transaction)
 

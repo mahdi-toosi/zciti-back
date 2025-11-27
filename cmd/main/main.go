@@ -1,7 +1,6 @@
 package main
 
 import (
-	fxzerolog "github.com/efectn/fx-zerolog"
 	"go-fiber-starter/app/middleware"
 	"go-fiber-starter/app/module/asset"
 	"go-fiber-starter/app/module/auth"
@@ -9,7 +8,7 @@ import (
 	"go-fiber-starter/app/module/comment"
 	"go-fiber-starter/app/module/coupon"
 	"go-fiber-starter/app/module/notification"
-	"go-fiber-starter/app/module/notificationTemplate"
+	notificationtemplate "go-fiber-starter/app/module/notificationTemplate"
 	"go-fiber-starter/app/module/order"
 	"go-fiber-starter/app/module/orderItem"
 	"go-fiber-starter/app/module/post"
@@ -25,6 +24,8 @@ import (
 	"go-fiber-starter/internal/bootstrap"
 	"go-fiber-starter/internal/bootstrap/database"
 	"go-fiber-starter/utils/config"
+
+	fxzerolog "github.com/efectn/fx-zerolog"
 	_ "go.uber.org/automaxprocs"
 	"go.uber.org/fx"
 )
@@ -59,6 +60,8 @@ func main() {
 		fx.Provide(database.NewDatabase),
 		// zarin pal
 		fx.Provide(internal.NewZarinPal),
+		// saman
+		fx.Provide(internal.NewSepGateway),
 		//// redis
 		//fx.Provide(bootstrap.NewRedis),
 		// middleware

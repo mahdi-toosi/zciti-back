@@ -57,6 +57,10 @@ type services = struct {
 		ApiKey string `toml:"apiKey"`
 	}
 
+	Saman struct {
+		TerminalID string `toml:"terminalID"`
+	}
+
 	ZarinPal struct {
 		MerchantID string `toml:"merchantId"`
 		Sandbox    bool   `toml:"sandbox"`
