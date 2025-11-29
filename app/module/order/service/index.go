@@ -231,7 +231,7 @@ func (_i *service) Store(req request.Order) (orderID uint64, paymentURL string, 
 			// 	fmt.Sprintf("0%d", req.User.Mobile),
 			// )
 			paymentURL, err = _i.SepGateway.PaymentService.SendRequest(
-				int(totalAmt),
+				int(totalAmt)*10,
 				strconv.FormatUint(orderID, 10),
 				fmt.Sprintf("0%d", req.User.Mobile),
 				redirectURL,
