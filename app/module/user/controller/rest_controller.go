@@ -538,7 +538,7 @@ func (_i *controller) OrderStatus(c *fiber.Ctx) error {
 	utils.Log(req)
 
 	refNum := req.RefNum
-	status := req.Status
+	status := req.State
 
 	if status == "OK" {
 		status, err = _i.oService.Status(userID, orderID, refNum)

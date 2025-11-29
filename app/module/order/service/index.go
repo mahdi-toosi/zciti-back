@@ -278,16 +278,16 @@ func (_i *service) Store(req request.Order) (orderID uint64, paymentURL string, 
 	return orderID, paymentURL, nil
 }
 
-func (_i *service) Status(userID uint64, orderID uint64, refNum string) (status string, err error) {
+func (_i *service) Status(userID uint64, orderID uint64, refNum string) (state string, err error) {
 	transaction, err := _i.TransactionRepo.GetOne(nil, &orderID)
 	if err != nil {
-		return "Failed", err
+		return "FAILED", err
 	}
 
 	order, err := _i.Repo.GetOne(userID, orderID)
 	if err != nil {
 
-		return "Failed", err
+		return "FAILED", err
 	}
 
 	if _i.Config.App.Production {
@@ -297,14 +297,14 @@ func (_i *service) Status(userID uint64, orderID uint64, refNum string) (status 
 			transaction.Status = schema.TransactionStatusFailed
 			_ = _i.TransactionRepo.Update(transaction.ID, transaction)
 
-			return "Failed", err
+			return "FAILED", err
 		}
 
-		if verified.ResultCode != 0 {
+		if !verified.Success {
 			transaction.Status = schema.TransactionStatusFailed
 			_ = _i.TransactionRepo.Update(transaction.ID, transaction)
 
-			return "Failed", &fiber.Error{Code: fiber.StatusBadRequest, Message: "پرداخت ناموفق بوده است"}
+			return "FAILED", &fiber.Error{Code: fiber.StatusBadRequest, Message: "پرداخت ناموفق بوده است"}
 		}
 	}
 
