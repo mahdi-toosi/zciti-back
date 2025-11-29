@@ -54,6 +54,19 @@ type BusinessUsersToggleSuspense struct {
 	UserID         uint64 `example:"1" validate:"required,number,min=1"`
 	BusinessID     uint64 `example:"1" validate:"required,number,min=1"`
 }
+type OrderStatus struct {
+	Token      string `example:"token"`
+	ResNum     string `example:"resnum"` // order id
+	RefNum     string `example:"refnum"` // این پارامتر کدی است تا 50 حرف یا عدد که برای هر تراکنش ایجاد می شود.
+	State      string `example:"state"`  // OK or FAILED
+	Status     string `example:"OK" validate:"required,oneof=OK FAILED"`
+	TraceNo    string `example:"traceno"`   //  این پارامتر شماره پیگیری تولید شده توسط سپ می باشد.
+	SecurePan  string `example:"securepan"` //  این پارامتر شماره پیگیری تولید شده توسط سپ می باشد.
+	Amount     int    `example:"10000"`
+	Rrn        string `example:"rrn"`        //  شماره مرجع تراکنش
+	MID        string `example:"mid"`        // شماره ترمینال پذیرنده
+	TerminalID string `example:"terminalid"` // شماره ترمینال پذیرنده
+}
 
 type Users struct {
 	Pagination *paginator.Pagination

@@ -3,8 +3,6 @@ package controller
 import (
 	"bytes"
 	"fmt"
-	"github.com/gofiber/fiber/v2"
-	"github.com/xuri/excelize/v2"
 	"go-fiber-starter/app/database/schema"
 	bService "go-fiber-starter/app/module/business/service"
 	orequest "go-fiber-starter/app/module/order/request"
@@ -15,8 +13,11 @@ import (
 	"go-fiber-starter/utils/config"
 	"go-fiber-starter/utils/paginator"
 	"go-fiber-starter/utils/response"
-	"golang.org/x/exp/slices"
 	"strconv"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/xuri/excelize/v2"
+	"golang.org/x/exp/slices"
 )
 
 type IRestController interface {
@@ -519,7 +520,7 @@ func (_i *controller) Orders(c *fiber.Ctx) error {
 // @Tags         Users
 // @Security     Bearer
 // @Param        businessID path int true "Business ID"
-// @Router       /user/orders/status [get]
+// @Router       /user/orders/status [post]
 func (_i *controller) OrderStatus(c *fiber.Ctx) error {
 	userID, err := utils.GetUintInQueries(c, "UserID")
 	if err != nil {
@@ -529,11 +530,18 @@ func (_i *controller) OrderStatus(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	authority := c.Query("Authority")
-	status := c.Query("Status")
+	req := new(request.OrderStatus)
+	if err := response.ParseAndValidate(c, req); err != nil {
+		return err
+	}
+
+	utils.Log(req)
+
+	refNum := req.RefNum
+	status := req.Status
 
 	if status == "OK" {
-		status, err = _i.oService.Status(userID, orderID, authority)
+		status, err = _i.oService.Status(userID, orderID, refNum)
 		if err != nil {
 			return err
 		}

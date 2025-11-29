@@ -29,7 +29,7 @@ type IService interface {
 	Index(req request.Orders) (orders []*response.Order, paging paginator.Pagination, err error)
 	Show(userID uint64, id uint64) (order *response.Order, err error)
 	Store(req request.Order) (orderID uint64, paymentURL string, err error)
-	Status(userID uint64, orderID uint64, authority string) (status string, err error)
+	Status(userID uint64, orderID uint64, refNum string) (status string, err error)
 	Update(id uint64, req request.Order) (err error)
 	Destroy(id uint64) error
 }
@@ -215,7 +215,7 @@ func (_i *service) Store(req request.Order) (orderID uint64, paymentURL string, 
 			return orderID, "", nil
 		}
 	} else {
-		callbackURL := fmt.Sprintf(
+		redirectURL := fmt.Sprintf(
 			"%s/v1/user/orders/status?OrderID=%d&UserID=%d",
 			_i.Config.App.BackendDomain,
 			orderID,
@@ -225,24 +225,24 @@ func (_i *service) Store(req request.Order) (orderID uint64, paymentURL string, 
 		var authority string
 		if _i.Config.App.Production {
 			// paymentURL, authority, _, err = _i.ZarinPal.NewPaymentRequest(
-			// 	int(totalAmt), callbackURL,
+			// 	int(totalAmt), redirectURL,
 			// 	"رزرو ماشین لباسشویی",
 			// 	"",
 			// 	fmt.Sprintf("0%d", req.User.Mobile),
 			// )
 			paymentURL, err = _i.SepGateway.PaymentService.SendRequest(
 				int(totalAmt),
-				"رزرو ماشین لباسشویی-"+strconv.FormatUint(orderID, 10),
+				strconv.FormatUint(orderID, 10),
 				fmt.Sprintf("0%d", req.User.Mobile),
-				callbackURL,
+				redirectURL,
 			)
 
 			if err != nil {
 				return 0, "", err
 			}
 		} else {
-			callbackURL := fmt.Sprintf("%s&Status=%s", callbackURL, "OK")
-			paymentURL = callbackURL
+			redirectURL := fmt.Sprintf("%s&Status=%s", redirectURL, "OK")
+			paymentURL = redirectURL
 			authority = "development authority"
 		}
 
