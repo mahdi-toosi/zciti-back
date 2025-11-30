@@ -8,10 +8,11 @@ import (
 	"go-fiber-starter/internal/bootstrap/database"
 	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
-	"gorm.io/gorm"
 	"strconv"
 	"strings"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type IRepository interface {
@@ -109,7 +110,7 @@ func (_i *repo) GetUsers(req request.BusinessUsers) (users []*schema.User, pagin
 		Order("users.created_at ASC")
 
 	if req.CountUsing != 0 {
-		query.Having("COUNT(reservations.id) = ?", req.CountUsing)
+		query.Having("COUNT(reservations.id) >= ?", req.CountUsing)
 	}
 
 	if req.Role != "" {
