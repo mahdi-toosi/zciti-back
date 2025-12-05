@@ -5,6 +5,7 @@ import (
 	"go-fiber-starter/app/module/transaction/request"
 	"go-fiber-starter/internal/bootstrap/database"
 	"go-fiber-starter/utils/paginator"
+
 	"gorm.io/gorm"
 )
 
@@ -60,7 +61,7 @@ func (_i *repo) GetAll(req request.Transactions) (transactions []*schema.Transac
 	sumQuery := baseQuery.Session(&gorm.Session{}) // new session, same model and conditions
 	if err = sumQuery.
 		Where(&schema.Transaction{Status: schema.TransactionStatusSuccess}).
-		Select("COALESCE(SUM(amount), 0)").
+		Select("COALESCE(CAST(ROUND(SUM(amount)) AS UNSIGNED), 0)").
 		Scan(&totalAmount).Error; err != nil {
 		return
 	}
