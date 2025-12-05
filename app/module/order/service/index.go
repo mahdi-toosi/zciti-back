@@ -163,11 +163,11 @@ func (_i *service) Store(req request.Order) (orderID uint64, paymentURL string, 
 		totalAmt += i.Subtotal
 		orderItems = append(orderItems, *i)
 	}
-
+	totalAmtWithTax := totalAmt * 1.1
 	// اعمال کوپن تخفیف در صورت وجود
 	if req.CouponCode != "" {
 		p := couponRequst.ValidateCoupon{
-			OrderTotalAmt:          totalAmt,
+			OrderTotalAmt:          totalAmtWithTax,
 			UserID:                 req.User.ID,
 			BusinessID:             req.BusinessID,
 			Code:                   req.CouponCode,
@@ -179,7 +179,7 @@ func (_i *service) Store(req request.Order) (orderID uint64, paymentURL string, 
 			return 0, "", err
 		}
 
-		if err = _i.CouponService.ApplyCoupon(coupon, req.User.ID, &totalAmt); err != nil {
+		if err = _i.CouponService.ApplyCoupon(coupon, req.User.ID, &totalAmtWithTax); err != nil {
 			return 0, "", err
 		}
 
@@ -187,9 +187,9 @@ func (_i *service) Store(req request.Order) (orderID uint64, paymentURL string, 
 	}
 
 	// بررسی مقدار حداقل سفارش
-	if totalAmt == 0 {
+	if totalAmtWithTax == 0 {
 		req.Status = schema.OrderStatusCompleted
-	} else if totalAmt < 100 {
+	} else if totalAmtWithTax < 100 {
 		return 0, "", &fiber.Error{
 			Code:    fiber.StatusBadRequest,
 			Message: "مبلغ فاکتور کمتر از حداقل مشخص شده است",
@@ -197,7 +197,7 @@ func (_i *service) Store(req request.Order) (orderID uint64, paymentURL string, 
 	}
 
 	// ایجاد سفارش در دیتابیس
-	orderID, err = _i.Repo.Create(req.ToDomain(&totalAmt, nil), tx)
+	orderID, err = _i.Repo.Create(req.ToDomain(&totalAmtWithTax, nil), tx)
 	if err != nil {
 		return 0, "", err
 	}
@@ -231,7 +231,7 @@ func (_i *service) Store(req request.Order) (orderID uint64, paymentURL string, 
 			// 	fmt.Sprintf("0%d", req.User.Mobile),
 			// )
 			paymentURL, err = _i.SepGateway.PaymentService.SendRequest(
-				int(totalAmt*1.1)*10,
+				int(totalAmtWithTax)*10,
 				strconv.FormatUint(orderID, 10),
 				fmt.Sprintf("0%d", req.User.Mobile),
 				redirectURL,
@@ -252,7 +252,7 @@ func (_i *service) Store(req request.Order) (orderID uint64, paymentURL string, 
 		}
 
 		err = _i.TransactionRepo.Create(&schema.Transaction{
-			Amount:               totalAmt,
+			Amount:               totalAmtWithTax,
 			OrderID:              &orderID,
 			GatewayTransactionID: &authority,
 			UserID:               req.User.ID,
