@@ -295,6 +295,7 @@ func (_i *service) Status(userID uint64, orderID uint64, refNum string) (state s
 		verified, err := _i.SepGateway.PaymentService.Verify(refNum)
 		if err != nil {
 			transaction.Status = schema.TransactionStatusFailed
+			transaction.GatewayTransactionID = &refNum
 			_ = _i.TransactionRepo.Update(transaction.ID, transaction)
 
 			return "FAILED", err

@@ -39,6 +39,7 @@ func (req *Order) ToDomain(totalAmt *float64, authority *string) *schema.Order {
 
 	if totalAmt != nil {
 		o.TotalAmt = *totalAmt
+		o.Meta.TaxAmt = uint64(*totalAmt * 0.1)
 	}
 
 	if req.CouponID != nil {
