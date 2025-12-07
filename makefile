@@ -25,3 +25,11 @@ swag:
 
 release:
 	GOPROXY="https://goproxy.io,direct" go build -mod=vendor -o ./tmp/main ./cmd/main/main.go
+
+tests:
+	go test -p 1 -v ./app/module/auth/test/... \
+	 ./app/module/business/test/... \
+	 ./app/module/coupon/test/... \
+	 ./app/module/order/test/... \
+	 ./app/module/orderItem/test/... \
+	 ./app/module/post/test/... 

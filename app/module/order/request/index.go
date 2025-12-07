@@ -46,7 +46,7 @@ func (req *Order) ToDomain(totalAmt *float64, authority *string) *schema.Order {
 		o.CouponID = req.CouponID
 	}
 
-	if int(*totalAmt) == 0 {
+	if totalAmt != nil && int(*totalAmt) == 0 {
 		req.Status = schema.OrderStatusCompleted
 	}
 

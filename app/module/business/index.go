@@ -51,6 +51,11 @@ func newRouter(fiber *fiber.App, controller *controller.Controller) *Router {
 	}
 }
 
+// NewRouter creates a new Router instance (exported for testing)
+func NewRouter(fiber *fiber.App, controller *controller.Controller) *Router {
+	return newRouter(fiber, controller)
+}
+
 var Module = fx.Options(
 	fx.Provide(repository.Repository),
 
