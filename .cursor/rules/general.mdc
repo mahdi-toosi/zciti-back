@@ -1,0 +1,60 @@
+# General Project Rules
+
+## Project Overview
+
+This is a **Go REST API** backend project using:
+- **Go Fiber v2** - Web framework
+- **go.uber.org/fx** - Dependency injection framework
+- **GORM** - ORM with PostgreSQL
+- **zerolog** - Structured logging
+- **JWT** - Authentication via gofiber/jwt
+- **Swagger** - API documentation
+
+## Project Structure
+
+```
+├── app/
+│   ├── database/
+│   │   ├── schema/      # GORM models
+│   │   └── seeds/       # Database seeders
+│   ├── middleware/      # Fiber middlewares (auth, authorization, params)
+│   ├── module/          # Feature modules (user, order, product, etc.)
+│   │   └── {module}/
+│   │       ├── controller/
+│   │       ├── service/
+│   │       ├── repository/
+│   │       ├── request/
+│   │       ├── response/
+│   │       └── index.go
+│   └── router/          # Route registration
+├── cmd/main/            # Application entrypoint
+├── config/              # TOML configuration files
+├── internal/            # Internal services (BaleBot, MessageWay, Cron, etc.)
+│   └── bootstrap/       # App initialization (database, webserver, logger)
+├── utils/               # Utility functions and helpers
+│   ├── config/
+│   ├── helpers/
+│   ├── paginator/
+│   └── response/
+└── storage/             # File storage
+```
+
+## Module Architecture
+
+Each module follows this pattern:
+
+1. **index.go** - fx.Module registration and route definitions
+2. **controller/** - HTTP handlers, request parsing, response formatting
+3. **service/** - Business logic layer with interface (IService)
+4. **repository/** - Data access layer with interface (IRepository)
+5. **request/** - Request DTOs with validation tags
+6. **response/** - Response DTOs with FromDomain mappers
+
+## Key Conventions
+
+- Use receiver name `_i` for struct methods
+- Use dependency injection via fx.Provide
+- Define interfaces for services and repositories
+- Use GORM for database operations
+- Follow RESTful naming conventions
+- Use Persian/Farsi for user-facing error messages when needed

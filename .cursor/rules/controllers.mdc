@@ -1,0 +1,235 @@
+# Controller Patterns
+
+## REST Controller Structure
+
+```go
+package controller
+
+import (
+    "go-fiber-starter/app/module/{module}/request"
+    "go-fiber-starter/app/module/{module}/service"
+    "go-fiber-starter/utils"
+    "go-fiber-starter/utils/paginator"
+    "go-fiber-starter/utils/response"
+    "go-fiber-starter/utils/config"
+
+    "github.com/gofiber/fiber/v2"
+)
+
+type IRestController interface {
+    Index(c *fiber.Ctx) error
+    Show(c *fiber.Ctx) error
+    Store(c *fiber.Ctx) error
+    Update(c *fiber.Ctx) error
+    Delete(c *fiber.Ctx) error
+}
+
+func RestController(s service.IService, config *config.Config) IRestController {
+    return &controller{s, config}
+}
+
+type controller struct {
+    service service.IService
+    Config  *config.Config
+}
+```
+
+## Handler Patterns
+
+### Index (List) Handler
+
+```go
+// Index
+// @Summary      Get all items
+// @Tags         Items
+// @Security     Bearer
+// @Router       /items [get]
+func (_i *controller) Index(c *fiber.Ctx) error {
+    paginate, err := paginator.Paginate(c)
+    if err != nil {
+        return err
+    }
+
+    var req request.Items
+    req.Pagination = paginate
+    req.Keyword = c.Query("Keyword")
+
+    items, paging, err := _i.service.Index(req)
+    if err != nil {
+        return err
+    }
+
+    return response.Resp(c, response.Response{
+        Data: items,
+        Meta: paging,
+    })
+}
+```
+
+### Show Handler
+
+```go
+// Show
+// @Summary      Get one item
+// @Tags         Items
+// @Security     Bearer
+// @Param        id path int true "Item ID"
+// @Router       /items/:id [get]
+func (_i *controller) Show(c *fiber.Ctx) error {
+    id, err := utils.GetIntInParams(c, "id")
+    if err != nil {
+        return err
+    }
+
+    item, err := _i.service.Show(id)
+    if err != nil {
+        return err
+    }
+
+    return c.JSON(item)
+}
+```
+
+### Store Handler
+
+```go
+// Store
+// @Summary      Create item
+// @Tags         Items
+// @Security     Bearer
+// @Param        item body request.Item true "Item details"
+// @Router       /items [post]
+func (_i *controller) Store(c *fiber.Ctx) error {
+    req := new(request.Item)
+    if err := response.ParseAndValidate(c, req); err != nil {
+        return err
+    }
+
+    err := _i.service.Store(*req)
+    if err != nil {
+        return err
+    }
+
+    return c.JSON("success")
+}
+```
+
+### Update Handler
+
+```go
+// Update
+// @Summary      Update item
+// @Tags         Items
+// @Security     Bearer
+// @Param        item body request.Item true "Item details"
+// @Param        id path int true "Item ID"
+// @Router       /items/:id [put]
+func (_i *controller) Update(c *fiber.Ctx) error {
+    id, err := utils.GetIntInParams(c, "id")
+    if err != nil {
+        return err
+    }
+
+    req := new(request.Item)
+    if err := response.ParseAndValidate(c, req); err != nil {
+        return err
+    }
+
+    err = _i.service.Update(id, *req)
+    if err != nil {
+        return err
+    }
+
+    return c.JSON("success")
+}
+```
+
+### Delete Handler
+
+```go
+// Delete
+// @Summary      Delete item
+// @Tags         Items
+// @Security     Bearer
+// @Param        id path int true "Item ID"
+// @Router       /items/:id [delete]
+func (_i *controller) Delete(c *fiber.Ctx) error {
+    id, err := utils.GetIntInParams(c, "id")
+    if err != nil {
+        return err
+    }
+
+    err = _i.service.Destroy(id)
+    if err != nil {
+        return err
+    }
+
+    return c.JSON("success")
+}
+```
+
+## Utility Functions
+
+### Get Authenticated User
+
+```go
+user, err := utils.GetAuthenticatedUser(c)
+if err != nil {
+    return err
+}
+```
+
+### Parse Path Parameters
+
+```go
+id, err := utils.GetIntInParams(c, "id")
+businessID, err := utils.GetIntInParams(c, "businessID")
+```
+
+### Parse Query Parameters
+
+```go
+keyword := c.Query("Keyword")
+status := c.Query("Status")
+id, err := utils.GetUintInQueries(c, "CategoryID")
+date := utils.GetDateInQueries(c, "StartDate")
+```
+
+## Response Patterns
+
+### Standard Response
+
+```go
+return response.Resp(c, response.Response{
+    Data: items,
+    Meta: paging,
+})
+```
+
+### Success Message
+
+```go
+return response.Resp(c, response.Response{
+    Messages: response.Messages{"success"},
+})
+```
+
+### Custom Data
+
+```go
+return response.Resp(c, response.Response{
+    Data: map[string]any{
+        "paymentUrl": paymentURL,
+        "orderID":    orderID,
+    },
+})
+```
+
+### Error Response
+
+```go
+return &fiber.Error{
+    Code:    fiber.StatusBadRequest,
+    Message: "درخواست شما معتبر نمی باشد.",
+}
+```

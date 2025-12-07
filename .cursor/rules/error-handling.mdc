@@ -1,0 +1,154 @@
+# Error Handling Patterns
+
+## Standard Error Returns
+
+Use Fiber errors for HTTP status codes:
+
+```go
+// 400 Bad Request
+return fiber.ErrBadRequest
+
+// 401 Unauthorized
+return fiber.ErrUnauthorized
+
+// 403 Forbidden
+return fiber.ErrForbidden
+
+// 404 Not Found
+return fiber.ErrNotFound
+
+// 500 Internal Server Error
+return fiber.ErrInternalServerError
+```
+
+## Custom Error Messages
+
+For custom messages (especially Persian/Farsi):
+
+```go
+return &fiber.Error{
+    Code:    fiber.StatusBadRequest,
+    Message: "درخواست شما معتبر نمی باشد.",
+}
+
+return &fiber.Error{
+    Code:    fiber.StatusNotFound,
+    Message: "موردی یافت نشد.",
+}
+
+return &fiber.Error{
+    Code:    fiber.StatusForbidden,
+    Message: "شما دسترسی به این بخش را ندارید.",
+}
+```
+
+## Error Propagation
+
+Let errors bubble up through layers:
+
+```go
+// Repository
+func (_i *repo) GetOne(id uint64) (item *schema.Item, err error) {
+    if err := _i.DB.Main.First(&item, id).Error; err != nil {
+        return nil, err
+    }
+    return item, nil
+}
+
+// Service
+func (_i *service) Show(id uint64) (item *response.Item, err error) {
+    result, err := _i.Repo.GetOne(id)
+    if err != nil {
+        return nil, err // Propagate error
+    }
+    return response.FromDomain(result), nil
+}
+
+// Controller
+func (_i *controller) Show(c *fiber.Ctx) error {
+    id, err := utils.GetIntInParams(c, "id")
+    if err != nil {
+        return err // Returns 400
+    }
+
+    item, err := _i.service.Show(id)
+    if err != nil {
+        return err // Returns 404/500
+    }
+
+    return c.JSON(item)
+}
+```
+
+## GORM Error Handling
+
+Handle specific GORM errors:
+
+```go
+import (
+    "errors"
+    "gorm.io/gorm"
+)
+
+func (_i *repo) FindByMobile(mobile uint64) (user *schema.User, err error) {
+    if err := _i.DB.Main.Where("mobile = ?", mobile).First(&user).Error; err != nil {
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            return nil, errors.New("شماره تلفن همراه معتبر نمی باشد.")
+        }
+        return nil, err
+    }
+    return user, nil
+}
+```
+
+## Response Error Structure
+
+The error handler returns:
+
+```json
+{
+    "Code": 400,
+    "Messages": ["Error message here"],
+    "Data": []
+}
+```
+
+## Validation Errors
+
+Return 422 with field-specific messages:
+
+```json
+{
+    "Code": 422,
+    "Messages": [{
+        "Title": "فیلد عنوان الزامی است.",
+        "Price": "فیلد قیمت نامعتبر است."
+    }],
+    "Data": []
+}
+```
+
+## Custom Error Type
+
+For complex error scenarios:
+
+```go
+import "go-fiber-starter/utils/response"
+
+return &response.Error{
+    Code:    fiber.StatusBadRequest,
+    Message: "Custom error message",
+}
+```
+
+## Logging Errors
+
+Errors are automatically logged in non-production:
+
+```go
+if !IsProduction {
+    log.Error().Err(err).Msg("From: Fiber's error handler")
+}
+```
+
+And sent to Bale bot for monitoring in production.

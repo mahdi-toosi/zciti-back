@@ -1,0 +1,119 @@
+# Swagger Documentation Patterns
+
+## Controller Annotations
+
+Add Swagger annotations above each handler:
+
+```go
+// Index
+// @Summary      Get all items
+// @Description  Retrieve a paginated list of items
+// @Tags         Items
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        page query int false "Page number"
+// @Param        limit query int false "Items per page"
+// @Param        Keyword query string false "Search keyword"
+// @Success      200 {object} response.Response{data=[]response.Item}
+// @Failure      401 {object} response.Response
+// @Failure      500 {object} response.Response
+// @Router       /items [get]
+func (_i *controller) Index(c *fiber.Ctx) error {
+```
+
+## Common Annotations
+
+### Path Parameters
+```go
+// @Param id path int true "Item ID"
+// @Param businessID path int true "Business ID"
+```
+
+### Query Parameters
+```go
+// @Param page query int false "Page number"
+// @Param Keyword query string false "Search keyword"
+// @Param Status query string false "Status filter" Enums(active, inactive)
+```
+
+### Request Body
+```go
+// @Param item body request.Item true "Item details"
+```
+
+### Security
+```go
+// @Security Bearer
+```
+
+### Tags (Group endpoints)
+```go
+// @Tags Users
+// @Tags Orders
+// @Tags Products
+```
+
+### Responses
+```go
+// @Success 200 {object} response.Response{data=response.Item}
+// @Success 200 {object} response.Response{data=[]response.Item}
+// @Success 200 {string} string "success"
+// @Failure 400 {object} response.Response
+// @Failure 401 {object} response.Response
+// @Failure 404 {object} response.Response
+// @Failure 422 {object} response.Response
+// @Failure 500 {object} response.Response
+```
+
+## Main Swagger Configuration
+
+In `cmd/main/main.go`:
+
+```go
+// @title                       Go Fiber Starter API Documentation
+// @version                     1.0
+// @description                 This is a sample API documentation.
+// @termsOfService              http://swagger.io/terms/
+// @contact.name                Mahdi Toosi
+// @contact.email               mailmahditoosi@gmail.com
+// @license.name                Apache 2.0
+// @license.url                 http://www.apache.org/licenses/LICENSE-2.0.html
+// @host                        localhost:8000/api/v1
+// @schemes                     http
+// @securityDefinitions.apikey  Bearer
+// @in                          header
+// @name                        Authorization
+// @description                 "Type 'Bearer {TOKEN}' to correctly set the API Key"
+// @BasePath                    /
+func main() {
+```
+
+## Request DTO Annotations
+
+```go
+type Item struct {
+    ID          uint64 `json:",omitempty" example:"1"`
+    Title       string `example:"Sample Title" validate:"required,min=2,max=255"`
+    Description string `example:"Sample description"`
+    Price       uint64 `example:"10000" validate:"required,number"`
+    Status      string `example:"active" validate:"required,oneof=active inactive"`
+}
+```
+
+## Generating Swagger Docs
+
+```bash
+# Install swag CLI
+go install github.com/swaggo/swag/cmd/swag@latest
+
+# Generate docs
+swag init -g cmd/main/main.go -o docs
+
+# With specific parse depth
+swag init -g cmd/main/main.go -o docs --parseDepth 1
+```
+
+## Accessing Swagger UI
+
+Navigate to: `http://localhost:8000/swagger/`

@@ -1,0 +1,161 @@
+# Database & GORM Patterns
+
+## Schema Definition
+
+All database models go in `app/database/schema/`:
+
+```go
+package schema
+
+import "gorm.io/gorm"
+
+type Item struct {
+    ID        uint64         `gorm:"primaryKey;autoIncrement" json:",omitempty"`
+    Title     string         `gorm:"type:varchar(255);not null" json:",omitempty"`
+    Status    ItemStatus     `gorm:"type:varchar(20);default:'active'" json:",omitempty"`
+    
+    // Relations
+    UserID    uint64         `json:",omitempty"`
+    User      *User          `gorm:"foreignKey:UserID" json:",omitempty"`
+    
+    // JSON fields (PostgreSQL)
+    Meta      *ItemMeta      `gorm:"type:jsonb" json:",omitempty"`
+    
+    Base // Embeds CreatedAt, UpdatedAt, DeletedAt
+}
+
+type ItemStatus string
+
+const (
+    ItemStatusActive   ItemStatus = "active"
+    ItemStatusInactive ItemStatus = "inactive"
+)
+
+type ItemMeta struct {
+    Tags     []string `json:",omitempty"`
+    Priority int      `json:",omitempty"`
+}
+```
+
+## Base Model
+
+Use the embedded Base struct for timestamps:
+
+```go
+type Base struct {
+    CreatedAt time.Time      `gorm:"autoCreateTime" json:",omitempty"`
+    UpdatedAt time.Time      `json:",omitempty"`
+    DeletedAt gorm.DeletedAt `json:",omitempty" faker:"-"`
+}
+```
+
+## Repository Patterns
+
+### Basic CRUD Operations
+
+```go
+func (_i *repo) GetAll(req request.Items) (items []*schema.Item, paging paginator.Pagination, err error) {
+    query := _i.DB.Main.Model(&schema.Item{})
+
+    // Apply filters
+    if req.Keyword != "" {
+        query.Where("title LIKE ?", "%"+req.Keyword+"%")
+    }
+
+    // Pagination
+    if req.Pagination.Page > 0 {
+        var total int64
+        query.Count(&total)
+        req.Pagination.Total = total
+        query.Offset(req.Pagination.Offset)
+        query.Limit(req.Pagination.Limit)
+    }
+
+    err = query.Order("created_at desc").Find(&items).Error
+    paging = *req.Pagination
+    return
+}
+
+func (_i *repo) GetOne(id uint64) (item *schema.Item, err error) {
+    if err := _i.DB.Main.First(&item, id).Error; err != nil {
+        return nil, err
+    }
+    return item, nil
+}
+
+func (_i *repo) Create(item *schema.Item) error {
+    return _i.DB.Main.Create(item).Error
+}
+
+func (_i *repo) Update(id uint64, item *schema.Item) error {
+    return _i.DB.Main.Model(&schema.Item{}).
+        Where(&schema.Item{ID: id}).
+        Updates(item).Error
+}
+
+func (_i *repo) Delete(id uint64) error {
+    return _i.DB.Main.Delete(&schema.Item{}, id).Error
+}
+```
+
+### Preloading Relations
+
+```go
+func (_i *repo) GetOneWithRelations(id uint64) (item *schema.Item, err error) {
+    if err := _i.DB.Main.
+        Preload("User").
+        Preload("Category").
+        First(&item, id).Error; err != nil {
+        return nil, err
+    }
+    return item, nil
+}
+```
+
+### JSONB Queries (PostgreSQL)
+
+```go
+// Query JSONB array contains
+query.Where(`meta->'tags' @> ?::jsonb`, `["important"]`)
+
+// Query JSONB field
+query.Where(`meta->>'Priority' = ?`, "1")
+```
+
+## Model Registration
+
+Register models in `app/database/schema/index.go`:
+
+```go
+func MainDBModels() []any {
+    return []any{
+        &User{},
+        &Item{},
+        // ... other models
+    }
+}
+```
+
+## Seeders
+
+Create seeders in `app/database/seeds/`:
+
+```go
+package seeds
+
+import "gorm.io/gorm"
+
+type ItemSeeder struct{}
+
+func (ItemSeeder) Seed(db *gorm.DB) error {
+    items := []schema.Item{
+        {Title: "Sample Item"},
+    }
+    return db.Create(&items).Error
+}
+
+func (ItemSeeder) Count(db *gorm.DB) (int64, error) {
+    var count int64
+    return count, db.Model(&schema.Item{}).Count(&count).Error
+}
+```

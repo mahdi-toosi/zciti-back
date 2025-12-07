@@ -1,0 +1,169 @@
+# Module Patterns
+
+## Creating a New Module
+
+When creating a new module, follow this exact structure:
+
+### 1. Module Index (index.go)
+
+```go
+package {modulename}
+
+import (
+    "github.com/gofiber/fiber/v2"
+    mdl "go-fiber-starter/app/middleware"
+    "go-fiber-starter/app/module/{modulename}/controller"
+    "go-fiber-starter/app/module/{modulename}/repository"
+    "go-fiber-starter/app/module/{modulename}/service"
+    "go-fiber-starter/utils/config"
+    "go.uber.org/fx"
+)
+
+type Router struct {
+    App        fiber.Router
+    Controller *controller.Controller
+}
+
+func (_i *Router) RegisterRoutes(cfg *config.Config) {
+    c := _i.Controller.RestController
+
+    _i.App.Route("/v1/{resources}", func(router fiber.Router) {
+        router.Get("/", mdl.Protected(cfg), c.Index)
+        router.Get("/:id", mdl.Protected(cfg), c.Show)
+        router.Post("/", mdl.Protected(cfg), c.Store)
+        router.Put("/:id", mdl.Protected(cfg), c.Update)
+        router.Delete("/:id", mdl.Protected(cfg), c.Delete)
+    })
+}
+
+func newRouter(fiber *fiber.App, controller *controller.Controller) *Router {
+    return &Router{
+        App:        fiber,
+        Controller: controller,
+    }
+}
+
+var Module = fx.Options(
+    fx.Provide(repository.Repository),
+    fx.Provide(service.Service),
+    fx.Provide(controller.Controllers),
+    fx.Provide(newRouter),
+)
+```
+
+### 2. Controller Structure
+
+```go
+package controller
+
+import (
+    "go-fiber-starter/app/module/{modulename}/service"
+    "go-fiber-starter/utils/config"
+)
+
+type Controller struct {
+    RestController IRestController
+}
+
+func Controllers(s service.IService, config *config.Config) *Controller {
+    return &Controller{
+        RestController: RestController(s, config),
+    }
+}
+```
+
+### 3. Service Interface Pattern
+
+```go
+package service
+
+type IService interface {
+    Index(req request.Items) (items []*response.Item, paging paginator.Pagination, err error)
+    Show(id uint64) (item *response.Item, err error)
+    Store(req request.Item) (err error)
+    Update(id uint64, req request.Item) (err error)
+    Destroy(id uint64) error
+}
+
+func Service(repo repository.IRepository) IService {
+    return &service{repo}
+}
+
+type service struct {
+    Repo repository.IRepository
+}
+```
+
+### 4. Repository Interface Pattern
+
+```go
+package repository
+
+type IRepository interface {
+    GetAll(req request.Items) (items []*schema.Item, paging paginator.Pagination, err error)
+    GetOne(id uint64) (item *schema.Item, err error)
+    Create(item *schema.Item) (err error)
+    Update(id uint64, item *schema.Item) (err error)
+    Delete(id uint64) (err error)
+}
+
+func Repository(DB *database.Database) IRepository {
+    return &repo{DB}
+}
+
+type repo struct {
+    DB *database.Database
+}
+```
+
+### 5. Request DTO Pattern
+
+```go
+package request
+
+import "go-fiber-starter/app/database/schema"
+
+type Item struct {
+    ID    uint64 `json:",omitempty"`
+    Title string `validate:"required,min=2,max=255"`
+    // ... other fields
+}
+
+func (req *Item) ToDomain() *schema.Item {
+    return &schema.Item{
+        ID:    req.ID,
+        Title: req.Title,
+    }
+}
+```
+
+### 6. Response DTO Pattern
+
+```go
+package response
+
+import "go-fiber-starter/app/database/schema"
+
+type Item struct {
+    ID    uint64 `json:",omitempty"`
+    Title string `json:",omitempty"`
+    // ... other fields
+}
+
+func FromDomain(item *schema.Item) *Item {
+    if item == nil {
+        return nil
+    }
+    return &Item{
+        ID:    item.ID,
+        Title: item.Title,
+    }
+}
+```
+
+## Registering a New Module
+
+1. Add module import in `cmd/main/main.go`
+2. Add module to fx.Options: `{modulename}.Module`
+3. Add router to `app/router/api.go`
+4. Register routes in Router.Register()

@@ -1,0 +1,111 @@
+# Project: zciti-back
+
+## Tech Stack
+- **Language**: Go 1.23+
+- **Web Framework**: Go Fiber v2
+- **Dependency Injection**: go.uber.org/fx
+- **ORM**: GORM with PostgreSQL
+- **Authentication**: JWT (gofiber/jwt)
+- **Logging**: zerolog
+- **API Docs**: Swagger (swaggo)
+- **Validation**: go-playground/validator
+
+## Architecture Pattern
+This project follows a **modular monolith** architecture with clean separation:
+
+```
+Module Structure:
+├── index.go           # fx.Module, routes, Router struct
+├── controller/        # HTTP handlers
+│   ├── index.go       # Controller struct aggregator
+│   └── rest_controller.go
+├── service/           # Business logic (IService interface)
+│   └── index.go
+├── repository/        # Data access (IRepository interface)
+│   └── index.go
+├── request/           # Request DTOs with validation
+│   └── index.go
+└── response/          # Response DTOs with FromDomain mappers
+    └── index.go
+```
+
+## Code Conventions
+
+### Receiver Name
+Always use `_i` as struct method receiver:
+```go
+func (_i *service) Index(req request.Items) ([]*response.Item, paginator.Pagination, error)
+```
+
+### Interface Naming
+Prefix interfaces with `I`:
+- `IService`
+- `IRepository`
+- `IRestController`
+
+### Error Messages
+- User-facing: Persian/Farsi
+- Internal/logs: English
+
+### JSON Tags
+Use `json:",omitempty"` for optional fields without explicit field names
+
+## Key Patterns
+
+### Dependency Injection
+```go
+var Module = fx.Options(
+    fx.Provide(repository.Repository),
+    fx.Provide(service.Service),
+    fx.Provide(controller.Controllers),
+    fx.Provide(newRouter),
+)
+```
+
+### Request Validation
+```go
+req := new(request.Item)
+if err := response.ParseAndValidate(c, req); err != nil {
+    return err
+}
+```
+
+### Standard Response
+```go
+return response.Resp(c, response.Response{
+    Data: items,
+    Meta: paging,
+})
+```
+
+### Protected Routes
+```go
+router.Get("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DUser, mdl.PReadAll), c.Index)
+```
+
+## File Organization
+- `app/database/schema/` - GORM models
+- `app/module/` - Feature modules
+- `app/middleware/` - HTTP middlewares
+- `app/router/` - Route aggregation
+- `cmd/main/` - Application entry point
+- `internal/` - Internal services & bootstrap
+- `utils/` - Helpers, config, response utilities
+- `config/` - TOML configuration files
+
+## When Creating New Features
+1. Create module folder in `app/module/{name}/`
+2. Follow the standard structure (controller, service, repository, request, response)
+3. Register in `cmd/main/main.go`
+4. Add router to `app/router/api.go`
+5. Create schema in `app/database/schema/`
+6. Add Swagger annotations
+
+## Don't Forget
+- Add validation tags to request structs
+- Use `ToDomain()` for request to schema conversion
+- Use `FromDomain()` for schema to response conversion
+- Handle errors at each layer and propagate up
+- Use transactions for multi-table operations
+- Add Swagger documentation for all endpoints
+

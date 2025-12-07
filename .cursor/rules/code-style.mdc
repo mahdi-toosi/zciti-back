@@ -1,0 +1,163 @@
+# Code Style Guidelines
+
+## Naming Conventions
+
+### Files
+- Use lowercase with underscores or camelCase: `rest_controller.go`, `messageRoom.go`
+- Main entry point is `index.go` for each package
+
+### Packages
+- Lowercase, single word preferred: `user`, `order`, `product`
+- Multi-word: `notificationtemplate` (no separators)
+
+### Variables & Functions
+- camelCase for private: `userID`, `orderService`
+- PascalCase for exported: `UserID`, `OrderService`
+
+### Interfaces
+- Prefix with `I`: `IService`, `IRepository`, `IRestController`
+
+### Structs
+- PascalCase: `User`, `Order`, `BusinessUsers`
+- Receiver name: `_i` (convention in this project)
+
+### Constants
+- PascalCase: `URAdmin`, `ItemStatusActive`
+- Prefixed groups: `UR` for UserRole, `D` for Domain, `P` for Permission
+
+## Struct Method Receiver
+
+Always use `_i` as receiver name:
+
+```go
+func (_i *service) Index(req request.Items) ([]*response.Item, paginator.Pagination, error) {
+    // ...
+}
+
+func (_i *repo) GetAll(req request.Items) ([]*schema.Item, paginator.Pagination, error) {
+    // ...
+}
+
+func (_i *controller) Show(c *fiber.Ctx) error {
+    // ...
+}
+```
+
+## Import Organization
+
+Group imports in this order:
+
+```go
+import (
+    // Standard library
+    "context"
+    "errors"
+    "fmt"
+    "time"
+
+    // Third-party packages
+    "github.com/gofiber/fiber/v2"
+    "gorm.io/gorm"
+
+    // Project packages
+    "go-fiber-starter/app/database/schema"
+    "go-fiber-starter/app/module/user/request"
+    "go-fiber-starter/utils/config"
+)
+```
+
+## Error Messages
+
+- User-facing: Persian/Farsi
+- Internal/logs: English
+
+```go
+// User-facing
+return &fiber.Error{
+    Code:    fiber.StatusBadRequest,
+    Message: "درخواست شما معتبر نمی باشد.",
+}
+
+// Logging
+log.Error().Err(err).Msg("Failed to create user")
+```
+
+## JSON Tags
+
+- Use `json:",omitempty"` for optional fields
+- Don't include field name if same as Go field name
+
+```go
+type User struct {
+    ID        uint64 `json:",omitempty"`
+    FirstName string `json:",omitempty"`
+    Mobile    uint64 `json:",omitempty"`
+}
+```
+
+## GORM Tags
+
+```go
+type Item struct {
+    ID          uint64         `gorm:"primaryKey;autoIncrement"`
+    Title       string         `gorm:"type:varchar(255);not null"`
+    Status      string         `gorm:"type:varchar(20);default:'active'"`
+    Meta        *ItemMeta      `gorm:"type:jsonb"`
+    BusinessID  uint64         `gorm:"index"`
+    DeletedAt   gorm.DeletedAt `gorm:"index"`
+}
+```
+
+## Validation Tags
+
+```go
+type Request struct {
+    Title  string `validate:"required,min=2,max=255"`
+    Price  uint64 `validate:"required,number,min=0"`
+    Status string `validate:"required,oneof=active inactive"`
+}
+```
+
+## Function Length
+
+- Keep functions under 50 lines when possible
+- Extract complex logic into helper methods
+- Single responsibility principle
+
+## Comments
+
+Use for:
+- Swagger annotations
+- Non-obvious business logic
+- TODOs
+
+```go
+// Index handles GET /items with pagination and filtering
+// @Summary      Get all items
+// @Tags         Items
+func (_i *controller) Index(c *fiber.Ctx) error {
+
+// TODO: move it to orders module
+_i.App.Route("/v1/user/orders", func(router fiber.Router) {
+```
+
+## Empty Line Usage
+
+- Between logical sections
+- Before return statements in longer functions
+- Between struct field groups
+
+```go
+func (_i *service) Store(req request.Item) error {
+    // Validate
+    if err := _i.validate(req); err != nil {
+        return err
+    }
+
+    // Transform
+    item := req.ToDomain()
+
+    // Persist
+    return _i.Repo.Create(item)
+}
+```

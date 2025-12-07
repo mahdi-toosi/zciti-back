@@ -1,0 +1,101 @@
+# Middleware Patterns
+
+## Authentication Middleware
+
+Use `mdl.Protected(cfg)` for JWT authentication:
+
+```go
+router.Get("/", mdl.Protected(cfg), c.Index)
+```
+
+## Authorization Middleware
+
+Use `mdl.BusinessPermission` for role-based access:
+
+```go
+// Parameters: Domain, Permission
+router.Get("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DUser, mdl.PReadAll), c.Index)
+router.Get("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DUser, mdl.PReadSingle), c.Show)
+router.Post("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DUser, mdl.PCreate), c.Store)
+router.Put("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DUser, mdl.PUpdate), c.Update)
+router.Delete("/:id", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DUser, mdl.PDelete), c.Delete)
+```
+
+## Permission Domains
+
+```go
+const (
+    DUser     = "user"
+    DPost     = "post"
+    DOrder    = "order"
+    DBusiness = "business"
+    // ... etc
+)
+```
+
+## Permission Types
+
+```go
+const (
+    PReadAll    = "readAll"
+    PReadSingle = "readSingle"
+    PCreate     = "create"
+    PUpdate     = "update"
+    PDelete     = "delete"
+)
+```
+
+## User Roles
+
+```go
+type UserRole string
+
+const (
+    URUser             UserRole = "user"
+    URAdmin            UserRole = "admin"
+    URBusinessOwner    UserRole = "businessOwner"
+    URBusinessObserver UserRole = "businessObserver"
+)
+```
+
+## Accessing User in Controller
+
+After `Protected` middleware, access user from context:
+
+```go
+user, err := utils.GetAuthenticatedUser(c)
+if err != nil {
+    return err
+}
+
+// Check admin status
+if !user.IsAdmin() {
+    return fiber.ErrForbidden
+}
+
+// Check suspended status
+if user.IsSuspended != nil && *user.IsSuspended {
+    return fiber.ErrForbidden
+}
+```
+
+## Route Groups with Mixed Protection
+
+```go
+_i.App.Route("/v1/items", func(router fiber.Router) {
+    // Public routes
+    router.Get("/public", c.PublicIndex)
+    
+    // Protected routes
+    router.Get("/", mdl.Protected(cfg), c.Index)
+    router.Post("/", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DItem, mdl.PCreate), c.Store)
+})
+```
+
+## Business Context Routes
+
+```go
+_i.App.Route("/v1/business/:businessID", func(router fiber.Router) {
+    router.Get("/items", mdl.Protected(cfg), mdl.BusinessPermission(mdl.DBusiness, mdl.PReadSingle), c.BusinessItems)
+})
+```

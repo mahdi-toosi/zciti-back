@@ -1,0 +1,103 @@
+# Validation Patterns
+
+## Request Validation Tags
+
+Use `go-playground/validator` tags:
+
+```go
+type ItemRequest struct {
+    Title       string `validate:"required,min=2,max=255"`
+    Description string `validate:"omitempty,max=1000"`
+    Price       uint64 `validate:"required,min=0"`
+    Email       string `validate:"required,email"`
+    Mobile      uint64 `validate:"required,number"`
+    Status      string `validate:"required,oneof=active inactive pending"`
+    CategoryID  uint64 `validate:"required,number,min=1"`
+    Tags        []string `validate:"dive,min=1,max=50"`
+}
+```
+
+## Common Validation Tags
+
+| Tag | Description |
+|-----|-------------|
+| `required` | Field must be present |
+| `omitempty` | Skip validation if empty |
+| `min=N` | Minimum length/value |
+| `max=N` | Maximum length/value |
+| `email` | Valid email format |
+| `number` | Numeric value |
+| `oneof=a b c` | Must be one of values |
+| `dive` | Validate each element in slice |
+| `url` | Valid URL format |
+| `uuid` | Valid UUID format |
+
+## Parsing and Validating
+
+Always use `response.ParseAndValidate`:
+
+```go
+req := new(request.Item)
+if err := response.ParseAndValidate(c, req); err != nil {
+    return err
+}
+```
+
+## Custom Validation
+
+For custom validation like mobile numbers:
+
+```go
+if err := utils.ValidateMobileNumber(strconv.FormatUint(req.Mobile, 10)); err != nil {
+    return err
+}
+```
+
+## Validation Error Response
+
+Validation errors return HTTP 422 with Persian/Farsi translations:
+
+```json
+{
+    "Code": 422,
+    "Messages": [{
+        "Title": "فیلد عنوان الزامی است.",
+        "Price": "فیلد قیمت باید حداقل 0 باشد."
+    }]
+}
+```
+
+## Optional Fields with Pointers
+
+For optional fields that can be null in database:
+
+```go
+type ItemRequest struct {
+    CategoryID *uint64 `json:",omitempty" validate:"omitempty,number,min=1"`
+    ParentID   *uint64 `json:",omitempty"`
+}
+
+func (req *ItemRequest) ToDomain() *schema.Item {
+    item := &schema.Item{
+        Title: req.Title,
+    }
+    
+    if req.CategoryID != nil {
+        item.CategoryID = req.CategoryID
+    }
+    
+    return item
+}
+```
+
+## JSON Tags
+
+Use `json:",omitempty"` for optional response fields:
+
+```go
+type ItemResponse struct {
+    ID          uint64 `json:",omitempty"`
+    Title       string `json:",omitempty"`
+    Description string `json:",omitempty"`
+}
+```

@@ -1,0 +1,206 @@
+# Configuration & External Services
+
+## Configuration File
+
+Config is in `config/zciti.toml`:
+
+```toml
+[app]
+name = "zciti"
+frontendDomain = "https://example.com"
+backendDomain = "localhost:8000"
+port = "8000"
+print-routes = false
+prefork = false
+production = false
+idle-timeout = 30
+
+[app.tls]
+enable = false
+cert-file = ""
+key-file = ""
+
+[db.main]
+url = "postgres://user:pass@localhost:5432/dbname?sslmode=disable"
+
+[redis]
+url = "redis://localhost:6379"
+
+[logger]
+time-format = "2006-01-02 15:04:05"
+level = 0
+prettier = true
+
+[services.messageWay]
+apiKey = "your-api-key"
+
+[services.saman]
+terminalID = "your-terminal-id"
+
+[services.zarinPal]
+merchantId = "your-merchant-id"
+sandbox = true
+
+[services.googleRecaptcha]
+secretKey = "your-secret"
+
+[services.baleBot]
+debug = true
+loggerChatID = 123456789
+loggerBotToken = "your-bot-token"
+
+[middleware.compress]
+enable = true
+level = 1
+
+[middleware.recover]
+enable = true
+
+[middleware.monitor]
+enable = true
+path = "/metrics"
+
+[middleware.pprof]
+enable = false
+
+[middleware.limiter]
+enable = false
+max = 100
+expiration_seconds = 60
+
+[middleware.fileSystem]
+enable = true
+browse = false
+max_age = 3600
+index = "index.html"
+root = "./storage/public"
+private_root = "./storage/private"
+
+[middleware.jwt]
+secret = "your-jwt-secret-key"
+expiration_seconds = 604800
+```
+
+## Accessing Config
+
+```go
+func NewMyService(cfg *config.Config) *MyService {
+    // App config
+    port := cfg.App.Port
+    isProduction := cfg.App.Production
+    frontendURL := cfg.App.FrontendDomain
+
+    // Database
+    dbURL := cfg.DB.Main.Url
+
+    // JWT
+    jwtSecret := cfg.Middleware.Jwt.Secret
+    jwtExpiration := cfg.Middleware.Jwt.Expiration
+
+    // External services
+    messageWayKey := cfg.Services.MessageWay.ApiKey
+    zarinPalMerchant := cfg.Services.ZarinPal.MerchantID
+}
+```
+
+## External Services
+
+### MessageWay (SMS)
+
+```go
+// internal/MessageWayService.go
+type MessageWay struct {
+    Client *messageway.Client
+}
+
+func NewMessageWay(cfg *config.Config) *MessageWay {
+    client := messageway.NewClient(cfg.Services.MessageWay.ApiKey)
+    return &MessageWay{Client: client}
+}
+```
+
+### ZarinPal (Payment)
+
+```go
+// internal/zarinpal.go
+type ZarinPal struct {
+    Client *zarinpal.Client
+}
+
+func NewZarinPal(cfg *config.Config) *ZarinPal {
+    // Initialize ZarinPal client
+}
+```
+
+### Saman (SEP Gateway)
+
+```go
+// internal/SepGateway.go
+type SepGateway struct {
+    TerminalID string
+}
+
+func NewSepGateway(cfg *config.Config) *SepGateway {
+    return &SepGateway{
+        TerminalID: cfg.Services.Saman.TerminalID,
+    }
+}
+```
+
+### Bale Bot (Logging)
+
+```go
+// internal/BaleBotService.go
+type BaleBot struct {
+    Bot           *baleBotApi.BotAPI
+    Connected     bool
+    LoggerChatID  int64
+}
+
+func NewBaleBotLogger(cfg *config.Config) *BaleBot {
+    // Initialize Bale bot for error logging
+}
+```
+
+### Cron Jobs
+
+```go
+// internal/CronJobService.go
+type CronService struct {
+    Cron *cron.Cron
+}
+
+func NewCronService() *CronService {
+    c := cron.New()
+    return &CronService{Cron: c}
+}
+
+// Schedule a job
+func (_i *CronService) Schedule(spec string, cmd func()) {
+    _i.Cron.AddFunc(spec, cmd)
+}
+```
+
+## Environment-Specific Config
+
+- Development: `config/zciti.toml` with `production = false`
+- Production: `config/zciti.toml` with `production = true`
+
+## Database Connection
+
+```go
+// internal/bootstrap/database/database.go
+func (_db *Database) ConnectDatabase() {
+    mainDB, err := gorm.Open(postgres.Open(_db.Cfg.DB.Main.Url), &gorm.Config{
+        PrepareStmt:            true,
+        SkipDefaultTransaction: true,
+        QueryFields:            _db.Cfg.App.Production,
+    })
+    // ...
+}
+```
+
+## File Storage
+
+- Public files: `./storage/public/` (served via FileSystem middleware)
+- Private files: `./storage/private/` (access controlled)

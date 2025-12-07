@@ -1,0 +1,173 @@
+# Testing Patterns
+
+## Unit Test Structure
+
+```go
+package service_test
+
+import (
+    "testing"
+    "go-fiber-starter/app/module/{module}/service"
+    "go-fiber-starter/app/module/{module}/request"
+)
+
+func TestService_Index(t *testing.T) {
+    // Setup mock repository
+    mockRepo := &mockRepository{}
+    svc := service.Service(mockRepo)
+
+    // Test
+    req := request.Items{
+        Keyword: "test",
+    }
+    
+    items, _, err := svc.Index(req)
+    
+    // Assert
+    if err != nil {
+        t.Errorf("Expected no error, got %v", err)
+    }
+    
+    if len(items) == 0 {
+        t.Error("Expected items, got empty")
+    }
+}
+```
+
+## Mock Repository
+
+```go
+type mockRepository struct{}
+
+func (m *mockRepository) GetAll(req request.Items) ([]*schema.Item, paginator.Pagination, error) {
+    return []*schema.Item{
+        {ID: 1, Title: "Test Item"},
+    }, paginator.Pagination{}, nil
+}
+
+func (m *mockRepository) GetOne(id uint64) (*schema.Item, error) {
+    return &schema.Item{ID: id, Title: "Test Item"}, nil
+}
+
+func (m *mockRepository) Create(item *schema.Item) error {
+    return nil
+}
+
+func (m *mockRepository) Update(id uint64, item *schema.Item) error {
+    return nil
+}
+
+func (m *mockRepository) Delete(id uint64) error {
+    return nil
+}
+```
+
+## Integration Test with Database
+
+```go
+func TestRepository_GetAll_Integration(t *testing.T) {
+    if testing.Short() {
+        t.Skip("Skipping integration test")
+    }
+
+    // Setup test database
+    db := setupTestDB(t)
+    defer cleanupTestDB(db)
+
+    repo := repository.Repository(&database.Database{Main: db})
+
+    // Seed test data
+    db.Create(&schema.Item{Title: "Test"})
+
+    // Test
+    items, _, err := repo.GetAll(request.Items{})
+    
+    if err != nil {
+        t.Fatal(err)
+    }
+    
+    if len(items) != 1 {
+        t.Errorf("Expected 1 item, got %d", len(items))
+    }
+}
+```
+
+## Table-Driven Tests
+
+```go
+func TestValidation(t *testing.T) {
+    tests := []struct {
+        name    string
+        input   request.Item
+        wantErr bool
+    }{
+        {
+            name:    "valid input",
+            input:   request.Item{Title: "Test", Price: 100},
+            wantErr: false,
+        },
+        {
+            name:    "missing title",
+            input:   request.Item{Price: 100},
+            wantErr: true,
+        },
+        {
+            name:    "invalid price",
+            input:   request.Item{Title: "Test", Price: 0},
+            wantErr: true,
+        },
+    }
+
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            err := validate.Struct(tt.input)
+            if (err != nil) != tt.wantErr {
+                t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
+            }
+        })
+    }
+}
+```
+
+## HTTP Handler Test
+
+```go
+func TestController_Index(t *testing.T) {
+    app := fiber.New()
+    
+    mockService := &mockService{}
+    ctrl := controller.RestController(mockService, config.NewConfig())
+    
+    app.Get("/items", ctrl.Index)
+
+    req := httptest.NewRequest("GET", "/items", nil)
+    resp, err := app.Test(req)
+    
+    if err != nil {
+        t.Fatal(err)
+    }
+    
+    if resp.StatusCode != fiber.StatusOK {
+        t.Errorf("Expected status 200, got %d", resp.StatusCode)
+    }
+}
+```
+
+## Running Tests
+
+```bash
+# Run all tests
+go test ./...
+
+# Run with verbose output
+go test -v ./...
+
+# Run specific package
+go test ./app/module/user/service/...
+
+# Skip integration tests
+go test -short ./...
+
+# With coverage
+go test -cover ./...
+```

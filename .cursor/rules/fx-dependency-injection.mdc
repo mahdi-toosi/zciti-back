@@ -1,0 +1,162 @@
+# fx Dependency Injection Patterns
+
+## Module Registration
+
+Each module exports an `fx.Options`:
+
+```go
+var Module = fx.Options(
+    fx.Provide(repository.Repository),
+    fx.Provide(service.Service),
+    fx.Provide(controller.Controllers),
+    fx.Provide(newRouter),
+)
+```
+
+## Main Application Setup
+
+In `cmd/main/main.go`:
+
+```go
+func main() {
+    fx.New(
+        // Core providers
+        fx.Provide(config.NewConfig),
+        fx.Provide(bootstrap.NewLogger),
+        fx.Provide(bootstrap.NewFiber),
+        fx.Provide(database.NewDatabase),
+        fx.Provide(middleware.NewMiddleware),
+        fx.Provide(router.NewRouter),
+
+        // External services
+        fx.Provide(internal.NewMessageWay),
+        fx.Provide(internal.NewCronService),
+        fx.Provide(internal.NewBaleBotLogger),
+
+        // Feature modules
+        user.Module,
+        order.Module,
+        product.Module,
+        // ... other modules
+
+        // Application lifecycle
+        fx.Invoke(bootstrap.Start),
+
+        // Logger
+        fx.WithLogger(fxzerolog.Init()),
+    ).Run()
+}
+```
+
+## Provider Functions
+
+### Simple Provider
+
+```go
+func Repository(DB *database.Database) IRepository {
+    return &repo{DB}
+}
+```
+
+### Provider with Multiple Dependencies
+
+```go
+func RestController(
+    s service.IService, 
+    b businessService.IService, 
+    config *config.Config,
+) IRestController {
+    return &controller{s, b, config}
+}
+```
+
+### Provider Returning Struct
+
+```go
+func Controllers(s service.IService, config *config.Config) *Controller {
+    return &Controller{
+        RestController: RestController(s, config),
+    }
+}
+```
+
+## Lifecycle Hooks
+
+Use `fx.Lifecycle` for startup/shutdown hooks:
+
+```go
+func Start(
+    fiber *fiber.App,
+    cfg *config.Config,
+    log zerolog.Logger,
+    router *router.Router,
+    lifecycle fx.Lifecycle,
+    database *database.Database,
+    middlewares *middleware.Middleware,
+) {
+    lifecycle.Append(
+        fx.Hook{
+            OnStart: func(ctx context.Context) error {
+                middlewares.Register()
+                router.Register()
+                database.ConnectDatabase()
+                
+                go func() {
+                    if err := fiber.Listen(":" + cfg.App.Port); err != nil {
+                        log.Error().Err(err).Msg("Server error")
+                    }
+                }()
+                
+                return nil
+            },
+            OnStop: func(ctx context.Context) error {
+                fiber.Shutdown()
+                database.ShutdownDatabase()
+                return nil
+            },
+        },
+    )
+}
+```
+
+## Router Integration
+
+Router receives all module routers via DI:
+
+```go
+func NewRouter(
+    fiber *fiber.App,
+    cfg *config.Config,
+    userRouter *user.Router,
+    orderRouter *order.Router,
+    // ... other routers
+) *Router {
+    return &Router{
+        App:         fiber,
+        Cfg:         cfg,
+        UserRouter:  userRouter,
+        OrderRouter: orderRouter,
+    }
+}
+```
+
+## Adding a New Service
+
+1. Create provider function:
+```go
+func NewMyService(cfg *config.Config, log zerolog.Logger) *MyService {
+    return &MyService{cfg: cfg, log: log}
+}
+```
+
+2. Register in main.go:
+```go
+fx.Provide(internal.NewMyService),
+```
+
+3. Inject where needed:
+```go
+func Service(repo repository.IRepository, myService *internal.MyService) IService {
+    return &service{repo, myService}
+}
+```

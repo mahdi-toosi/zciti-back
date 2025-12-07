@@ -1,0 +1,165 @@
+# Pagination Patterns
+
+## Using Pagination in Controllers
+
+```go
+func (_i *controller) Index(c *fiber.Ctx) error {
+    paginate, err := paginator.Paginate(c)
+    if err != nil {
+        return err
+    }
+
+    var req request.Items
+    req.Pagination = paginate
+    req.Keyword = c.Query("Keyword")
+
+    items, paging, err := _i.service.Index(req)
+    if err != nil {
+        return err
+    }
+
+    return response.Resp(c, response.Response{
+        Data: items,
+        Meta: paging,
+    })
+}
+```
+
+## Pagination in Request DTOs
+
+```go
+type Items struct {
+    Pagination *paginator.Pagination
+    Keyword    string
+    Status     string
+    // ... other filters
+}
+```
+
+## Pagination in Repository
+
+```go
+func (_i *repo) GetAll(req request.Items) (items []*schema.Item, paging paginator.Pagination, err error) {
+    query := _i.DB.Main.Model(&schema.Item{})
+
+    // Apply filters
+    if req.Keyword != "" {
+        query.Where("title LIKE ?", "%"+req.Keyword+"%")
+    }
+
+    // Apply pagination only if page is specified
+    if req.Pagination.Page > 0 {
+        var total int64
+        query.Count(&total)
+        req.Pagination.Total = total
+
+        query.Offset(req.Pagination.Offset)
+        query.Limit(req.Pagination.Limit)
+    }
+
+    err = query.Order("created_at desc").Find(&items).Error
+    if err != nil {
+        return
+    }
+
+    paging = *req.Pagination
+
+    return
+}
+```
+
+## Pagination Struct
+
+```go
+// utils/paginator/paginator.go
+type Pagination struct {
+    Page   int   `json:"page"`
+    Limit  int   `json:"limit"`
+    Offset int   `json:"-"`
+    Total  int64 `json:"total"`
+}
+
+func Paginate(c *fiber.Ctx) (*Pagination, error) {
+    page, _ := strconv.Atoi(c.Query("page", "1"))
+    limit, _ := strconv.Atoi(c.Query("limit", "10"))
+
+    if page < 1 {
+        page = 1
+    }
+    if limit < 1 {
+        limit = 10
+    }
+    if limit > 100 {
+        limit = 100
+    }
+
+    offset := (page - 1) * limit
+
+    return &Pagination{
+        Page:   page,
+        Limit:  limit,
+        Offset: offset,
+    }, nil
+}
+```
+
+## Response with Pagination
+
+```json
+{
+    "Code": 200,
+    "Data": [...],
+    "Meta": {
+        "page": 1,
+        "limit": 10,
+        "total": 100
+    }
+}
+```
+
+## Query Parameters
+
+| Parameter | Default | Max |
+|-----------|---------|-----|
+| `page` | 1 | - |
+| `limit` | 10 | 100 |
+
+## API Examples
+
+```bash
+# First page, default limit
+GET /api/v1/items
+
+# Second page, 20 items
+GET /api/v1/items?page=2&limit=20
+
+# With filters
+GET /api/v1/items?page=1&limit=10&Keyword=search&Status=active
+```
+
+## Skip Pagination
+
+When you don't want pagination (get all items):
+
+```go
+func (_i *repo) GetAll(req request.Items) (items []*schema.Item, paging paginator.Pagination, err error) {
+    query := _i.DB.Main.Model(&schema.Item{})
+
+    // Only paginate if explicitly requested
+    if req.Pagination != nil && req.Pagination.Page > 0 {
+        var total int64
+        query.Count(&total)
+        req.Pagination.Total = total
+        query.Offset(req.Pagination.Offset)
+        query.Limit(req.Pagination.Limit)
+    }
+
+    err = query.Find(&items).Error
+    
+    if req.Pagination != nil {
+        paging = *req.Pagination
+    }
+
+    return
+}
+```
