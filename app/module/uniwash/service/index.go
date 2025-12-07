@@ -3,7 +3,6 @@ package service
 import (
 	"errors"
 	"fmt"
-	ptime "github.com/yaa110/go-persian-calendar"
 	"go-fiber-starter/app/database/schema"
 	request2 "go-fiber-starter/app/module/coupon/request"
 	cservice "go-fiber-starter/app/module/coupon/service"
@@ -15,8 +14,10 @@ import (
 	"go-fiber-starter/internal"
 	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
-	"gorm.io/gorm"
 	"time"
+
+	ptime "github.com/yaa110/go-persian-calendar"
+	"gorm.io/gorm"
 
 	MessageWay "github.com/MessageWay/MessageWayGolang"
 	"github.com/gofiber/fiber/v2"
@@ -256,7 +257,7 @@ func (_i *service) SendFullCouponToUser(businessID uint64, reservationID uint64)
 
 	coupon := request2.Coupon{
 		BusinessID: reservation.BusinessID,
-		Value:      reservation.Product.Price,
+		Value:      reservation.Product.Price * 1.1, // 10% tax
 		Type:       schema.CouponTypeFixedAmount,
 		EndTime:    endTime.Format(time.DateTime),
 		StartTime:  startTime.Format(time.DateTime),
