@@ -33,11 +33,11 @@ func (_i *repo) GetAll(req request.Transactions) (transactions []*schema.Transac
 		Where(&schema.Transaction{WalletID: req.WalletID})
 
 	if req.StartTime != nil && !req.StartTime.IsZero() {
-		baseQuery = baseQuery.Where("start_time >= ?", req.StartTime)
+		baseQuery = baseQuery.Where("created_at >= ?", req.StartTime)
 	}
 
 	if req.EndTime != nil && !req.EndTime.IsZero() {
-		baseQuery = baseQuery.Where("end_time <= ?", req.EndTime)
+		baseQuery = baseQuery.Where("created_at <= ?", req.EndTime)
 	}
 
 	// Apply filters (CityID / WorkspaceID / DormitoryID)
