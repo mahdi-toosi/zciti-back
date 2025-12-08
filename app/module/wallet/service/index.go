@@ -79,8 +79,10 @@ func (_i *service) GetOrCreateWallet(userID *uint64, businessID *uint64, tx *gor
 			}
 
 			wallet = &response.Wallet{
-				ID:     walletSchema.ID,
-				Amount: walletSchema.Amount,
+				ID:         walletSchema.ID,
+				Amount:     walletSchema.Amount,
+				UserID:     walletSchema.UserID,
+				BusinessID: walletSchema.BusinessID,
 			}
 		} else {
 			return nil, err

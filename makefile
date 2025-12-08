@@ -32,4 +32,11 @@ tests:
 	 ./app/module/coupon/test/... \
 	 ./app/module/order/test/... \
 	 ./app/module/orderItem/test/... \
-	 ./app/module/post/test/... 
+	 ./app/module/post/test/... \
+	 ./app/module/product/test/... \
+	 ./app/module/reservation/test/... \
+	 ./app/module/taxonomy/test/... \
+	 ./app/module/uniwash/test/... \
+	 ./app/module/transaction/test/... \
+	 ./app/module/user/test/... \
+	 ./app/module/wallet/test/...

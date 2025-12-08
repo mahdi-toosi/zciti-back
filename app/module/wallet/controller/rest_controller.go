@@ -73,7 +73,7 @@ func (_i *controller) Show(c *fiber.Ctx) error {
 	if queryUserID > 0 {
 		userID = &queryUserID
 
-		if userID != &user.ID {
+		if queryUserID != user.ID {
 			return fiber.ErrForbidden
 		}
 	}
