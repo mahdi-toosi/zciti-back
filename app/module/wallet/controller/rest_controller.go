@@ -1,12 +1,13 @@
 package controller
 
 import (
-	"github.com/gofiber/fiber/v2"
 	"go-fiber-starter/app/module/wallet/request"
 	"go-fiber-starter/app/module/wallet/service"
 	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
 	"go-fiber-starter/utils/response"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type IRestController interface {
@@ -81,7 +82,7 @@ func (_i *controller) Show(c *fiber.Ctx) error {
 	if queryBusinessID > 0 {
 		businessID = &queryBusinessID
 
-		if !user.IsBusinessOwner(queryBusinessID) {
+		if !user.IsBusinessOwner(queryBusinessID) && !user.IsBusinessObserver(queryBusinessID) {
 			return fiber.ErrForbidden
 		}
 	}

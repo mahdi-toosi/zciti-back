@@ -64,7 +64,7 @@ var routes = []route{
 		},
 	},
 	{
-		Permissions: []schema.UserRole{schema.URBusinessOwner},
+		Permissions: []schema.UserRole{schema.URBusinessOwner, schema.URBusinessObserver},
 		MenuItems: menuItems{
 			schema.BTypeWMReservation: {Title: "تراکنش ها", Href: "/admin/b/:BusinessID/transactions", Icon: "pi pi-arrow-right-arrow-left"},
 		},

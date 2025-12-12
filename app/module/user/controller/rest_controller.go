@@ -562,8 +562,6 @@ func (_i *controller) OrderStatus(c *fiber.Ctx) error {
 		return err
 	}
 
-	utils.Log(req)
-
 	refNum := req.RefNum
 	status := req.State
 

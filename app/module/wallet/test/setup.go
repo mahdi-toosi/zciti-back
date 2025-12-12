@@ -266,6 +266,29 @@ func (ta *TestApp) CreateTestUserWithBusinessOwner(t *testing.T, mobile uint64, 
 	return user
 }
 
+// CreateTestUserWithBusinessObserver creates a user with business observer role
+func (ta *TestApp) CreateTestUserWithBusinessObserver(t *testing.T, mobile uint64, password string, firstName, lastName string, businessID uint64) *schema.User {
+	t.Helper()
+
+	isSuspended := false
+	user := &schema.User{
+		Mobile:    mobile,
+		FirstName: firstName,
+		LastName:  lastName,
+		Password:  helpers.Hash([]byte(password)),
+		Permissions: schema.UserPermissions{
+			businessID: []schema.UserRole{schema.URBusinessObserver},
+		},
+		IsSuspended: &isSuspended,
+	}
+
+	if err := ta.DB.Create(user).Error; err != nil {
+		t.Fatalf("failed to create test user with business observer role: %v", err)
+	}
+
+	return user
+}
+
 // CreateTestWallet creates a test wallet in the database
 func (ta *TestApp) CreateTestWallet(t *testing.T, userID *uint64, businessID *uint64, amount float64) *schema.Wallet {
 	t.Helper()

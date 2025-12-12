@@ -2,9 +2,10 @@ package middleware
 
 import (
 	"errors"
-	"github.com/gofiber/fiber/v2"
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/utils"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 func AdminPermission(c *fiber.Ctx) error {
@@ -85,6 +86,7 @@ var Permissions = map[schema.UserRole]map[Domain]map[Permission]bool{
 		DOrder:                {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DCoupon:               {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DProduct:              {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
+		DWallet:               {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DComment:              {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DMessage:              {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DTaxonomy:             {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
@@ -101,6 +103,7 @@ var Permissions = map[schema.UserRole]map[Domain]map[Permission]bool{
 		DPost:                 {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DOrder:                {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true},
 		DProduct:              {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
+		DWallet:               {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DComment:              {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DMessage:              {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
 		DCoupon:               {PCreate: true, PReadAll: true, PReadSingle: true, PUpdate: true, PDelete: true},
@@ -124,6 +127,8 @@ var Permissions = map[schema.UserRole]map[Domain]map[Permission]bool{
 	schema.URBusinessObserver: {
 		DProduct:     {PReadAll: true},
 		DTaxonomy:    {PReadAll: true},
+		DTransaction: {PReadAll: true},
+		DWallet:      {PReadAll: true},
 		DBusiness:    {PReadSingle: true},
 		DReservation: {PReadAll: true, PReadSingle: true},
 	},
@@ -141,6 +146,7 @@ const (
 	DOrder
 	DFile
 	DCoupon
+	DWallet
 	DProduct
 	DComment
 	DMessage

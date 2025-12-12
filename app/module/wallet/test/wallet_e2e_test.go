@@ -122,6 +122,49 @@ func TestShowWallet_BusinessWallet_Success(t *testing.T) {
 	}
 }
 
+func TestShowWallet_BusinessWallet_Success_AsObserver(t *testing.T) {
+	ta := SetupTestApp(t)
+	defer ta.Cleanup()
+
+	// Create test user who will own the business
+	testMobile := uint64(9123456789)
+	testPassword := "testPassword123"
+	owner := ta.CreateTestUser(t, testMobile, testPassword, "Business", "Owner")
+
+	// Create business
+	business := ta.CreateTestBusiness(t, "Test Business", owner.ID)
+
+	// Create user with business observer permissions
+	businessObserver := ta.CreateTestUserWithBusinessObserver(t, 9123456780, testPassword, "Observer", "User", business.ID)
+
+	// Create wallet for business
+	amount := float64(5000)
+	ta.CreateTestWallet(t, nil, &business.ID, amount)
+
+	// Generate token for business observer
+	token := ta.GenerateTestToken(t, businessObserver)
+
+	// Make request - business observer should be able to view business wallet
+	resp := ta.MakeAuthenticatedRequest(t, http.MethodGet, "/v1/wallets/wallet?BusinessID="+uintToString(business.ID), nil, token)
+
+	if resp.StatusCode != http.StatusOK {
+		result := ParseResponse(t, resp)
+		t.Errorf("expected status 200 for business observer, got %d, response: %v", resp.StatusCode, result)
+		return
+	}
+
+	var wallet response.Wallet
+	ParseResponseTo(t, resp, &wallet)
+
+	if wallet.Amount != amount {
+		t.Errorf("expected wallet amount %f, got %f", amount, wallet.Amount)
+	}
+
+	if wallet.BusinessID == nil || *wallet.BusinessID != business.ID {
+		t.Errorf("expected wallet business ID %d, got %v", business.ID, wallet.BusinessID)
+	}
+}
+
 func TestShowWallet_Unauthorized_NoToken(t *testing.T) {
 	ta := SetupTestApp(t)
 	defer ta.Cleanup()

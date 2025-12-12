@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"go-fiber-starter/utils/helpers"
+
 	"golang.org/x/exp/slices"
 )
 
@@ -67,7 +68,7 @@ func (u *User) IsAdmin() bool {
 	return slices.Contains(u.Permissions[ROOT_BUSINESS_ID], URAdmin)
 }
 
-func (u *User) IsObserver(BusinessID uint64) bool {
+func (u *User) IsBusinessObserver(BusinessID uint64) bool {
 	return slices.Contains(u.Permissions[BusinessID], URBusinessObserver)
 }
 

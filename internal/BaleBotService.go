@@ -1,9 +1,10 @@
 package internal
 
 import (
+	"go-fiber-starter/utils/config"
+
 	baleBotApi "github.com/ghiac/bale-bot-api"
 	"github.com/rs/zerolog/log"
-	"go-fiber-starter/utils/config"
 )
 
 type BaleBot struct {
@@ -41,7 +42,6 @@ func NewBaleBotLogger(cfg *config.Config) *BaleBot {
 	//	return nil
 	//}
 	//for update := range updates {
-	//	utils.Log(update)
 	//	if update.Message == nil { // ignore any non-Message updates
 	//		continue
 	//	}

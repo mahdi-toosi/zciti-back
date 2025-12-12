@@ -2,9 +2,6 @@ package controller
 
 import (
 	"bytes"
-	"github.com/gofiber/fiber/v2"
-	"github.com/xuri/excelize/v2"
-	ptime "github.com/yaa110/go-persian-calendar"
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/transaction/request"
 	transactionResponse "go-fiber-starter/app/module/transaction/response"
@@ -15,6 +12,10 @@ import (
 	"go-fiber-starter/utils/response"
 	"strconv"
 	"time"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/xuri/excelize/v2"
+	ptime "github.com/yaa110/go-persian-calendar"
 )
 
 type IRestController interface {
@@ -86,7 +87,7 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	}
 
 	if wallet.BusinessID != nil {
-		if !user.IsBusinessOwner(*wallet.BusinessID) {
+		if !user.IsBusinessOwner(*wallet.BusinessID) && !user.IsBusinessObserver(*wallet.BusinessID) {
 			return fiber.ErrForbidden
 		}
 	}

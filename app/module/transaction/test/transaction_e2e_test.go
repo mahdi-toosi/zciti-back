@@ -101,6 +101,52 @@ func TestIndex_Success_BusinessWallet(t *testing.T) {
 	}
 }
 
+func TestIndex_Success_BusinessWallet_AsObserver(t *testing.T) {
+	ta := SetupTestApp(t)
+	defer ta.Cleanup()
+
+	// Create business owner user
+	owner := ta.CreateTestUser(t, 9123456789, "testPassword123", "Owner", "User", 0, nil)
+
+	// Create test business
+	business := ta.CreateTestBusiness(t, "Test Business", schema.BTypeGymManager, owner.ID)
+
+	// Create observer user with business observer role
+	observer := ta.CreateTestUser(t, 9987654321, "testPassword123", "Observer", "User", business.ID, []schema.UserRole{schema.URBusinessObserver})
+
+	// Create wallet for the business
+	wallet := ta.CreateTestWallet(t, nil, &business.ID, 5000)
+
+	// Create test transactions
+	ta.CreateTestTransaction(t, wallet.ID, owner.ID, 500, schema.TransactionStatusSuccess, schema.OrderPaymentMethodOnline, "Business transaction 1")
+	ta.CreateTestTransaction(t, wallet.ID, owner.ID, 1000, schema.TransactionStatusSuccess, schema.OrderPaymentMethodOnline, "Business transaction 2")
+
+	// Generate token for observer
+	token := ta.GenerateTestToken(t, observer)
+
+	// Make request - business observer should be able to view business wallet transactions
+	resp := ta.MakeRequest(t, http.MethodGet, fmt.Sprintf("/v1/wallets/%d/transactions", wallet.ID), nil, token)
+
+	if resp.StatusCode != http.StatusOK {
+		result := ParseResponse(t, resp)
+		t.Errorf("expected status 200 for business observer, got %d, response: %v", resp.StatusCode, result)
+		return
+	}
+
+	result := ParseResponse(t, resp)
+
+	// Verify response contains data
+	data, ok := result["Data"].([]interface{})
+	if !ok {
+		t.Errorf("expected Data array in response, got: %v", result)
+		return
+	}
+
+	if len(data) != 2 {
+		t.Errorf("expected 2 transactions, got %d", len(data))
+	}
+}
+
 func TestIndex_Unauthorized(t *testing.T) {
 	ta := SetupTestApp(t)
 	defer ta.Cleanup()

@@ -1,12 +1,13 @@
 package transaction
 
 import (
-	"github.com/gofiber/fiber/v2"
 	mdl "go-fiber-starter/app/middleware"
 	"go-fiber-starter/app/module/transaction/controller"
 	"go-fiber-starter/app/module/transaction/repository"
 	"go-fiber-starter/app/module/transaction/service"
 	"go-fiber-starter/utils/config"
+
+	"github.com/gofiber/fiber/v2"
 	"go.uber.org/fx"
 )
 

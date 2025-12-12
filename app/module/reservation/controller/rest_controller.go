@@ -6,11 +6,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gofiber/fiber/v2"
 	"go-fiber-starter/app/module/reservation/request"
 	"go-fiber-starter/app/module/reservation/service"
 	"go-fiber-starter/utils/paginator"
 	"go-fiber-starter/utils/response"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type IRestController interface {
@@ -71,7 +72,7 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 		req.EndTime = &v
 	}
 
-	if user.IsObserver(businessID) {
+	if user.IsBusinessObserver(businessID) {
 		if user.Meta == nil {
 			return &fiber.Error{
 				Code:    fiber.StatusForbidden,
