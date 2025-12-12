@@ -10,6 +10,7 @@ import (
 	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
 	"go-fiber-starter/utils/response"
+	"slices"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -55,10 +56,19 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	req.Pagination = paginate
 	export := c.Query("Export")
 	req.Status = c.Query("Status")
-	req.CityID, _ = utils.GetUintInQueries(c, "CityID")
 	req.ProductID, _ = utils.GetUintInQueries(c, "ProductID")
+
+	req.CityID, _ = utils.GetUintInQueries(c, "CityID")
 	req.WorkspaceID, _ = utils.GetUintInQueries(c, "WorkspaceID")
 	req.DormitoryID, _ = utils.GetUintInQueries(c, "DormitoryID")
+	var taxonomies []uint64
+	if req.DormitoryID != 0 {
+		taxonomies = append(taxonomies, req.DormitoryID)
+	} else if req.WorkspaceID != 0 {
+		taxonomies = append(taxonomies, req.WorkspaceID)
+	} else if req.CityID != 0 {
+		taxonomies = append(taxonomies, req.CityID)
+	}
 
 	req.StartTime = utils.GetDateInQueries(c, "StartTime")
 	req.EndTime = utils.GetDateInQueries(c, "EndTime")
@@ -88,6 +98,28 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	if wallet.BusinessID != nil {
 		if !user.IsBusinessOwner(*wallet.BusinessID) && !user.IsBusinessObserver(*wallet.BusinessID) {
 			return fiber.ErrForbidden
+		}
+
+		if user.IsBusinessObserver(*wallet.BusinessID) {
+			if user.Meta == nil {
+				return &fiber.Error{
+					Code:    fiber.StatusForbidden,
+					Message: "برای شما سطح دسترسی مشخص نشده است.",
+				}
+			}
+			observerTaxonomies := user.Meta.GetTaxonomiesToObserve(true, false)
+
+			if len(taxonomies) > 0 {
+				for _, taxonomy := range taxonomies {
+					if slices.Contains(observerTaxonomies, taxonomy) {
+						req.Taxonomies = append(req.Taxonomies, taxonomy)
+					}
+				}
+			}
+
+			if len(req.Taxonomies) == 0 {
+				req.Taxonomies = observerTaxonomies
+			}
 		}
 	}
 

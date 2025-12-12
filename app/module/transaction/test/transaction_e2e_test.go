@@ -908,3 +908,526 @@ func TestIndex_ResponseFormat(t *testing.T) {
 	}
 }
 
+// =============================================================================
+// TAXONOMY FILTER TESTS
+// =============================================================================
+
+func TestIndex_FilterByTaxonomies(t *testing.T) {
+	ta := SetupTestApp(t)
+	defer ta.Cleanup()
+
+	// Create business owner
+	owner := ta.CreateTestUser(t, 9123456789, "testPassword123", "Owner", "User", 0, nil)
+	business := ta.CreateTestBusiness(t, "Test Business", schema.BTypeGymManager, owner.ID)
+
+	// Update owner with business permissions
+	owner.Permissions[business.ID] = []schema.UserRole{schema.URBusinessOwner}
+	ta.DB.Save(owner)
+
+	// Create business wallet
+	wallet := ta.CreateTestWallet(t, nil, &business.ID, 10000)
+
+	// Create taxonomies (city -> workspace -> dormitory)
+	city1 := ta.CreateTestTaxonomy(t, "City 1", schema.TaxonomyTypeCategory, business.ID, nil)
+	city2 := ta.CreateTestTaxonomy(t, "City 2", schema.TaxonomyTypeCategory, business.ID, nil)
+
+	// Create posts and products
+	post1 := ta.CreateTestPost(t, "Product 1", schema.PostTypeProduct, business.ID, owner.ID)
+	post2 := ta.CreateTestPost(t, "Product 2", schema.PostTypeProduct, business.ID, owner.ID)
+
+	// Attach taxonomies to posts
+	ta.AttachTaxonomyToPost(t, post1.ID, city1.ID)
+	ta.AttachTaxonomyToPost(t, post2.ID, city2.ID)
+
+	// Create orders
+	order1 := ta.CreateTestOrder(t, owner.ID, business.ID, 100, schema.OrderStatusCompleted)
+	order2 := ta.CreateTestOrder(t, owner.ID, business.ID, 200, schema.OrderStatusCompleted)
+
+	// Create order items linked to posts
+	ta.CreateTestOrderItem(t, order1.ID, post1.ID, 1, 100)
+	ta.CreateTestOrderItem(t, order2.ID, post2.ID, 1, 200)
+
+	// Create transactions linked to orders
+	ta.CreateTestTransactionWithOrder(t, wallet.ID, owner.ID, order1.ID, 100, schema.TransactionStatusSuccess, schema.OrderPaymentMethodOnline, "Transaction 1")
+	ta.CreateTestTransactionWithOrder(t, wallet.ID, owner.ID, order2.ID, 200, schema.TransactionStatusSuccess, schema.OrderPaymentMethodOnline, "Transaction 2")
+
+	// Generate token
+	token := ta.GenerateTestToken(t, owner)
+
+	// Filter by CityID - should only get transactions for city1
+	resp := ta.MakeRequest(t, http.MethodGet, fmt.Sprintf("/v1/wallets/%d/transactions?CityID=%d", wallet.ID, city1.ID), nil, token)
+
+	if resp.StatusCode != http.StatusOK {
+		result := ParseResponse(t, resp)
+		t.Errorf("expected status 200, got %d, response: %v", resp.StatusCode, result)
+		return
+	}
+
+	result := ParseResponse(t, resp)
+	data, ok := result["Data"].([]interface{})
+	if !ok {
+		t.Errorf("expected Data array in response, got: %v", result)
+		return
+	}
+
+	if len(data) != 1 {
+		t.Errorf("expected 1 transaction for city1 filter, got %d", len(data))
+	}
+
+	// Verify total amount only includes filtered transactions
+	meta, ok := result["Meta"].(map[string]interface{})
+	if !ok {
+		t.Errorf("expected Meta in response")
+		return
+	}
+
+	totalAmount, ok := meta["TotalAmount"].(float64)
+	if !ok || totalAmount != 100 {
+		t.Errorf("expected total amount 100 for city1 filter, got: %v", totalAmount)
+	}
+}
+
+func TestIndex_FilterByDormitoryID(t *testing.T) {
+	ta := SetupTestApp(t)
+	defer ta.Cleanup()
+
+	// Create business owner
+	owner := ta.CreateTestUser(t, 9123456789, "testPassword123", "Owner", "User", 0, nil)
+	business := ta.CreateTestBusiness(t, "Test Business", schema.BTypeGymManager, owner.ID)
+
+	// Update owner with business permissions
+	owner.Permissions[business.ID] = []schema.UserRole{schema.URBusinessOwner}
+	ta.DB.Save(owner)
+
+	// Create business wallet
+	wallet := ta.CreateTestWallet(t, nil, &business.ID, 10000)
+
+	// Create hierarchical taxonomies
+	city := ta.CreateTestTaxonomy(t, "City", schema.TaxonomyTypeCategory, business.ID, nil)
+	workspace := ta.CreateTestTaxonomy(t, "Workspace", schema.TaxonomyTypeCategory, business.ID, &city.ID)
+	dormitory := ta.CreateTestTaxonomy(t, "Dormitory", schema.TaxonomyTypeCategory, business.ID, &workspace.ID)
+
+	// Create posts
+	post1 := ta.CreateTestPost(t, "Product 1", schema.PostTypeProduct, business.ID, owner.ID)
+	post2 := ta.CreateTestPost(t, "Product 2", schema.PostTypeProduct, business.ID, owner.ID)
+
+	// Attach taxonomies - post1 to dormitory, post2 to workspace
+	ta.AttachTaxonomyToPost(t, post1.ID, dormitory.ID)
+	ta.AttachTaxonomyToPost(t, post2.ID, workspace.ID)
+
+	// Create orders
+	order1 := ta.CreateTestOrder(t, owner.ID, business.ID, 100, schema.OrderStatusCompleted)
+	order2 := ta.CreateTestOrder(t, owner.ID, business.ID, 200, schema.OrderStatusCompleted)
+
+	// Create order items linked to posts
+	ta.CreateTestOrderItem(t, order1.ID, post1.ID, 1, 100)
+	ta.CreateTestOrderItem(t, order2.ID, post2.ID, 1, 200)
+
+	// Create transactions linked to orders
+	ta.CreateTestTransactionWithOrder(t, wallet.ID, owner.ID, order1.ID, 100, schema.TransactionStatusSuccess, schema.OrderPaymentMethodOnline, "Transaction 1")
+	ta.CreateTestTransactionWithOrder(t, wallet.ID, owner.ID, order2.ID, 200, schema.TransactionStatusSuccess, schema.OrderPaymentMethodOnline, "Transaction 2")
+
+	// Generate token
+	token := ta.GenerateTestToken(t, owner)
+
+	// Filter by DormitoryID - should only get dormitory transactions
+	resp := ta.MakeRequest(t, http.MethodGet, fmt.Sprintf("/v1/wallets/%d/transactions?DormitoryID=%d", wallet.ID, dormitory.ID), nil, token)
+
+	if resp.StatusCode != http.StatusOK {
+		result := ParseResponse(t, resp)
+		t.Errorf("expected status 200, got %d, response: %v", resp.StatusCode, result)
+		return
+	}
+
+	result := ParseResponse(t, resp)
+	data, ok := result["Data"].([]interface{})
+	if !ok {
+		t.Errorf("expected Data array in response, got: %v", result)
+		return
+	}
+
+	if len(data) != 1 {
+		t.Errorf("expected 1 transaction for dormitory filter, got %d", len(data))
+	}
+}
+
+// =============================================================================
+// BUSINESS OBSERVER TESTS
+// =============================================================================
+
+func TestIndex_BusinessObserver_WithMeta(t *testing.T) {
+	ta := SetupTestApp(t)
+	defer ta.Cleanup()
+
+	// Create business owner
+	owner := ta.CreateTestUser(t, 9123456789, "testPassword123", "Owner", "User", 0, nil)
+	business := ta.CreateTestBusiness(t, "Test Business", schema.BTypeGymManager, owner.ID)
+
+	// Update owner with business permissions
+	owner.Permissions[business.ID] = []schema.UserRole{schema.URBusinessOwner}
+	ta.DB.Save(owner)
+
+	// Create business wallet
+	wallet := ta.CreateTestWallet(t, nil, &business.ID, 10000)
+
+	// Create taxonomies
+	city1 := ta.CreateTestTaxonomy(t, "City 1", schema.TaxonomyTypeCategory, business.ID, nil)
+	city2 := ta.CreateTestTaxonomy(t, "City 2", schema.TaxonomyTypeCategory, business.ID, nil)
+
+	// Create posts
+	post1 := ta.CreateTestPost(t, "Product 1", schema.PostTypeProduct, business.ID, owner.ID)
+	post2 := ta.CreateTestPost(t, "Product 2", schema.PostTypeProduct, business.ID, owner.ID)
+
+	// Attach taxonomies
+	ta.AttachTaxonomyToPost(t, post1.ID, city1.ID)
+	ta.AttachTaxonomyToPost(t, post2.ID, city2.ID)
+
+	// Create orders
+	order1 := ta.CreateTestOrder(t, owner.ID, business.ID, 100, schema.OrderStatusCompleted)
+	order2 := ta.CreateTestOrder(t, owner.ID, business.ID, 200, schema.OrderStatusCompleted)
+
+	// Create order items linked to posts
+	ta.CreateTestOrderItem(t, order1.ID, post1.ID, 1, 100)
+	ta.CreateTestOrderItem(t, order2.ID, post2.ID, 1, 200)
+
+	// Create transactions linked to orders
+	ta.CreateTestTransactionWithOrder(t, wallet.ID, owner.ID, order1.ID, 100, schema.TransactionStatusSuccess, schema.OrderPaymentMethodOnline, "Transaction 1")
+	ta.CreateTestTransactionWithOrder(t, wallet.ID, owner.ID, order2.ID, 200, schema.TransactionStatusSuccess, schema.OrderPaymentMethodOnline, "Transaction 2")
+
+	// Create observer with access to city1 only
+	observerMeta := &schema.UserMeta{
+		TaxonomiesToObserve: schema.UserMetaTaxonomiesToObserve{
+			city1.ID: {Checked: true, PartialChecked: false},
+		},
+	}
+	observer := ta.CreateTestUserWithMeta(t, 9987654321, "testPassword456", "Observer", "User", business.ID, []schema.UserRole{schema.URBusinessObserver}, observerMeta)
+
+	// Generate token for observer
+	token := ta.GenerateTestToken(t, observer)
+
+	// Make request - observer should only see transactions for city1
+	resp := ta.MakeRequest(t, http.MethodGet, fmt.Sprintf("/v1/wallets/%d/transactions", wallet.ID), nil, token)
+
+	if resp.StatusCode != http.StatusOK {
+		result := ParseResponse(t, resp)
+		t.Errorf("expected status 200, got %d, response: %v", resp.StatusCode, result)
+		return
+	}
+
+	result := ParseResponse(t, resp)
+	data, ok := result["Data"].([]interface{})
+	if !ok {
+		t.Errorf("expected Data array in response, got: %v", result)
+		return
+	}
+
+	// Observer should only see transactions related to city1
+	if len(data) != 1 {
+		t.Errorf("expected 1 transaction for observer with city1 access, got %d", len(data))
+	}
+
+	// Verify total amount only includes observer's accessible transactions
+	meta, ok := result["Meta"].(map[string]interface{})
+	if !ok {
+		t.Errorf("expected Meta in response")
+		return
+	}
+
+	totalAmount, ok := meta["TotalAmount"].(float64)
+	if !ok || totalAmount != 100 {
+		t.Errorf("expected total amount 100 for observer, got: %v", totalAmount)
+	}
+}
+
+func TestIndex_BusinessObserver_WithoutMeta(t *testing.T) {
+	ta := SetupTestApp(t)
+	defer ta.Cleanup()
+
+	// Create business owner
+	owner := ta.CreateTestUser(t, 9123456789, "testPassword123", "Owner", "User", 0, nil)
+	business := ta.CreateTestBusiness(t, "Test Business", schema.BTypeGymManager, owner.ID)
+
+	// Update owner with business permissions
+	owner.Permissions[business.ID] = []schema.UserRole{schema.URBusinessOwner}
+	ta.DB.Save(owner)
+
+	// Create business wallet
+	wallet := ta.CreateTestWallet(t, nil, &business.ID, 10000)
+
+	// Create observer without meta (should be forbidden)
+	observer := ta.CreateTestUser(t, 9987654321, "testPassword456", "Observer", "User", business.ID, []schema.UserRole{schema.URBusinessObserver})
+
+	// Generate token for observer
+	token := ta.GenerateTestToken(t, observer)
+
+	// Make request - observer without meta should get forbidden
+	resp := ta.MakeRequest(t, http.MethodGet, fmt.Sprintf("/v1/wallets/%d/transactions", wallet.ID), nil, token)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Errorf("expected status 403 for observer without meta, got %d", resp.StatusCode)
+	}
+}
+
+func TestIndex_BusinessObserver_FilterWithTaxonomyAccess(t *testing.T) {
+	ta := SetupTestApp(t)
+	defer ta.Cleanup()
+
+	// Create business owner
+	owner := ta.CreateTestUser(t, 9123456789, "testPassword123", "Owner", "User", 0, nil)
+	business := ta.CreateTestBusiness(t, "Test Business", schema.BTypeGymManager, owner.ID)
+
+	// Update owner with business permissions
+	owner.Permissions[business.ID] = []schema.UserRole{schema.URBusinessOwner}
+	ta.DB.Save(owner)
+
+	// Create business wallet
+	wallet := ta.CreateTestWallet(t, nil, &business.ID, 10000)
+
+	// Create taxonomies
+	city1 := ta.CreateTestTaxonomy(t, "City 1", schema.TaxonomyTypeCategory, business.ID, nil)
+	city2 := ta.CreateTestTaxonomy(t, "City 2", schema.TaxonomyTypeCategory, business.ID, nil)
+
+	// Create posts
+	post1 := ta.CreateTestPost(t, "Product 1", schema.PostTypeProduct, business.ID, owner.ID)
+	post2 := ta.CreateTestPost(t, "Product 2", schema.PostTypeProduct, business.ID, owner.ID)
+
+	// Attach taxonomies
+	ta.AttachTaxonomyToPost(t, post1.ID, city1.ID)
+	ta.AttachTaxonomyToPost(t, post2.ID, city2.ID)
+
+	// Create orders
+	order1 := ta.CreateTestOrder(t, owner.ID, business.ID, 100, schema.OrderStatusCompleted)
+	order2 := ta.CreateTestOrder(t, owner.ID, business.ID, 200, schema.OrderStatusCompleted)
+
+	// Create order items linked to posts
+	ta.CreateTestOrderItem(t, order1.ID, post1.ID, 1, 100)
+	ta.CreateTestOrderItem(t, order2.ID, post2.ID, 1, 200)
+
+	// Create transactions linked to orders
+	ta.CreateTestTransactionWithOrder(t, wallet.ID, owner.ID, order1.ID, 100, schema.TransactionStatusSuccess, schema.OrderPaymentMethodOnline, "Transaction 1")
+	ta.CreateTestTransactionWithOrder(t, wallet.ID, owner.ID, order2.ID, 200, schema.TransactionStatusSuccess, schema.OrderPaymentMethodOnline, "Transaction 2")
+
+	// Create observer with access to city1 only
+	observerMeta := &schema.UserMeta{
+		TaxonomiesToObserve: schema.UserMetaTaxonomiesToObserve{
+			city1.ID: {Checked: true, PartialChecked: false},
+		},
+	}
+	observer := ta.CreateTestUserWithMeta(t, 9987654321, "testPassword456", "Observer", "User", business.ID, []schema.UserRole{schema.URBusinessObserver}, observerMeta)
+
+	// Generate token for observer
+	token := ta.GenerateTestToken(t, observer)
+
+	// Observer requests with CityID filter for city1 (which they have access to)
+	resp := ta.MakeRequest(t, http.MethodGet, fmt.Sprintf("/v1/wallets/%d/transactions?CityID=%d", wallet.ID, city1.ID), nil, token)
+
+	if resp.StatusCode != http.StatusOK {
+		result := ParseResponse(t, resp)
+		t.Errorf("expected status 200, got %d, response: %v", resp.StatusCode, result)
+		return
+	}
+
+	result := ParseResponse(t, resp)
+	data, ok := result["Data"].([]interface{})
+	if !ok {
+		t.Errorf("expected Data array in response, got: %v", result)
+		return
+	}
+
+	// Should only see city1 transaction
+	if len(data) != 1 {
+		t.Errorf("expected 1 transaction for observer with city1 filter, got %d", len(data))
+	}
+}
+
+func TestIndex_BusinessObserver_FilterWithNoTaxonomyAccess(t *testing.T) {
+	ta := SetupTestApp(t)
+	defer ta.Cleanup()
+
+	// Create business owner
+	owner := ta.CreateTestUser(t, 9123456789, "testPassword123", "Owner", "User", 0, nil)
+	business := ta.CreateTestBusiness(t, "Test Business", schema.BTypeGymManager, owner.ID)
+
+	// Update owner with business permissions
+	owner.Permissions[business.ID] = []schema.UserRole{schema.URBusinessOwner}
+	ta.DB.Save(owner)
+
+	// Create business wallet
+	wallet := ta.CreateTestWallet(t, nil, &business.ID, 10000)
+
+	// Create taxonomies
+	city1 := ta.CreateTestTaxonomy(t, "City 1", schema.TaxonomyTypeCategory, business.ID, nil)
+	city2 := ta.CreateTestTaxonomy(t, "City 2", schema.TaxonomyTypeCategory, business.ID, nil)
+
+	// Create posts
+	post1 := ta.CreateTestPost(t, "Product 1", schema.PostTypeProduct, business.ID, owner.ID)
+	post2 := ta.CreateTestPost(t, "Product 2", schema.PostTypeProduct, business.ID, owner.ID)
+
+	// Attach taxonomies
+	ta.AttachTaxonomyToPost(t, post1.ID, city1.ID)
+	ta.AttachTaxonomyToPost(t, post2.ID, city2.ID)
+
+	// Create orders
+	order1 := ta.CreateTestOrder(t, owner.ID, business.ID, 100, schema.OrderStatusCompleted)
+	order2 := ta.CreateTestOrder(t, owner.ID, business.ID, 200, schema.OrderStatusCompleted)
+
+	// Create order items linked to posts
+	ta.CreateTestOrderItem(t, order1.ID, post1.ID, 1, 100)
+	ta.CreateTestOrderItem(t, order2.ID, post2.ID, 1, 200)
+
+	// Create transactions linked to orders
+	ta.CreateTestTransactionWithOrder(t, wallet.ID, owner.ID, order1.ID, 100, schema.TransactionStatusSuccess, schema.OrderPaymentMethodOnline, "Transaction 1")
+	ta.CreateTestTransactionWithOrder(t, wallet.ID, owner.ID, order2.ID, 200, schema.TransactionStatusSuccess, schema.OrderPaymentMethodOnline, "Transaction 2")
+
+	// Create observer with access to city1 only
+	observerMeta := &schema.UserMeta{
+		TaxonomiesToObserve: schema.UserMetaTaxonomiesToObserve{
+			city1.ID: {Checked: true, PartialChecked: false},
+		},
+	}
+	observer := ta.CreateTestUserWithMeta(t, 9987654321, "testPassword456", "Observer", "User", business.ID, []schema.UserRole{schema.URBusinessObserver}, observerMeta)
+
+	// Generate token for observer
+	token := ta.GenerateTestToken(t, observer)
+
+	// Observer requests with CityID filter for city2 (which they DON'T have access to)
+	// Should return empty results because city2 is not in observer's access list
+	resp := ta.MakeRequest(t, http.MethodGet, fmt.Sprintf("/v1/wallets/%d/transactions?CityID=%d", wallet.ID, city2.ID), nil, token)
+
+	if resp.StatusCode != http.StatusOK {
+		result := ParseResponse(t, resp)
+		t.Errorf("expected status 200, got %d, response: %v", resp.StatusCode, result)
+		return
+	}
+
+	result := ParseResponse(t, resp)
+	data, ok := result["Data"].([]interface{})
+	if !ok {
+		t.Errorf("expected Data array in response, got: %v", result)
+		return
+	}
+
+	// Observer requested city2 but only has access to city1, so should get only city1 results
+	// Based on the controller logic, if the requested taxonomy is not in observer's list,
+	// it falls back to showing all taxonomies the observer has access to
+	if len(data) != 1 {
+		t.Errorf("expected 1 transaction (fallback to observer's accessible taxonomies), got %d", len(data))
+	}
+}
+
+func TestIndex_TotalAmount_WithTaxonomyFilter(t *testing.T) {
+	ta := SetupTestApp(t)
+	defer ta.Cleanup()
+
+	// Create business owner
+	owner := ta.CreateTestUser(t, 9123456789, "testPassword123", "Owner", "User", 0, nil)
+	business := ta.CreateTestBusiness(t, "Test Business", schema.BTypeGymManager, owner.ID)
+
+	// Update owner with business permissions
+	owner.Permissions[business.ID] = []schema.UserRole{schema.URBusinessOwner}
+	ta.DB.Save(owner)
+
+	// Create business wallet
+	wallet := ta.CreateTestWallet(t, nil, &business.ID, 10000)
+
+	// Create taxonomies
+	city1 := ta.CreateTestTaxonomy(t, "City 1", schema.TaxonomyTypeCategory, business.ID, nil)
+	city2 := ta.CreateTestTaxonomy(t, "City 2", schema.TaxonomyTypeCategory, business.ID, nil)
+
+	// Create posts
+	post1 := ta.CreateTestPost(t, "Product 1", schema.PostTypeProduct, business.ID, owner.ID)
+	post2 := ta.CreateTestPost(t, "Product 2", schema.PostTypeProduct, business.ID, owner.ID)
+	post3 := ta.CreateTestPost(t, "Product 3", schema.PostTypeProduct, business.ID, owner.ID)
+
+	// Attach taxonomies
+	ta.AttachTaxonomyToPost(t, post1.ID, city1.ID)
+	ta.AttachTaxonomyToPost(t, post2.ID, city1.ID) // Also city1
+	ta.AttachTaxonomyToPost(t, post3.ID, city2.ID)
+
+	// Create orders
+	order1 := ta.CreateTestOrder(t, owner.ID, business.ID, 100, schema.OrderStatusCompleted)
+	order2 := ta.CreateTestOrder(t, owner.ID, business.ID, 250, schema.OrderStatusCompleted)
+	order3 := ta.CreateTestOrder(t, owner.ID, business.ID, 500, schema.OrderStatusCompleted)
+
+	// Create order items linked to posts
+	ta.CreateTestOrderItem(t, order1.ID, post1.ID, 1, 100)
+	ta.CreateTestOrderItem(t, order2.ID, post2.ID, 1, 250)
+	ta.CreateTestOrderItem(t, order3.ID, post3.ID, 1, 500)
+
+	// Create transactions - 2 for city1, 1 for city2
+	ta.CreateTestTransactionWithOrder(t, wallet.ID, owner.ID, order1.ID, 100, schema.TransactionStatusSuccess, schema.OrderPaymentMethodOnline, "Transaction 1")
+	ta.CreateTestTransactionWithOrder(t, wallet.ID, owner.ID, order2.ID, 250, schema.TransactionStatusSuccess, schema.OrderPaymentMethodOnline, "Transaction 2")
+	ta.CreateTestTransactionWithOrder(t, wallet.ID, owner.ID, order3.ID, 500, schema.TransactionStatusSuccess, schema.OrderPaymentMethodOnline, "Transaction 3")
+
+	// Generate token
+	token := ta.GenerateTestToken(t, owner)
+
+	// Filter by city1 - should get total amount of 350 (100 + 250)
+	resp := ta.MakeRequest(t, http.MethodGet, fmt.Sprintf("/v1/wallets/%d/transactions?CityID=%d", wallet.ID, city1.ID), nil, token)
+
+	if resp.StatusCode != http.StatusOK {
+		result := ParseResponse(t, resp)
+		t.Errorf("expected status 200, got %d, response: %v", resp.StatusCode, result)
+		return
+	}
+
+	result := ParseResponse(t, resp)
+
+	// Verify total amount for city1 filter
+	meta, ok := result["Meta"].(map[string]interface{})
+	if !ok {
+		t.Errorf("expected Meta in response")
+		return
+	}
+
+	totalAmount, ok := meta["TotalAmount"].(float64)
+	if !ok || totalAmount != 350 {
+		t.Errorf("expected total amount 350 for city1 filter, got: %v", totalAmount)
+	}
+
+	data, ok := result["Data"].([]interface{})
+	if !ok || len(data) != 2 {
+		t.Errorf("expected 2 transactions for city1 filter, got %d", len(data))
+	}
+}
+
+func TestIndex_StatusFilter(t *testing.T) {
+	ta := SetupTestApp(t)
+	defer ta.Cleanup()
+
+	// Create test user
+	user := ta.CreateTestUser(t, 9123456789, "testPassword123", "Test", "User", 0, nil)
+
+	// Create wallet for the user
+	wallet := ta.CreateTestWallet(t, &user.ID, nil, 1000)
+
+	// Create transactions with different statuses
+	ta.CreateTestTransaction(t, wallet.ID, user.ID, 100, schema.TransactionStatusSuccess, schema.OrderPaymentMethodOnline, "Success 1")
+	ta.CreateTestTransaction(t, wallet.ID, user.ID, 200, schema.TransactionStatusSuccess, schema.OrderPaymentMethodOnline, "Success 2")
+	ta.CreateTestTransaction(t, wallet.ID, user.ID, 50, schema.TransactionStatusPending, schema.OrderPaymentMethodOnline, "Pending")
+	ta.CreateTestTransaction(t, wallet.ID, user.ID, 75, schema.TransactionStatusFailed, schema.OrderPaymentMethodOnline, "Failed")
+
+	// Generate token
+	token := ta.GenerateTestToken(t, user)
+
+	// Filter by status=success
+	resp := ta.MakeRequest(t, http.MethodGet, fmt.Sprintf("/v1/wallets/%d/transactions?Status=success", wallet.ID), nil, token)
+
+	if resp.StatusCode != http.StatusOK {
+		result := ParseResponse(t, resp)
+		t.Errorf("expected status 200, got %d, response: %v", resp.StatusCode, result)
+		return
+	}
+
+	result := ParseResponse(t, resp)
+	data, ok := result["Data"].([]interface{})
+	if !ok {
+		t.Errorf("expected Data array in response, got: %v", result)
+		return
+	}
+
+	if len(data) != 2 {
+		t.Errorf("expected 2 successful transactions, got %d", len(data))
+	}
+}
+

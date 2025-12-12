@@ -2,6 +2,7 @@ package controller
 
 import (
 	"go-fiber-starter/utils"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -59,6 +60,15 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	req.WorkspaceID, _ = utils.GetUintInQueries(c, "WorkspaceID")
 	req.DormitoryID, _ = utils.GetUintInQueries(c, "DormitoryID")
 
+	var taxonomies []uint64
+	if req.DormitoryID != 0 {
+		taxonomies = append(taxonomies, req.DormitoryID)
+	} else if req.WorkspaceID != 0 {
+		taxonomies = append(taxonomies, req.WorkspaceID)
+	} else if req.CityID != 0 {
+		taxonomies = append(taxonomies, req.CityID)
+	}
+
 	//req.UsageCount, _ = utils.GetUintInQueries(c, "UsageCount")
 	req.WithUsageCount, _ = utils.GetUintInQueries(c, "WithUsageCount")
 
@@ -77,7 +87,19 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 				Message: "برای شما سطح دسترسی مشخص نشده است.",
 			}
 		}
-		req.Posts = user.Meta.PostsToObserve
+		observerTaxonomies := user.Meta.GetTaxonomiesToObserve(true, false)
+
+		if len(taxonomies) > 0 {
+			for _, taxonomy := range taxonomies {
+				if slices.Contains(observerTaxonomies, taxonomy) {
+					req.Taxonomies = append(req.Taxonomies, taxonomy)
+				}
+			}
+		}
+
+		if len(req.Taxonomies) == 0 {
+			req.Taxonomies = observerTaxonomies
+		}
 	}
 
 	reservations, paging, err := _i.service.Index(req)

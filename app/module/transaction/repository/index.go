@@ -33,11 +33,11 @@ func (_i *repo) GetAll(req request.Transactions) (transactions []*schema.Transac
 		Where(&schema.Transaction{WalletID: req.WalletID})
 
 	if req.StartTime != nil && !req.StartTime.IsZero() {
-		baseQuery = baseQuery.Where("created_at >= ?", req.StartTime)
+		baseQuery = baseQuery.Where("transactions.created_at >= ?", req.StartTime)
 	}
 
 	if req.EndTime != nil && !req.EndTime.IsZero() {
-		baseQuery = baseQuery.Where("created_at <= ?", req.EndTime)
+		baseQuery = baseQuery.Where("transactions.created_at <= ?", req.EndTime)
 	}
 
 	if req.Status != "" {
@@ -45,26 +45,40 @@ func (_i *repo) GetAll(req request.Transactions) (transactions []*schema.Transac
 	}
 
 	// Apply filters (CityID / WorkspaceID / DormitoryID)
-	if req.CityID > 0 || req.WorkspaceID > 0 || req.DormitoryID > 0 {
-		var filters []uint64
-		if req.DormitoryID > 0 {
-			filters = append(filters, req.DormitoryID)
-		} else if req.WorkspaceID > 0 {
-			filters = append(filters, req.WorkspaceID)
-		} else if req.CityID > 0 {
-			filters = append(filters, req.CityID)
-		}
-
+	if len(req.Taxonomies) > 0 {
 		baseQuery = baseQuery.
 			Joins("JOIN order_items ON transactions.order_id = order_items.order_id").
 			Joins("JOIN posts_taxonomies ON posts_taxonomies.post_id = order_items.post_id").
-			Where("posts_taxonomies.taxonomy_id IN (?)", filters)
+			Where("posts_taxonomies.taxonomy_id IN (?)", req.Taxonomies)
 	}
 
-	// ✅ Clone safely for SUM
-	sumQuery := baseQuery.Session(&gorm.Session{}) // new session, same model and conditions
+	// ✅ SUM query with EXISTS to avoid duplicate amounts from JOINs
+	sumQuery := _i.DB.Main.
+		Model(&schema.Transaction{}).
+		Where(&schema.Transaction{WalletID: req.WalletID, Status: schema.TransactionStatusSuccess})
+
+	if req.StartTime != nil && !req.StartTime.IsZero() {
+		sumQuery = sumQuery.Where("created_at >= ?", req.StartTime)
+	}
+
+	if req.EndTime != nil && !req.EndTime.IsZero() {
+		sumQuery = sumQuery.Where("created_at <= ?", req.EndTime)
+	}
+
+	// Use EXISTS subquery to filter without creating duplicate rows
+	if len(req.Taxonomies) > 0 {
+		sumQuery = sumQuery.Where(
+			`EXISTS (
+				SELECT 1 FROM order_items 
+				JOIN posts_taxonomies ON posts_taxonomies.post_id = order_items.post_id 
+				WHERE order_items.order_id = transactions.order_id 
+				AND posts_taxonomies.taxonomy_id IN (?)
+			)`,
+			req.Taxonomies,
+		)
+	}
+
 	if err = sumQuery.
-		Where(&schema.Transaction{Status: schema.TransactionStatusSuccess}).
 		Select("COALESCE(CAST(ROUND(SUM(amount)) AS BIGINT), 0)").
 		Scan(&totalAmount).Error; err != nil {
 		return
@@ -83,7 +97,7 @@ func (_i *repo) GetAll(req request.Transactions) (transactions []*schema.Transac
 
 	err = listQuery.
 		Preload("User").
-		Order("created_at desc").
+		Order("transactions.created_at desc").
 		Find(&transactions).Error
 	if err != nil {
 		return

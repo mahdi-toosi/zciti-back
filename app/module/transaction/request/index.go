@@ -20,6 +20,7 @@ type Transactions struct {
 	CityID      uint64     ``
 	WorkspaceID uint64     ``
 	DormitoryID uint64     ``
+	Taxonomies  []uint64   ``
 	Status      string     `example:"pending" validate:"omitempty,oneof=pending success failed refunded cancelled"`
 	StartTime   *time.Time ``
 	EndTime     *time.Time ``

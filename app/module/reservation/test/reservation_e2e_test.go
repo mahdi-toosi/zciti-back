@@ -934,3 +934,344 @@ func TestIndex_DifferentRoles(t *testing.T) {
 	}
 }
 
+// =============================================================================
+// TAXONOMY FILTER TESTS
+// =============================================================================
+
+func TestIndex_FilterByTaxonomies(t *testing.T) {
+	ta := SetupTestApp(t)
+	defer ta.Cleanup()
+
+	// Create test user with business owner role
+	user := ta.CreateTestUser(t, 9123456789, "testPassword123", "Test", "User", 0, nil)
+	business := ta.CreateTestBusiness(t, "Test Business", schema.BTypeGymManager, user.ID)
+
+	// Update user with business permissions
+	user.Permissions[business.ID] = []schema.UserRole{schema.URBusinessOwner}
+	ta.DB.Save(user)
+
+	// Create taxonomies (city -> workspace -> dormitory)
+	city := ta.CreateTestTaxonomy(t, "Test City", schema.TaxonomyTypeCategory, business.ID, nil)
+	workspace := ta.CreateTestTaxonomy(t, "Test Workspace", schema.TaxonomyTypeCategory, business.ID, &city.ID)
+	dormitory := ta.CreateTestTaxonomy(t, "Test Dormitory", schema.TaxonomyTypeCategory, business.ID, &workspace.ID)
+
+	// Create test posts and products
+	post1 := ta.CreateTestPost(t, "Product 1", schema.PostTypeProduct, business.ID, user.ID)
+	post2 := ta.CreateTestPost(t, "Product 2", schema.PostTypeProduct, business.ID, user.ID)
+	variantType := schema.ProductVariantTypeWashingMachine
+	product1 := ta.CreateTestProduct(t, post1.ID, business.ID, 10000, schema.ProductTypeVariant, &variantType)
+	product2 := ta.CreateTestProduct(t, post2.ID, business.ID, 15000, schema.ProductTypeVariant, &variantType)
+
+	// Attach taxonomies to posts
+	ta.AttachTaxonomyToPost(t, post1.ID, dormitory.ID)
+	ta.AttachTaxonomyToPost(t, post2.ID, workspace.ID)
+
+	// Create reservations for different products
+	now := time.Now()
+	ta.CreateTestReservation(t, user.ID, product1.ID, business.ID, now.Add(time.Hour), now.Add(2*time.Hour), schema.ReservationStatusReserved)
+	ta.CreateTestReservation(t, user.ID, product2.ID, business.ID, now.Add(3*time.Hour), now.Add(4*time.Hour), schema.ReservationStatusReserved)
+
+	// Generate token
+	token := ta.GenerateTestToken(t, user)
+
+	// Test filter by DormitoryID - should only get product1's reservation
+	resp := ta.MakeRequest(t, http.MethodGet, fmt.Sprintf("/v1/business/%d/reservations?DormitoryID=%d", business.ID, dormitory.ID), nil, token)
+
+	if resp.StatusCode != http.StatusOK {
+		result := ParseResponse(t, resp)
+		t.Errorf("expected status 200, got %d, response: %v", resp.StatusCode, result)
+		return
+	}
+
+	result := ParseResponse(t, resp)
+	data, ok := result["Data"].([]interface{})
+	if !ok {
+		t.Errorf("expected Data array in response, got: %v", result)
+		return
+	}
+
+	if len(data) != 1 {
+		t.Errorf("expected 1 reservation for dormitory filter, got %d", len(data))
+	}
+}
+
+func TestIndex_FilterByCityID(t *testing.T) {
+	ta := SetupTestApp(t)
+	defer ta.Cleanup()
+
+	// Create test user with business owner role
+	user := ta.CreateTestUser(t, 9123456789, "testPassword123", "Test", "User", 0, nil)
+	business := ta.CreateTestBusiness(t, "Test Business", schema.BTypeGymManager, user.ID)
+
+	// Update user with business permissions
+	user.Permissions[business.ID] = []schema.UserRole{schema.URBusinessOwner}
+	ta.DB.Save(user)
+
+	// Create taxonomies
+	city1 := ta.CreateTestTaxonomy(t, "City 1", schema.TaxonomyTypeCategory, business.ID, nil)
+	city2 := ta.CreateTestTaxonomy(t, "City 2", schema.TaxonomyTypeCategory, business.ID, nil)
+
+	// Create test posts and products
+	post1 := ta.CreateTestPost(t, "Product 1", schema.PostTypeProduct, business.ID, user.ID)
+	post2 := ta.CreateTestPost(t, "Product 2", schema.PostTypeProduct, business.ID, user.ID)
+	variantType := schema.ProductVariantTypeWashingMachine
+	product1 := ta.CreateTestProduct(t, post1.ID, business.ID, 10000, schema.ProductTypeVariant, &variantType)
+	product2 := ta.CreateTestProduct(t, post2.ID, business.ID, 15000, schema.ProductTypeVariant, &variantType)
+
+	// Attach taxonomies to posts
+	ta.AttachTaxonomyToPost(t, post1.ID, city1.ID)
+	ta.AttachTaxonomyToPost(t, post2.ID, city2.ID)
+
+	// Create reservations
+	now := time.Now()
+	ta.CreateTestReservation(t, user.ID, product1.ID, business.ID, now.Add(time.Hour), now.Add(2*time.Hour), schema.ReservationStatusReserved)
+	ta.CreateTestReservation(t, user.ID, product2.ID, business.ID, now.Add(3*time.Hour), now.Add(4*time.Hour), schema.ReservationStatusReserved)
+
+	// Generate token
+	token := ta.GenerateTestToken(t, user)
+
+	// Filter by CityID
+	resp := ta.MakeRequest(t, http.MethodGet, fmt.Sprintf("/v1/business/%d/reservations?CityID=%d", business.ID, city1.ID), nil, token)
+
+	if resp.StatusCode != http.StatusOK {
+		result := ParseResponse(t, resp)
+		t.Errorf("expected status 200, got %d, response: %v", resp.StatusCode, result)
+		return
+	}
+
+	result := ParseResponse(t, resp)
+	data, ok := result["Data"].([]interface{})
+	if !ok {
+		t.Errorf("expected Data array in response, got: %v", result)
+		return
+	}
+
+	if len(data) != 1 {
+		t.Errorf("expected 1 reservation for city1 filter, got %d", len(data))
+	}
+}
+
+// =============================================================================
+// BUSINESS OBSERVER TESTS
+// =============================================================================
+
+func TestIndex_BusinessObserver_WithMeta(t *testing.T) {
+	ta := SetupTestApp(t)
+	defer ta.Cleanup()
+
+	// Create business owner
+	owner := ta.CreateTestUser(t, 9123456789, "testPassword123", "Owner", "User", 0, nil)
+	business := ta.CreateTestBusiness(t, "Test Business", schema.BTypeGymManager, owner.ID)
+
+	// Update owner with business permissions
+	owner.Permissions[business.ID] = []schema.UserRole{schema.URBusinessOwner}
+	ta.DB.Save(owner)
+
+	// Create taxonomies
+	city1 := ta.CreateTestTaxonomy(t, "City 1", schema.TaxonomyTypeCategory, business.ID, nil)
+	city2 := ta.CreateTestTaxonomy(t, "City 2", schema.TaxonomyTypeCategory, business.ID, nil)
+
+	// Create test posts and products
+	post1 := ta.CreateTestPost(t, "Product 1", schema.PostTypeProduct, business.ID, owner.ID)
+	post2 := ta.CreateTestPost(t, "Product 2", schema.PostTypeProduct, business.ID, owner.ID)
+	variantType := schema.ProductVariantTypeWashingMachine
+	product1 := ta.CreateTestProduct(t, post1.ID, business.ID, 10000, schema.ProductTypeVariant, &variantType)
+	product2 := ta.CreateTestProduct(t, post2.ID, business.ID, 15000, schema.ProductTypeVariant, &variantType)
+
+	// Attach taxonomies to posts
+	ta.AttachTaxonomyToPost(t, post1.ID, city1.ID)
+	ta.AttachTaxonomyToPost(t, post2.ID, city2.ID)
+
+	// Create reservations
+	now := time.Now()
+	ta.CreateTestReservation(t, owner.ID, product1.ID, business.ID, now.Add(time.Hour), now.Add(2*time.Hour), schema.ReservationStatusReserved)
+	ta.CreateTestReservation(t, owner.ID, product2.ID, business.ID, now.Add(3*time.Hour), now.Add(4*time.Hour), schema.ReservationStatusReserved)
+
+	// Create observer with access to city1 only
+	observerMeta := &schema.UserMeta{
+		TaxonomiesToObserve: schema.UserMetaTaxonomiesToObserve{
+			city1.ID: {Checked: true, PartialChecked: false},
+		},
+	}
+	observer := ta.CreateTestUserWithMeta(t, 9987654321, "testPassword456", "Observer", "User", business.ID, []schema.UserRole{schema.URBusinessObserver}, observerMeta)
+
+	// Generate token for observer
+	token := ta.GenerateTestToken(t, observer)
+
+	// Make request - observer should only see reservations for city1
+	resp := ta.MakeRequest(t, http.MethodGet, fmt.Sprintf("/v1/business/%d/reservations", business.ID), nil, token)
+
+	if resp.StatusCode != http.StatusOK {
+		result := ParseResponse(t, resp)
+		t.Errorf("expected status 200, got %d, response: %v", resp.StatusCode, result)
+		return
+	}
+
+	result := ParseResponse(t, resp)
+	data, ok := result["Data"].([]interface{})
+	if !ok {
+		t.Errorf("expected Data array in response, got: %v", result)
+		return
+	}
+
+	// Observer should only see reservations related to city1
+	if len(data) != 1 {
+		t.Errorf("expected 1 reservation for observer with city1 access, got %d", len(data))
+	}
+}
+
+func TestIndex_BusinessObserver_WithoutMeta(t *testing.T) {
+	ta := SetupTestApp(t)
+	defer ta.Cleanup()
+
+	// Create business owner
+	owner := ta.CreateTestUser(t, 9123456789, "testPassword123", "Owner", "User", 0, nil)
+	business := ta.CreateTestBusiness(t, "Test Business", schema.BTypeGymManager, owner.ID)
+
+	// Create observer without meta (should be forbidden)
+	observer := ta.CreateTestUser(t, 9987654321, "testPassword456", "Observer", "User", business.ID, []schema.UserRole{schema.URBusinessObserver})
+
+	// Generate token for observer
+	token := ta.GenerateTestToken(t, observer)
+
+	// Make request - observer without meta should get forbidden
+	resp := ta.MakeRequest(t, http.MethodGet, fmt.Sprintf("/v1/business/%d/reservations", business.ID), nil, token)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Errorf("expected status 403 for observer without meta, got %d", resp.StatusCode)
+	}
+}
+
+func TestIndex_BusinessObserver_FilterWithTaxonomyAccess(t *testing.T) {
+	ta := SetupTestApp(t)
+	defer ta.Cleanup()
+
+	// Create business owner
+	owner := ta.CreateTestUser(t, 9123456789, "testPassword123", "Owner", "User", 0, nil)
+	business := ta.CreateTestBusiness(t, "Test Business", schema.BTypeGymManager, owner.ID)
+
+	// Update owner with business permissions
+	owner.Permissions[business.ID] = []schema.UserRole{schema.URBusinessOwner}
+	ta.DB.Save(owner)
+
+	// Create taxonomies
+	city1 := ta.CreateTestTaxonomy(t, "City 1", schema.TaxonomyTypeCategory, business.ID, nil)
+	city2 := ta.CreateTestTaxonomy(t, "City 2", schema.TaxonomyTypeCategory, business.ID, nil)
+
+	// Create test posts and products
+	post1 := ta.CreateTestPost(t, "Product 1", schema.PostTypeProduct, business.ID, owner.ID)
+	post2 := ta.CreateTestPost(t, "Product 2", schema.PostTypeProduct, business.ID, owner.ID)
+	variantType := schema.ProductVariantTypeWashingMachine
+	product1 := ta.CreateTestProduct(t, post1.ID, business.ID, 10000, schema.ProductTypeVariant, &variantType)
+	product2 := ta.CreateTestProduct(t, post2.ID, business.ID, 15000, schema.ProductTypeVariant, &variantType)
+
+	// Attach taxonomies to posts
+	ta.AttachTaxonomyToPost(t, post1.ID, city1.ID)
+	ta.AttachTaxonomyToPost(t, post2.ID, city2.ID)
+
+	// Create reservations
+	now := time.Now()
+	ta.CreateTestReservation(t, owner.ID, product1.ID, business.ID, now.Add(time.Hour), now.Add(2*time.Hour), schema.ReservationStatusReserved)
+	ta.CreateTestReservation(t, owner.ID, product2.ID, business.ID, now.Add(3*time.Hour), now.Add(4*time.Hour), schema.ReservationStatusReserved)
+
+	// Create observer with access to city1 only
+	observerMeta := &schema.UserMeta{
+		TaxonomiesToObserve: schema.UserMetaTaxonomiesToObserve{
+			city1.ID: {Checked: true, PartialChecked: false},
+		},
+	}
+	observer := ta.CreateTestUserWithMeta(t, 9987654321, "testPassword456", "Observer", "User", business.ID, []schema.UserRole{schema.URBusinessObserver}, observerMeta)
+
+	// Generate token for observer
+	token := ta.GenerateTestToken(t, observer)
+
+	// Observer requests with CityID filter for city1 (which they have access to)
+	resp := ta.MakeRequest(t, http.MethodGet, fmt.Sprintf("/v1/business/%d/reservations?CityID=%d", business.ID, city1.ID), nil, token)
+
+	if resp.StatusCode != http.StatusOK {
+		result := ParseResponse(t, resp)
+		t.Errorf("expected status 200, got %d, response: %v", resp.StatusCode, result)
+		return
+	}
+
+	result := ParseResponse(t, resp)
+	data, ok := result["Data"].([]interface{})
+	if !ok {
+		t.Errorf("expected Data array in response, got: %v", result)
+		return
+	}
+
+	// Should only see city1 reservation
+	if len(data) != 1 {
+		t.Errorf("expected 1 reservation for observer with city1 filter, got %d", len(data))
+	}
+}
+
+func TestIndex_BusinessObserver_FilterWithNoTaxonomyAccess(t *testing.T) {
+	ta := SetupTestApp(t)
+	defer ta.Cleanup()
+
+	// Create business owner
+	owner := ta.CreateTestUser(t, 9123456789, "testPassword123", "Owner", "User", 0, nil)
+	business := ta.CreateTestBusiness(t, "Test Business", schema.BTypeGymManager, owner.ID)
+
+	// Update owner with business permissions
+	owner.Permissions[business.ID] = []schema.UserRole{schema.URBusinessOwner}
+	ta.DB.Save(owner)
+
+	// Create taxonomies
+	city1 := ta.CreateTestTaxonomy(t, "City 1", schema.TaxonomyTypeCategory, business.ID, nil)
+	city2 := ta.CreateTestTaxonomy(t, "City 2", schema.TaxonomyTypeCategory, business.ID, nil)
+
+	// Create test posts and products
+	post1 := ta.CreateTestPost(t, "Product 1", schema.PostTypeProduct, business.ID, owner.ID)
+	post2 := ta.CreateTestPost(t, "Product 2", schema.PostTypeProduct, business.ID, owner.ID)
+	variantType := schema.ProductVariantTypeWashingMachine
+	product1 := ta.CreateTestProduct(t, post1.ID, business.ID, 10000, schema.ProductTypeVariant, &variantType)
+	product2 := ta.CreateTestProduct(t, post2.ID, business.ID, 15000, schema.ProductTypeVariant, &variantType)
+
+	// Attach taxonomies to posts
+	ta.AttachTaxonomyToPost(t, post1.ID, city1.ID)
+	ta.AttachTaxonomyToPost(t, post2.ID, city2.ID)
+
+	// Create reservations
+	now := time.Now()
+	ta.CreateTestReservation(t, owner.ID, product1.ID, business.ID, now.Add(time.Hour), now.Add(2*time.Hour), schema.ReservationStatusReserved)
+	ta.CreateTestReservation(t, owner.ID, product2.ID, business.ID, now.Add(3*time.Hour), now.Add(4*time.Hour), schema.ReservationStatusReserved)
+
+	// Create observer with access to city1 only
+	observerMeta := &schema.UserMeta{
+		TaxonomiesToObserve: schema.UserMetaTaxonomiesToObserve{
+			city1.ID: {Checked: true, PartialChecked: false},
+		},
+	}
+	observer := ta.CreateTestUserWithMeta(t, 9987654321, "testPassword456", "Observer", "User", business.ID, []schema.UserRole{schema.URBusinessObserver}, observerMeta)
+
+	// Generate token for observer
+	token := ta.GenerateTestToken(t, observer)
+
+	// Observer requests with CityID filter for city2 (which they DON'T have access to)
+	// Should return empty results because city2 is not in observer's access list
+	resp := ta.MakeRequest(t, http.MethodGet, fmt.Sprintf("/v1/business/%d/reservations?CityID=%d", business.ID, city2.ID), nil, token)
+
+	if resp.StatusCode != http.StatusOK {
+		result := ParseResponse(t, resp)
+		t.Errorf("expected status 200, got %d, response: %v", resp.StatusCode, result)
+		return
+	}
+
+	result := ParseResponse(t, resp)
+	data, ok := result["Data"].([]interface{})
+	if !ok {
+		t.Errorf("expected Data array in response, got: %v", result)
+		return
+	}
+
+	// Observer requested city2 but only has access to city1, so should get only city1 results
+	// Based on the controller logic, if the requested taxonomy is not in observer's list,
+	// it falls back to showing all taxonomies the observer has access to
+	if len(data) != 1 {
+		t.Errorf("expected 1 reservation (fallback to observer's accessible taxonomies), got %d", len(data))
+	}
+}
+

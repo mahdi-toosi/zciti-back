@@ -27,7 +27,7 @@ type Reservations struct {
 	StartTime      *time.Time
 	EndTime        *time.Time
 	WithUsageCount uint64
-	Posts          []uint64
+	Taxonomies     []uint64
 	Status         schema.ReservationStatus
 	Pagination     *paginator.Pagination
 	//UsageCount     uint64

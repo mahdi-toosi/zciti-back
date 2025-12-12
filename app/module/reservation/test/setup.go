@@ -68,6 +68,8 @@ func createTestErrorHandler() fiber.ErrorHandler {
 // migrateTestModels creates the necessary tables for reservation testing
 func migrateTestModels(db *gorm.DB) error {
 	// Drop existing tables to ensure clean state
+	db.Exec("DROP TABLE IF EXISTS posts_taxonomies CASCADE")
+	db.Exec("DROP TABLE IF EXISTS taxonomies CASCADE")
 	db.Exec("DROP TABLE IF EXISTS reservations CASCADE")
 	db.Exec("DROP TABLE IF EXISTS products CASCADE")
 	db.Exec("DROP TABLE IF EXISTS posts CASCADE")
@@ -196,6 +198,35 @@ func migrateTestModels(db *gorm.DB) error {
 		return err
 	}
 
+	// Create taxonomies table
+	if err := db.Exec(`
+		CREATE TABLE IF NOT EXISTS taxonomies (
+			id BIGSERIAL PRIMARY KEY,
+			title VARCHAR(255) NOT NULL,
+			slug VARCHAR(255),
+			type VARCHAR(50),
+			parent_id BIGINT,
+			business_id BIGINT,
+			description VARCHAR(500),
+			created_at TIMESTAMPTZ,
+			updated_at TIMESTAMPTZ,
+			deleted_at TIMESTAMPTZ
+		)
+	`).Error; err != nil {
+		return err
+	}
+
+	// Create posts_taxonomies junction table
+	if err := db.Exec(`
+		CREATE TABLE IF NOT EXISTS posts_taxonomies (
+			post_id BIGINT NOT NULL,
+			taxonomy_id BIGINT NOT NULL,
+			PRIMARY KEY (post_id, taxonomy_id)
+		)
+	`).Error; err != nil {
+		return err
+	}
+
 	// Create indexes
 	db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_mobile ON users(mobile)")
 	db.Exec("CREATE INDEX IF NOT EXISTS idx_users_deleted_at ON users(deleted_at)")
@@ -205,6 +236,9 @@ func migrateTestModels(db *gorm.DB) error {
 	db.Exec("CREATE INDEX IF NOT EXISTS idx_products_post_id ON products(post_id)")
 	db.Exec("CREATE INDEX IF NOT EXISTS idx_products_business_id ON products(business_id)")
 	db.Exec("CREATE INDEX IF NOT EXISTS idx_posts_business_id ON posts(business_id)")
+	db.Exec("CREATE INDEX IF NOT EXISTS idx_taxonomies_business_id ON taxonomies(business_id)")
+	db.Exec("CREATE INDEX IF NOT EXISTS idx_posts_taxonomies_post_id ON posts_taxonomies(post_id)")
+	db.Exec("CREATE INDEX IF NOT EXISTS idx_posts_taxonomies_taxonomy_id ON posts_taxonomies(taxonomy_id)")
 
 	return nil
 }
@@ -261,6 +295,8 @@ func SetupTestApp(t *testing.T) *TestApp {
 	// Cleanup function
 	cleanup := func() {
 		// Clean up test data
+		dbWrapper.Main.Exec("DELETE FROM posts_taxonomies")
+		dbWrapper.Main.Exec("DELETE FROM taxonomies")
 		dbWrapper.Main.Exec("DELETE FROM reservations")
 		dbWrapper.Main.Exec("DELETE FROM products")
 		dbWrapper.Main.Exec("DELETE FROM posts")
@@ -492,11 +528,67 @@ func (ta *TestApp) CleanupReservations(t *testing.T) {
 // CleanupAll removes all test data from the database
 func (ta *TestApp) CleanupAll(t *testing.T) {
 	t.Helper()
+	ta.DB.Exec("DELETE FROM posts_taxonomies")
+	ta.DB.Exec("DELETE FROM taxonomies")
 	ta.DB.Exec("DELETE FROM reservations")
 	ta.DB.Exec("DELETE FROM products")
 	ta.DB.Exec("DELETE FROM posts")
 	ta.DB.Exec("DELETE FROM business_users")
 	ta.DB.Exec("DELETE FROM businesses")
 	ta.DB.Exec("DELETE FROM users")
+}
+
+// CreateTestTaxonomy creates a test taxonomy in the database
+func (ta *TestApp) CreateTestTaxonomy(t *testing.T, title string, taxonomyType schema.TaxonomyType, businessID uint64, parentID *uint64) *schema.Taxonomy {
+	t.Helper()
+
+	taxonomy := &schema.Taxonomy{
+		Title:      title,
+		Type:       taxonomyType,
+		BusinessID: businessID,
+		ParentID:   parentID,
+	}
+
+	if err := ta.DB.Create(taxonomy).Error; err != nil {
+		t.Fatalf("failed to create test taxonomy: %v", err)
+	}
+
+	return taxonomy
+}
+
+// AttachTaxonomyToPost attaches a taxonomy to a post
+func (ta *TestApp) AttachTaxonomyToPost(t *testing.T, postID, taxonomyID uint64) {
+	t.Helper()
+
+	if err := ta.DB.Exec("INSERT INTO posts_taxonomies (post_id, taxonomy_id) VALUES (?, ?)", postID, taxonomyID).Error; err != nil {
+		t.Fatalf("failed to attach taxonomy to post: %v", err)
+	}
+}
+
+// CreateTestUserWithMeta creates a test user with meta data for observer permissions
+func (ta *TestApp) CreateTestUserWithMeta(t *testing.T, mobile uint64, password string, firstName, lastName string, businessID uint64, roles []schema.UserRole, meta *schema.UserMeta) *schema.User {
+	t.Helper()
+
+	isSuspended := false
+	permissions := schema.UserPermissions{}
+	if businessID > 0 && len(roles) > 0 {
+		permissions[businessID] = roles
+	}
+
+	user := &schema.User{
+		Mobile:      mobile,
+		FirstName:   firstName,
+		LastName:    lastName,
+		Password:    helpers.Hash([]byte(password)),
+		Permissions: permissions,
+		IsSuspended: &isSuspended,
+		Meta:        meta,
+	}
+
+	if err := ta.DB.Create(user).Error; err != nil {
+		t.Fatalf("failed to create test user: %v", err)
+	}
+
+	return user
 }
 
