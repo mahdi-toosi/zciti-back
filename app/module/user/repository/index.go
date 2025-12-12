@@ -10,7 +10,6 @@ import (
 	"go-fiber-starter/utils/paginator"
 	"strconv"
 	"strings"
-	"time"
 
 	"gorm.io/gorm"
 )
@@ -121,12 +120,12 @@ func (_i *repo) GetUsers(req request.BusinessUsers) (users []*schema.User, pagin
 	joinCondition := "reservations.user_id = users.id AND reservations.deleted_at IS NULL AND reservations.status = 'reserved'"
 
 	if req.StartTime != nil && !req.StartTime.IsZero() {
-		date, _ := utils.StartOfDate(req.StartTime.Format(time.DateTime), time.DateTime)
+		date := utils.StartOfDay(*req.StartTime)
 		joinCondition += fmt.Sprintf(" AND reservations.start_time >= '%s'", date)
 	}
 
 	if req.EndTime != nil && !req.EndTime.IsZero() {
-		date, _ := utils.EndOfDate(req.EndTime.Format(time.DateTime), time.DateTime)
+		date := utils.EndOfDay(*req.EndTime)
 		joinCondition += fmt.Sprintf(" AND reservations.end_time <= '%s'", date)
 	}
 

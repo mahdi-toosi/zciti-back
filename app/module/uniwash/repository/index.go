@@ -117,8 +117,8 @@ func (_i *repo) IndexReservedMachines(req request.ReservedMachinesRequest) (rese
 	}
 
 	if !req.Date.IsZero() {
-		startTime, _ := utils.StartOfDate(req.Date.Format(time.DateTime), time.DateTime)
-		endTime, _ := utils.EndOfDate(req.Date.Format(time.DateTime), time.DateTime)
+		startTime := utils.StartOfDay(req.Date)
+		endTime := utils.EndOfDay(req.Date)
 		query.Where("start_time BETWEEN ? AND ?", startTime, endTime)
 	}
 

@@ -11,7 +11,6 @@ import (
 	"go-fiber-starter/utils/paginator"
 	"go-fiber-starter/utils/response"
 	"strconv"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/xuri/excelize/v2"
@@ -55,6 +54,7 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	req.WalletID = walletID
 	req.Pagination = paginate
 	export := c.Query("Export")
+	req.Status = c.Query("Status")
 	req.CityID, _ = utils.GetUintInQueries(c, "CityID")
 	req.ProductID, _ = utils.GetUintInQueries(c, "ProductID")
 	req.WorkspaceID, _ = utils.GetUintInQueries(c, "WorkspaceID")
@@ -64,8 +64,7 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	req.EndTime = utils.GetDateInQueries(c, "EndTime")
 	if req.EndTime != nil && !req.EndTime.IsZero() {
 		// end of the end date
-		endOfEndTime, _ := utils.EndOfDate(req.EndTime.Format(time.DateTime), time.DateTime)
-		v, _ := time.Parse(time.DateTime, endOfEndTime)
+		v := utils.EndOfDay(*req.EndTime)
 		req.EndTime = &v
 	}
 

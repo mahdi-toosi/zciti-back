@@ -336,54 +336,10 @@ func GenerateRandomString(length int) string {
 	return string(b)
 }
 
-func StartOfDate(dateStr string, returnLayout string) (string, error) {
-	// Load Tehran location
-	tehranLoc, err := time.LoadLocation("Asia/Tehran")
-	if err != nil {
-		return "", fmt.Errorf("failed to load Tehran location: %w", err)
-	}
-
-	var t time.Time
-
-	// First try parsing with DateTime layout (includes time)
-	t, err = time.ParseInLocation(time.DateTime, dateStr, tehranLoc)
-	if err != nil {
-		// If DateTime fails, try DateOnly layout (just date)
-		t, err = time.ParseInLocation(time.DateOnly, dateStr, tehranLoc)
-		if err != nil {
-			return "", fmt.Errorf("failed to parse date: %w", err)
-		}
-	}
-
-	// Get start of the day (midnight) in Tehran timezone
-	startTime := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, tehranLoc)
-
-	// Format according to the requested layout
-	return startTime.Format(returnLayout), nil
+func StartOfDay(t time.Time) time.Time {
+	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
 }
 
-func EndOfDate(dateStr string, returnLayout string) (string, error) {
-	// Load Tehran location
-	tehranLoc, err := time.LoadLocation("Asia/Tehran")
-	if err != nil {
-		return "", fmt.Errorf("failed to load Tehran location: %w", err)
-	}
-
-	var t time.Time
-
-	// First try parsing with DateTime layout (includes time)
-	t, err = time.ParseInLocation(time.DateTime, dateStr, tehranLoc)
-	if err != nil {
-		// If DateTime fails, try DateOnly layout (just date)
-		t, err = time.ParseInLocation(time.DateOnly, dateStr, tehranLoc)
-		if err != nil {
-			return "", fmt.Errorf("failed to parse date: %w", err)
-		}
-	}
-
-	// Get end of the day (one nanosecond before midnight of next day)
-	endTime := time.Date(t.Year(), t.Month(), t.Day(), 23, 59, 59, 99, tehranLoc)
-
-	// Format according to the requested layout
-	return endTime.Format(returnLayout), nil
+func EndOfDay(t time.Time) time.Time {
+	return time.Date(t.Year(), t.Month(), t.Day(), 23, 59, 59, 999999999, t.Location())
 }

@@ -40,6 +40,10 @@ func (_i *repo) GetAll(req request.Transactions) (transactions []*schema.Transac
 		baseQuery = baseQuery.Where("created_at <= ?", req.EndTime)
 	}
 
+	if req.Status != "" {
+		baseQuery = baseQuery.Where("status = ?", req.Status)
+	}
+
 	// Apply filters (CityID / WorkspaceID / DormitoryID)
 	if req.CityID > 0 || req.WorkspaceID > 0 || req.DormitoryID > 0 {
 		var filters []uint64

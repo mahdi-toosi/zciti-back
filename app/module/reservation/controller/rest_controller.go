@@ -4,7 +4,6 @@ import (
 	"go-fiber-starter/utils"
 	"strconv"
 	"strings"
-	"time"
 
 	"go-fiber-starter/app/module/reservation/request"
 	"go-fiber-starter/app/module/reservation/service"
@@ -67,9 +66,8 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	req.EndTime = utils.GetDateInQueries(c, "EndTime")
 	if req.EndTime != nil && !req.EndTime.IsZero() {
 		// end of the end date
-		endOfEndTime, _ := utils.EndOfDate(req.EndTime.Format(time.DateTime), time.DateTime)
-		v, _ := time.Parse(time.DateTime, endOfEndTime)
-		req.EndTime = &v
+		endOfEndTime := utils.EndOfDay(*req.EndTime)
+		req.EndTime = &endOfEndTime
 	}
 
 	if user.IsBusinessObserver(businessID) {
