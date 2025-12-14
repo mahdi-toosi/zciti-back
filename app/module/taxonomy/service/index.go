@@ -34,6 +34,9 @@ func (_i *service) Index(req request.Taxonomies, forUser bool) (taxonomies []*re
 		return
 	}
 
+	// Initialize empty slice to avoid returning nil
+	taxonomies = make([]*response.Taxonomy, 0)
+
 	for _, result := range results {
 		taxonomies = append(taxonomies, response.FromDomain(result, forUser))
 	}
@@ -46,6 +49,9 @@ func (_i *service) Search(req request.Taxonomies, forUser bool, user *schema.Use
 	if err != nil {
 		return
 	}
+
+	// Initialize empty slice to avoid returning nil
+	taxonomies = make([]*response.Taxonomy, 0)
 
 	isObserver := false
 	var taxonomiesToObserve []uint64

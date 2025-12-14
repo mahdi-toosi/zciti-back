@@ -4,6 +4,7 @@ import (
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/transaction/request"
 	"go-fiber-starter/internal/bootstrap/database"
+	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
 
 	"gorm.io/gorm"
@@ -33,11 +34,11 @@ func (_i *repo) GetAll(req request.Transactions) (transactions []*schema.Transac
 		Where(&schema.Transaction{WalletID: req.WalletID})
 
 	if req.StartTime != nil && !req.StartTime.IsZero() {
-		baseQuery = baseQuery.Where("transactions.created_at >= ?", req.StartTime)
+		baseQuery = baseQuery.Where("transactions.created_at >= ?", utils.StartOfDayString(*req.StartTime))
 	}
 
 	if req.EndTime != nil && !req.EndTime.IsZero() {
-		baseQuery = baseQuery.Where("transactions.created_at <= ?", req.EndTime)
+		baseQuery = baseQuery.Where("transactions.created_at <= ?", utils.EndOfDayString(*req.EndTime))
 	}
 
 	if req.Status != "" {
@@ -45,7 +46,11 @@ func (_i *repo) GetAll(req request.Transactions) (transactions []*schema.Transac
 	}
 
 	// Apply filters (CityID / WorkspaceID / DormitoryID)
-	if len(req.Taxonomies) > 0 {
+	if req.ProductID != 0 {
+		baseQuery = baseQuery.
+			Joins("JOIN order_items ON transactions.order_id = order_items.order_id").
+			Where("CAST(order_items.meta->>'ProductID' AS BIGINT) = ?", req.ProductID)
+	} else if len(req.Taxonomies) > 0 {
 		baseQuery = baseQuery.
 			Joins("JOIN order_items ON transactions.order_id = order_items.order_id").
 			Joins("JOIN posts_taxonomies ON posts_taxonomies.post_id = order_items.post_id").
@@ -58,15 +63,25 @@ func (_i *repo) GetAll(req request.Transactions) (transactions []*schema.Transac
 		Where(&schema.Transaction{WalletID: req.WalletID, Status: schema.TransactionStatusSuccess})
 
 	if req.StartTime != nil && !req.StartTime.IsZero() {
-		sumQuery = sumQuery.Where("created_at >= ?", req.StartTime)
+		sumQuery = sumQuery.Where("created_at >= ?", utils.StartOfDayString(*req.StartTime))
 	}
 
 	if req.EndTime != nil && !req.EndTime.IsZero() {
-		sumQuery = sumQuery.Where("created_at <= ?", req.EndTime)
+		sumQuery = sumQuery.Where("created_at <= ?", utils.EndOfDayString(*req.EndTime))
 	}
 
-	// Use EXISTS subquery to filter without creating duplicate rows
-	if len(req.Taxonomies) > 0 {
+	if req.ProductID != 0 {
+		// Use EXISTS subquery to filter without creating duplicate rows
+		sumQuery = sumQuery.Where(
+			`EXISTS (
+				SELECT 1 FROM order_items 
+				WHERE order_items.order_id = transactions.order_id 
+				AND CAST(order_items.meta->>'ProductID' AS BIGINT) = ?
+			)`,
+			req.ProductID,
+		)
+	} else if len(req.Taxonomies) > 0 {
+		// Use EXISTS subquery to filter without creating duplicate rows
 		sumQuery = sumQuery.Where(
 			`EXISTS (
 				SELECT 1 FROM order_items 

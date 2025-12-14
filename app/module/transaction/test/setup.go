@@ -223,9 +223,12 @@ func migrateTestModels(db *gorm.DB) error {
 		CREATE TABLE IF NOT EXISTS orders (
 			id BIGSERIAL PRIMARY KEY,
 			status VARCHAR(50) DEFAULT 'pending',
-			total FLOAT NOT NULL DEFAULT 0,
+			total_amt FLOAT NOT NULL DEFAULT 0,
+			payment_method VARCHAR(20) DEFAULT 'online' NOT NULL,
 			user_id BIGINT NOT NULL,
 			business_id BIGINT,
+			coupon_id BIGINT,
+			parent_id BIGINT,
 			meta JSONB,
 			created_at TIMESTAMPTZ,
 			updated_at TIMESTAMPTZ,
@@ -239,12 +242,14 @@ func migrateTestModels(db *gorm.DB) error {
 	if err := db.Exec(`
 		CREATE TABLE IF NOT EXISTS order_items (
 			id BIGSERIAL PRIMARY KEY,
+			type VARCHAR(50) NOT NULL DEFAULT 'lineItem',
 			order_id BIGINT NOT NULL,
-			product_id BIGINT NOT NULL,
 			post_id BIGINT,
 			quantity INT NOT NULL DEFAULT 1,
 			price FLOAT NOT NULL,
-			total FLOAT NOT NULL,
+			subtotal FLOAT NOT NULL DEFAULT 0,
+			tax_amt FLOAT NOT NULL DEFAULT 0,
+			reservation_id BIGINT,
 			meta JSONB,
 			created_at TIMESTAMPTZ,
 			updated_at TIMESTAMPTZ,
@@ -259,10 +264,11 @@ func migrateTestModels(db *gorm.DB) error {
 		CREATE TABLE IF NOT EXISTS taxonomies (
 			id BIGSERIAL PRIMARY KEY,
 			title VARCHAR(255) NOT NULL,
-			slug VARCHAR(255),
-			type VARCHAR(50),
+			slug VARCHAR(255) NOT NULL,
+			type VARCHAR(50) NOT NULL,
+			domain VARCHAR(100) NOT NULL,
 			parent_id BIGINT,
-			business_id BIGINT,
+			business_id BIGINT NOT NULL,
 			description VARCHAR(500),
 			created_at TIMESTAMPTZ,
 			updated_at TIMESTAMPTZ,
@@ -670,6 +676,8 @@ func (ta *TestApp) CreateTestTaxonomy(t *testing.T, title string, taxonomyType s
 	taxonomy := &schema.Taxonomy{
 		Title:      title,
 		Type:       taxonomyType,
+		Domain:     schema.PostTypePost,
+		Slug:       title + "-slug",
 		BusinessID: businessID,
 		ParentID:   parentID,
 	}
@@ -737,4 +745,3 @@ func (ta *TestApp) CreateTestTransactionWithOrder(t *testing.T, walletID uint64,
 
 	return transaction
 }
-

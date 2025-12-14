@@ -2,7 +2,6 @@ package repository
 
 import (
 	"errors"
-	"fmt"
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/user/request"
 	"go-fiber-starter/internal/bootstrap/database"
@@ -116,20 +115,21 @@ func (_i *repo) GetUsers(req request.BusinessUsers) (users []*schema.User, pagin
 		query.Where(`permissions -> '2' ? 'businessObserver'`)
 	}
 
-	// Build the LEFT JOIN condition dynamically
-	joinCondition := "reservations.user_id = users.id AND reservations.deleted_at IS NULL AND reservations.status = 'reserved'"
+	// Build the LEFT JOIN condition dynamically with parameterized queries
+	joinCondition := "LEFT JOIN reservations ON reservations.user_id = users.id AND reservations.deleted_at IS NULL AND reservations.status = 'reserved'"
+	joinArgs := []interface{}{}
 
 	if req.StartTime != nil && !req.StartTime.IsZero() {
-		date := utils.StartOfDay(*req.StartTime)
-		joinCondition += fmt.Sprintf(" AND reservations.start_time >= '%s'", date)
+		joinCondition += " AND reservations.start_time >= ?"
+		joinArgs = append(joinArgs, utils.StartOfDayString(*req.StartTime))
 	}
 
 	if req.EndTime != nil && !req.EndTime.IsZero() {
-		date := utils.EndOfDay(*req.EndTime)
-		joinCondition += fmt.Sprintf(" AND reservations.end_time <= '%s'", date)
+		joinCondition += " AND reservations.end_time <= ?"
+		joinArgs = append(joinArgs, utils.EndOfDayString(*req.EndTime))
 	}
 
-	query.Joins("LEFT JOIN reservations ON " + joinCondition)
+	query.Joins(joinCondition, joinArgs...)
 
 	if len(req.UserIDs) > 0 {
 		query.Where("users.id IN (?)", req.UserIDs)

@@ -44,11 +44,17 @@ func (_i *repo) GetAll(req request.Taxonomies) (taxonomies []*schema.Taxonomy, p
 		req.Pagination.Total = total
 	}
 
+	// Build OFFSET and LIMIT clause only when pagination is requested
+	offsetLimitClause := ""
+	if req.Pagination.Page > 0 {
+		offsetLimitClause = fmt.Sprintf("OFFSET %d LIMIT %d", req.Pagination.Offset, req.Pagination.Limit)
+	}
+
 	q := fmt.Sprintf(`
 		WITH roots AS (
 			SELECT id FROM taxonomies WHERE parent_id IS NULL
-				AND business_id = ? AND %s type = ? AND %s deleted_at IS NULL 
-				OFFSET ? LIMIT ?
+				AND business_id = ? AND %s %s %s deleted_at IS NULL 
+				%s
 		),
 			 recursive AS (
 				 WITH RECURSIVE taxonomy_tree(id, parent_id, title, type, domain, slug, description, created_at, depth) AS (
@@ -64,11 +70,13 @@ func (_i *repo) GetAll(req request.Taxonomies) (taxonomies []*schema.Taxonomy, p
 			 )
 		SELECT r.* FROM recursive r ORDER BY r.created_at DESC;
 		`,
-		utils.InlineCondition(req.Domain != "", "domain = '"+req.Domain+"' AND", ""),
+		utils.InlineCondition(req.Type != "", "type = '"+string(req.Type)+"' AND", ""),
+		utils.InlineCondition(req.Domain != "", "domain = '"+string(req.Domain)+"' AND", ""),
 		utils.InlineCondition(req.Keyword != "", "title Like '%"+req.Keyword+"%' AND", ""),
+		offsetLimitClause,
 	)
 
-	query := _i.DB.Main.Raw(q, req.BusinessID, req.Type, req.Pagination.Offset, req.Pagination.Limit)
+	query := _i.DB.Main.Raw(q, req.BusinessID)
 
 	err = query.Scan(&taxonomies).Error
 	if err != nil {

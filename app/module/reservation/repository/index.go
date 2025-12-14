@@ -6,6 +6,7 @@ import (
 	"go-fiber-starter/app/module/reservation/request"
 	"go-fiber-starter/app/module/reservation/response"
 	"go-fiber-starter/internal/bootstrap/database"
+	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
 	"strings"
 	"time"
@@ -78,14 +79,16 @@ func (_i *repo) GetAll(req request.Reservations) (reservations []*schema.Reserva
 	}
 
 	if req.StartTime != nil && !req.StartTime.IsZero() {
-		query.Where("start_time >= ?", req.StartTime)
+		query.Where("start_time >= ?", utils.StartOfDayString(*req.StartTime))
 	}
 
 	if req.EndTime != nil && !req.EndTime.IsZero() {
-		query.Where("end_time <= ?", req.EndTime)
+		query.Where("end_time <= ?", utils.EndOfDayString(*req.EndTime))
 	}
 
-	if len(req.Taxonomies) > 0 {
+	if req.ProductID != 0 {
+		query.Where("product_id = ?", req.ProductID)
+	} else if len(req.Taxonomies) > 0 {
 		query.Joins("JOIN products ON reservations.product_id = products.id")
 		query.Joins("JOIN posts_taxonomies ON posts_taxonomies.post_id = products.post_id")
 		query.Where("posts_taxonomies.taxonomy_id IN (?)", req.Taxonomies)

@@ -72,11 +72,6 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 
 	req.StartTime = utils.GetDateInQueries(c, "StartTime")
 	req.EndTime = utils.GetDateInQueries(c, "EndTime")
-	if req.EndTime != nil && !req.EndTime.IsZero() {
-		// end of the end date
-		v := utils.EndOfDay(*req.EndTime)
-		req.EndTime = &v
-	}
 
 	// get Wallet and check the owner
 	wallet, err := _i.walletService.Show(&walletID, nil, nil)
@@ -120,6 +115,8 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 			if len(req.Taxonomies) == 0 {
 				req.Taxonomies = observerTaxonomies
 			}
+		} else {
+			req.Taxonomies = taxonomies
 		}
 	}
 

@@ -2,14 +2,15 @@ package cron
 
 import (
 	"fmt"
-	MessageWay "github.com/MessageWay/MessageWayGolang"
-	"github.com/rs/zerolog"
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/reservation/repository"
 	"go-fiber-starter/app/module/reservation/request"
 	"go-fiber-starter/internal"
 	"go-fiber-starter/utils/config"
 	"time"
+
+	MessageWay "github.com/MessageWay/MessageWayGolang"
+	"github.com/rs/zerolog"
 )
 
 type TurnOnReminderService struct {

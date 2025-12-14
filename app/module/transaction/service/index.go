@@ -32,6 +32,9 @@ func (_i *service) Index(req request.Transactions) (transactions []*response.Tra
 		return
 	}
 
+	// Initialize empty slice to avoid returning nil
+	transactions = make([]*response.Transaction, 0)
+
 	for _, result := range results {
 		transactions = append(transactions, response.FromDomain(result))
 	}

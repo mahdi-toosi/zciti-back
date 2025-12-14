@@ -445,6 +445,9 @@ func TestStore_DraftStatus(t *testing.T) {
 		"Content": "Draft content",
 		"Status":  string(schema.PostStatusDraft),
 		"Type":    string(schema.PostTypePost),
+		"Meta": map[string]interface{}{
+			"CommentsStatus": string(schema.PostCommentStatusOpen),
+		},
 	}
 
 	// Make request
@@ -493,6 +496,9 @@ func TestUpdate_Success(t *testing.T) {
 		"Excerpt": "Updated Excerpt",
 		"Status":  string(schema.PostStatusPublished),
 		"Type":    string(schema.PostTypePost),
+		"Meta": map[string]interface{}{
+			"CommentsStatus": string(schema.PostCommentStatusOpen),
+		},
 	}
 
 	// Make request
@@ -542,6 +548,9 @@ func TestUpdate_NotFound(t *testing.T) {
 		"Content": "Updated Content",
 		"Status":  string(schema.PostStatusPublished),
 		"Type":    string(schema.PostTypePost),
+		"Meta": map[string]interface{}{
+			"CommentsStatus": string(schema.PostCommentStatusOpen),
+		},
 	}
 
 	// Make request
@@ -577,6 +586,9 @@ func TestUpdate_ChangeStatus(t *testing.T) {
 		"Content": "Content",
 		"Status":  string(schema.PostStatusPublished),
 		"Type":    string(schema.PostTypePost),
+		"Meta": map[string]interface{}{
+			"CommentsStatus": string(schema.PostCommentStatusOpen),
+		},
 	}
 
 	// Make request
@@ -857,6 +869,9 @@ func TestCRUD_Integration(t *testing.T) {
 		"Excerpt": "Integration excerpt",
 		"Status":  string(schema.PostStatusDraft),
 		"Type":    string(schema.PostTypePost),
+		"Meta": map[string]interface{}{
+			"CommentsStatus": string(schema.PostCommentStatusOpen),
+		},
 	}
 
 	createResp := ta.MakeRequest(t, http.MethodPost, fmt.Sprintf("/v1/business/%d/posts", business.ID), createReq, token)
@@ -885,6 +900,9 @@ func TestCRUD_Integration(t *testing.T) {
 		"Excerpt": "Updated excerpt",
 		"Status":  string(schema.PostStatusPublished),
 		"Type":    string(schema.PostTypePost),
+		"Meta": map[string]interface{}{
+			"CommentsStatus": string(schema.PostCommentStatusOpen),
+		},
 	}
 
 	updateResp := ta.MakeRequest(t, http.MethodPut, fmt.Sprintf("/v1/business/%d/posts/%d", business.ID, postID), updateReq, token)
@@ -939,6 +957,9 @@ func TestPostWithTaxonomies_Integration(t *testing.T) {
 		"Content": "Learn Go programming",
 		"Status":  string(schema.PostStatusPublished),
 		"Type":    string(schema.PostTypePost),
+		"Meta": map[string]interface{}{
+			"CommentsStatus": string(schema.PostCommentStatusOpen),
+		},
 	}
 
 	createResp := ta.MakeRequest(t, http.MethodPost, fmt.Sprintf("/v1/business/%d/posts", business.ID), createReq, token)
@@ -1147,6 +1168,9 @@ func TestPermissionLevels(t *testing.T) {
 		"Content": "Content",
 		"Status":  string(schema.PostStatusPublished),
 		"Type":    string(schema.PostTypePost),
+		"Meta": map[string]interface{}{
+			"CommentsStatus": string(schema.PostCommentStatusOpen),
+		},
 	}
 
 	ownerUpdateResp := ta.MakeRequest(t, http.MethodPut, fmt.Sprintf("/v1/business/%d/posts/%d", business.ID, post.ID), updateReq, ownerToken)
@@ -1160,4 +1184,3 @@ func TestPermissionLevels(t *testing.T) {
 		t.Errorf("reader should not be able to update, got status: %d", readerUpdateResp.StatusCode)
 	}
 }
-

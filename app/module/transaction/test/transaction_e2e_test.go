@@ -111,15 +111,39 @@ func TestIndex_Success_BusinessWallet_AsObserver(t *testing.T) {
 	// Create test business
 	business := ta.CreateTestBusiness(t, "Test Business", schema.BTypeGymManager, owner.ID)
 
-	// Create observer user with business observer role
-	observer := ta.CreateTestUser(t, 9987654321, "testPassword123", "Observer", "User", business.ID, []schema.UserRole{schema.URBusinessObserver})
+	// Update owner with business permissions
+	owner.Permissions[business.ID] = []schema.UserRole{schema.URBusinessOwner}
+	ta.DB.Save(owner)
 
 	// Create wallet for the business
 	wallet := ta.CreateTestWallet(t, nil, &business.ID, 5000)
 
-	// Create test transactions
-	ta.CreateTestTransaction(t, wallet.ID, owner.ID, 500, schema.TransactionStatusSuccess, schema.OrderPaymentMethodOnline, "Business transaction 1")
-	ta.CreateTestTransaction(t, wallet.ID, owner.ID, 1000, schema.TransactionStatusSuccess, schema.OrderPaymentMethodOnline, "Business transaction 2")
+	// Create a taxonomy for the observer to have access to
+	taxonomy := ta.CreateTestTaxonomy(t, "TestCity", schema.TaxonomyTypeCategory, business.ID, nil)
+
+	// Create posts and attach taxonomy
+	post1 := ta.CreateTestPost(t, "Product 1", schema.PostTypeProduct, business.ID, owner.ID)
+	post2 := ta.CreateTestPost(t, "Product 2", schema.PostTypeProduct, business.ID, owner.ID)
+	ta.AttachTaxonomyToPost(t, post1.ID, taxonomy.ID)
+	ta.AttachTaxonomyToPost(t, post2.ID, taxonomy.ID)
+
+	// Create orders linked to posts via order_items
+	order1 := ta.CreateTestOrder(t, owner.ID, business.ID, 500, schema.OrderStatusCompleted)
+	order2 := ta.CreateTestOrder(t, owner.ID, business.ID, 1000, schema.OrderStatusCompleted)
+	ta.CreateTestOrderItem(t, order1.ID, post1.ID, 1, 500)
+	ta.CreateTestOrderItem(t, order2.ID, post2.ID, 1, 1000)
+
+	// Create test transactions linked to orders
+	ta.CreateTestTransactionWithOrder(t, wallet.ID, owner.ID, order1.ID, 500, schema.TransactionStatusSuccess, schema.OrderPaymentMethodOnline, "Business transaction 1")
+	ta.CreateTestTransactionWithOrder(t, wallet.ID, owner.ID, order2.ID, 1000, schema.TransactionStatusSuccess, schema.OrderPaymentMethodOnline, "Business transaction 2")
+
+	// Create observer user with business observer role AND meta containing taxonomy access
+	observerMeta := &schema.UserMeta{
+		TaxonomiesToObserve: schema.UserMetaTaxonomiesToObserve{
+			taxonomy.ID: {Checked: true, PartialChecked: false},
+		},
+	}
+	observer := ta.CreateTestUserWithMeta(t, 9987654321, "testPassword123", "Observer", "User", business.ID, []schema.UserRole{schema.URBusinessObserver}, observerMeta)
 
 	// Generate token for observer
 	token := ta.GenerateTestToken(t, observer)
@@ -1430,4 +1454,3 @@ func TestIndex_StatusFilter(t *testing.T) {
 		t.Errorf("expected 2 successful transactions, got %d", len(data))
 	}
 }
-

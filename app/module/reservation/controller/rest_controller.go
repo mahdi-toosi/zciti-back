@@ -74,11 +74,6 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 
 	req.StartTime = utils.GetDateInQueries(c, "StartTime")
 	req.EndTime = utils.GetDateInQueries(c, "EndTime")
-	if req.EndTime != nil && !req.EndTime.IsZero() {
-		// end of the end date
-		endOfEndTime := utils.EndOfDay(*req.EndTime)
-		req.EndTime = &endOfEndTime
-	}
 
 	if user.IsBusinessObserver(businessID) {
 		if user.Meta == nil {
@@ -100,6 +95,8 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 		if len(req.Taxonomies) == 0 {
 			req.Taxonomies = observerTaxonomies
 		}
+	} else {
+		req.Taxonomies = taxonomies
 	}
 
 	reservations, paging, err := _i.service.Index(req)

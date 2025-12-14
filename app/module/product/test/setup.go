@@ -13,6 +13,7 @@ import (
 
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/middleware"
+	postController "go-fiber-starter/app/module/post/controller"
 	postRepo "go-fiber-starter/app/module/post/repository"
 	postService "go-fiber-starter/app/module/post/service"
 	"go-fiber-starter/app/module/product"
@@ -299,13 +300,15 @@ func SetupTestApp(t *testing.T) *TestApp {
 	postSvc := postService.Service(postRepository)
 	productSvc := service.Service(productRepo, postSvc, userSvc)
 
-	// Create product controller
-	productController := controller.Controllers(productSvc)
+	// Create controllers
+	productCtrl := controller.Controllers(productSvc)
+	postCtrl := postController.Controllers(postSvc)
 
 	// Create product router manually
 	productRouter := &product.Router{
-		App:        app,
-		Controller: productController,
+		App:            app,
+		Controller:     productCtrl,
+		PostController: postCtrl,
 	}
 	productRouter.RegisterRoutes(cfg)
 
@@ -587,4 +590,3 @@ func (ta *TestApp) CleanupAll(t *testing.T) {
 	ta.DB.Exec("DELETE FROM businesses")
 	ta.DB.Exec("DELETE FROM users")
 }
-

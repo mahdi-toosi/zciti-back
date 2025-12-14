@@ -203,10 +203,11 @@ func migrateTestModels(db *gorm.DB) error {
 		CREATE TABLE IF NOT EXISTS taxonomies (
 			id BIGSERIAL PRIMARY KEY,
 			title VARCHAR(255) NOT NULL,
-			slug VARCHAR(255),
-			type VARCHAR(50),
+			slug VARCHAR(255) NOT NULL,
+			type VARCHAR(50) NOT NULL,
+			domain VARCHAR(100) NOT NULL,
 			parent_id BIGINT,
-			business_id BIGINT,
+			business_id BIGINT NOT NULL,
 			description VARCHAR(500),
 			created_at TIMESTAMPTZ,
 			updated_at TIMESTAMPTZ,
@@ -545,6 +546,8 @@ func (ta *TestApp) CreateTestTaxonomy(t *testing.T, title string, taxonomyType s
 	taxonomy := &schema.Taxonomy{
 		Title:      title,
 		Type:       taxonomyType,
+		Domain:     schema.PostTypePost,
+		Slug:       title + "-slug",
 		BusinessID: businessID,
 		ParentID:   parentID,
 	}
@@ -591,4 +594,3 @@ func (ta *TestApp) CreateTestUserWithMeta(t *testing.T, mobile uint64, password 
 
 	return user
 }
-

@@ -173,12 +173,13 @@ func (_i *controller) StoreAttribute(c *fiber.Ctx) error {
 	}
 
 	req := new(request.StoreProductAttribute)
-	req.ProductID = productID
-	req.BusinessID = businessID
-
 	if err := response.ParseAndValidate(c, req); err != nil {
 		return err
 	}
+
+	// Set URL params after parsing body to avoid overwriting
+	req.ProductID = productID
+	req.BusinessID = businessID
 
 	if err := _i.service.StoreAttribute(*req); err != nil {
 		return err
