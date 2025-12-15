@@ -1,0 +1,311 @@
+# Code Commenting Guidelines
+
+## Core Principle
+
+**Always add precise, optimized comments that explain the "why" and "what", not the "how".**  
+Comments must be updated immediately whenever the related code changes.
+
+---
+
+## Comment Categories
+
+### 1. File/Package Header Comments
+
+Every `.go` file should have a header comment:
+
+```go
+// Package user provides user management functionality including authentication,
+// profile management, and role-based access control.
+package user
+```
+
+For `index.go` in modules:
+
+```go
+// Module: User
+// Description: Handles user registration, authentication, and profile operations
+// Dependencies: business, notification modules
+// Routes: /v1/user/*, /v1/admin/users/*
+package user
+```
+
+### 2. Interface Comments
+
+Document the contract and behavior:
+
+```go
+// IService defines the business logic contract for user operations.
+// All methods are safe for concurrent use.
+type IService interface {
+    // Index retrieves paginated users based on filter criteria.
+    // Returns empty slice (not nil) when no results found.
+    Index(req request.Users) ([]*response.User, paginator.Pagination, error)
+    
+    // Store creates a new user after validation.
+    // Sends welcome notification upon successful creation.
+    Store(req request.User) (*response.User, error)
+    
+    // Update modifies user data. Only non-zero fields are updated.
+    // Returns ErrNotFound if user doesn't exist.
+    Update(id uint64, req request.User) (*response.User, error)
+}
+```
+
+### 3. Struct Comments
+
+Document purpose and field meanings when not obvious:
+
+```go
+// User represents a registered user in the system.
+// Implements soft delete via DeletedAt field.
+type User struct {
+    ID        uint64         // Unique identifier, auto-incremented
+    Mobile    uint64         // Iranian mobile number without country code
+    Status    string         // active | inactive | banned
+    RoleID    uint64         // Foreign key to roles table
+    Meta      *UserMeta      // JSONB field for extensible user data
+    DeletedAt gorm.DeletedAt // Soft delete timestamp, nil if not deleted
+}
+
+// UserMeta stores additional user information in JSONB format.
+// All fields are optional and may be nil.
+type UserMeta struct {
+    DeviceToken *string // FCM token for push notifications
+    LastLoginIP *string // IP address of last successful login
+    Preferences *Prefs  // User-specific settings
+}
+```
+
+### 4. Function/Method Comments
+
+Document behavior, parameters, return values, and side effects:
+
+```go
+// Index retrieves all users matching the filter criteria with pagination.
+//
+// Parameters:
+//   - req: Contains pagination (Page, Limit) and filter fields
+//
+// Returns:
+//   - []*response.User: Slice of user responses (empty slice if none found)
+//   - paginator.Pagination: Contains TotalRows, TotalPages, CurrentPage
+//   - error: Database errors or validation failures
+//
+// Note: Excludes soft-deleted users unless explicitly requested.
+func (_i *service) Index(req request.Users) ([]*response.User, paginator.Pagination, error) {
+    // ...
+}
+```
+
+### 5. Complex Logic Comments
+
+Add inline comments for non-trivial logic:
+
+```go
+func (_i *service) CalculateDiscount(order *schema.Order) uint64 {
+    // Base discount: 5% for orders above 1M Toman
+    var discount uint64 = 0
+    if order.Total > 10_000_000 {
+        discount = order.Total * 5 / 100
+    }
+    
+    // Loyalty bonus: Additional 2% for users with >10 orders
+    // Capped at 500K Toman to prevent excessive discounts
+    if order.User.OrderCount > 10 {
+        loyaltyBonus := order.Total * 2 / 100
+        if loyaltyBonus > 5_000_000 {
+            loyaltyBonus = 5_000_000
+        }
+        discount += loyaltyBonus
+    }
+    
+    // First-time buyer: Fixed 100K Toman discount
+    // Only applies if no other discount was given
+    if order.User.OrderCount == 0 && discount == 0 {
+        discount = 1_000_000
+    }
+    
+    return discount
+}
+```
+
+### 6. API/Controller Comments (Swagger)
+
+Always include comprehensive Swagger annotations:
+
+```go
+// Index retrieves paginated list of users
+// @Summary      Get all users
+// @Description  Retrieves users with optional filtering by status, role, and search term
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Param        page     query    int     false  "Page number (default: 1)"
+// @Param        limit    query    int     false  "Items per page (default: 15, max: 100)"
+// @Param        status   query    string  false  "Filter by status: active, inactive, banned"
+// @Param        role_id  query    int     false  "Filter by role ID"
+// @Param        search   query    string  false  "Search by name or mobile"
+// @Success      200      {object} response.Response{data=[]response.User,meta=paginator.Pagination}
+// @Failure      400      {object} response.Error
+// @Failure      401      {object} response.Error
+// @Router       /v1/admin/users [get]
+// @Security     Bearer
+func (_i *controller) Index(c *fiber.Ctx) error {
+    // ...
+}
+```
+
+### 7. Repository Comments
+
+Document query behavior and edge cases:
+
+```go
+// GetByMobile finds a user by their mobile number.
+// Returns nil user and nil error if not found (not an error condition).
+// Only returns non-deleted users.
+func (_i *repo) GetByMobile(mobile uint64) (*schema.User, error) {
+    // ...
+}
+
+// GetAllWithOrders retrieves users with their orders preloaded.
+// Orders are sorted by created_at DESC and limited to last 10.
+// Uses LEFT JOIN - users without orders are still returned.
+func (_i *repo) GetAllWithOrders(businessID uint64) ([]*schema.User, error) {
+    // ...
+}
+```
+
+### 8. Request/Response DTO Comments
+
+Document validation rules and data transformations:
+
+```go
+// User represents the request payload for creating/updating a user.
+type User struct {
+    // Mobile: 10-digit Iranian mobile number (e.g., 9121234567)
+    Mobile    uint64 `json:"mobile" validate:"required,number,min=9000000000,max=9999999999"`
+    
+    // FirstName: User's first name, 2-50 Persian/English characters
+    FirstName string `json:"first_name" validate:"required,min=2,max=50"`
+    
+    // RoleID: Must reference an existing role. Defaults to "user" role if omitted
+    RoleID    uint64 `json:"role_id" validate:"omitempty,number"`
+    
+    // Status: Account status. Only admins can set "banned"
+    Status    string `json:"status" validate:"omitempty,oneof=active inactive banned"`
+}
+
+// ToDomain converts request DTO to database schema.
+// Sets default values for optional fields.
+func (_i *User) ToDomain() *schema.User {
+    // Default role is regular user (ID: 2)
+    roleID := _i.RoleID
+    if roleID == 0 {
+        roleID = 2
+    }
+    
+    return &schema.User{
+        Mobile:    _i.Mobile,
+        FirstName: _i.FirstName,
+        RoleID:    roleID,
+        Status:    _i.Status,
+    }
+}
+```
+
+---
+
+## Comment Update Rules
+
+### When to Update Comments
+
+1. **Function signature changes** → Update parameter/return documentation
+2. **Logic changes** → Update inline comments explaining the logic
+3. **New edge cases handled** → Document the new behavior
+4. **Performance optimizations** → Explain why the optimization was needed
+5. **Bug fixes** → Add comment explaining what was fixed and why
+
+### Comment Review Checklist
+
+Before committing, verify:
+
+- [ ] All new functions have descriptive comments
+- [ ] Modified functions have updated comments
+- [ ] Complex logic blocks have inline explanations
+- [ ] Swagger annotations match actual behavior
+- [ ] No stale comments referring to old behavior
+- [ ] Interface methods document their contract
+- [ ] Error conditions are documented
+
+---
+
+## Comment Style Rules
+
+### Do's ✅
+
+```go
+// CalculateShipping determines shipping cost based on distance and weight.
+// Uses tiered pricing: base 50K + 5K per 10km + 2K per kg over 5kg.
+
+// Retry up to 3 times with exponential backoff (1s, 2s, 4s)
+// to handle transient network failures.
+
+// IMPORTANT: This must run inside a transaction.
+// Caller is responsible for commit/rollback.
+```
+
+### Don'ts ❌
+
+```go
+// This function calculates shipping
+// (Too vague - doesn't explain how or why)
+
+// i++
+// (Never comment obvious code)
+
+// TODO: fix this later
+// (Unactionable - add specific details or remove)
+
+// Returns user
+// (Obvious from signature - add meaningful info instead)
+```
+
+---
+
+## Special Comment Tags
+
+Use these tags consistently:
+
+```go
+// TODO: [description] - Planned enhancement (include ticket if applicable)
+// FIXME: [description] - Known bug that needs fixing
+// HACK: [description] - Temporary workaround, explain why
+// NOTE: [description] - Important information for future developers
+// DEPRECATED: [description] - Explain what to use instead
+// SECURITY: [description] - Security-sensitive code, explain considerations
+```
+
+Example:
+
+```go
+// TODO(ZCITI-234): Add caching for frequently accessed users
+// FIXME: Race condition when updating user balance concurrently
+// HACK: Using sleep due to external API rate limit - replace with proper queue
+// NOTE: Mobile format changed from 11-digit to 10-digit in v2.0
+// DEPRECATED: Use GetUserByID instead, this will be removed in v3.0
+// SECURITY: Rate limit this endpoint to prevent brute force attacks
+```
+
+---
+
+## Persian Comments
+
+For business-specific logic that's clearer in Persian:
+
+```go
+// محاسبه مالیات بر ارزش افزوده ۹٪ طبق قانون ۱۴۰۲
+// VAT calculation: 9% as per Iranian tax law 1402
+func calculateVAT(amount uint64) uint64 {
+    return amount * 9 / 100
+}
+```

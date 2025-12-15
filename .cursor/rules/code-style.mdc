@@ -126,18 +126,25 @@ type Request struct {
 
 ## Comments
 
-Use for:
-- Swagger annotations
-- Non-obvious business logic
-- TODOs
+**See [comments.mdc](./comments.mdc) for comprehensive commenting guidelines.**
+
+Key rules:
+- Add precise comments explaining "why" and "what", not "how"
+- Update comments immediately when related code changes
+- Every interface, exported function, and complex logic block needs comments
+- Use Swagger annotations for all API endpoints
+- Use tags: `TODO:`, `FIXME:`, `HACK:`, `NOTE:`, `DEPRECATED:`, `SECURITY:`
+
+Quick example:
 
 ```go
-// Index handles GET /items with pagination and filtering
+// Index retrieves paginated items based on filter criteria.
+// Returns empty slice (not nil) when no results found.
 // @Summary      Get all items
 // @Tags         Items
 func (_i *controller) Index(c *fiber.Ctx) error {
 
-// TODO: move it to orders module
+// TODO(ZCITI-123): Move to orders module after refactoring
 _i.App.Route("/v1/user/orders", func(router fiber.Router) {
 ```
 

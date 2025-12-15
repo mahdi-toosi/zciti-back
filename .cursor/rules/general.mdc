@@ -58,3 +58,9 @@ Each module follows this pattern:
 - Use GORM for database operations
 - Follow RESTful naming conventions
 - Use Persian/Farsi for user-facing error messages when needed
+
+## Code Quality Requirements
+
+- **Comments are mandatory**: Add precise, optimized comments on all interfaces, exported functions, complex logic, and Swagger annotations
+- **Comments must stay current**: Update comments immediately when modifying related code - stale comments are worse than no comments
+- See [comments.mdc](./comments.mdc) for detailed commenting guidelines
