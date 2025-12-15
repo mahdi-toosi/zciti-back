@@ -151,14 +151,18 @@ func (_i *repo) GetAll(req request.Reservations) (reservations []*schema.Reserva
 }
 
 func (_i *repo) GetOne(businessID uint64, id uint64) (reservation *response.Reservation, err error) {
+	var item schema.Reservation
 	if err := _i.DB.Main.
+		Preload("User").
+		Preload("Product.Post").
+		Preload("Business").
 		Where(&schema.Reservation{BusinessID: businessID}).
-		First(&reservation, id).
+		First(&item, id).
 		Error; err != nil {
 		return nil, err
 	}
 
-	return reservation, nil
+	return response.FromDomain(&item), nil
 }
 
 func (_i *repo) Create(reservation *schema.Reservation) (err error) {

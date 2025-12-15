@@ -1,15 +1,13 @@
 package router
 
 import (
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/swagger"
 	"go-fiber-starter/app/module/asset"
 	"go-fiber-starter/app/module/auth"
 	"go-fiber-starter/app/module/business"
 	"go-fiber-starter/app/module/comment"
 	"go-fiber-starter/app/module/coupon"
 	"go-fiber-starter/app/module/notification"
-	"go-fiber-starter/app/module/notificationTemplate"
+	notificationtemplate "go-fiber-starter/app/module/notificationTemplate"
 	"go-fiber-starter/app/module/order"
 	"go-fiber-starter/app/module/post"
 	"go-fiber-starter/app/module/product"
@@ -20,6 +18,9 @@ import (
 	"go-fiber-starter/app/module/user"
 	"go-fiber-starter/app/module/wallet"
 	"go-fiber-starter/utils/config"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/swagger"
 )
 
 type Router struct {
@@ -42,8 +43,6 @@ type Router struct {
 	ReservationsRouter         *reservation.Router
 	NotificationRouter         *notification.Router
 	NotificationTemplateRouter *notificationtemplate.Router
-	//MessageRouter              *message.Router
-	//MessageRoomRouter          *messageRoom.Router
 }
 
 func NewRouter(
@@ -66,8 +65,6 @@ func NewRouter(
 	reservationsRouter *reservation.Router,
 	notificationRouter *notification.Router,
 	notificationTemplateRouter *notificationtemplate.Router,
-	// messageRouter *message.Router,
-	// messageRoomRouter *messageRoom.Router,
 ) *Router {
 	return &Router{
 		App: fiber,

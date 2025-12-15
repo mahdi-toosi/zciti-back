@@ -11,7 +11,7 @@ type Reservation struct {
 	ReceiverID uint64    `reservation:"1" validate:"required,number,min=1"`
 	Type       []string  `reservation:"Sms" validate:"required,dive"`
 	BusinessID uint64    `reservation:"1" validate:"min=1"`
-	SentAt     time.Time `reservation:"2023-10-20T15:47:33.084Z" validate:"datetime"`
+	SentAt     time.Time `reservation:"2023-10-20T15:47:33.084Z"`
 	TemplateID uint64    `reservation:"1" validate:"required,min=1"`
 }
 

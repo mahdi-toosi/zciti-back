@@ -64,10 +64,6 @@ func TestShow_Unauthorized(t *testing.T) {
 // =============================================================================
 
 func TestStore_Success(t *testing.T) {
-	// SKIP: This test is skipped due to a bug in the Reservation request struct.
-	// The SentAt field has `validate:"datetime"` tag but is typed as time.Time.
-	t.Skip("Skipped: Reservation request struct has datetime validation on time.Time field causing panic")
-
 	ta := SetupTestApp(t)
 	defer ta.Cleanup()
 
@@ -78,6 +74,7 @@ func TestStore_Success(t *testing.T) {
 		"Type":       []string{"Sms"},
 		"SentAt":     "2023-10-20T15:47:33.084Z",
 		"TemplateID": 1,
+		"BusinessID": setup.Business.ID,
 	}
 
 	resp := ta.MakeRequest(t, http.MethodPost, fmt.Sprintf("/v1/business/%d/reservations", setup.Business.ID), storeReq, setup.Token)
@@ -90,8 +87,6 @@ func TestStore_Success(t *testing.T) {
 }
 
 func TestStore_ValidationError_MissingRequired(t *testing.T) {
-	t.Skip("Skipped: Reservation request struct has datetime validation on time.Time field causing panic")
-
 	ta := SetupTestApp(t)
 	defer ta.Cleanup()
 
@@ -118,8 +113,6 @@ func TestStore_Unauthorized(t *testing.T) {
 // =============================================================================
 
 func TestUpdate_Success(t *testing.T) {
-	t.Skip("Skipped: Reservation request struct has datetime validation on time.Time field causing panic")
-
 	ta := SetupTestApp(t)
 	defer ta.Cleanup()
 
@@ -130,6 +123,7 @@ func TestUpdate_Success(t *testing.T) {
 		"Type":       []string{"Sms", "Email"},
 		"SentAt":     "2023-10-21T15:47:33.084Z",
 		"TemplateID": 2,
+		"BusinessID": data.Business.ID,
 	}
 
 	resp := ta.MakeRequest(t, http.MethodPut, fmt.Sprintf("/v1/business/%d/reservations/%d", data.Business.ID, data.Reservation.ID), updateReq, data.Token)
@@ -142,8 +136,6 @@ func TestUpdate_Success(t *testing.T) {
 }
 
 func TestUpdate_NotFound(t *testing.T) {
-	t.Skip("Skipped: Reservation request struct has datetime validation on time.Time field causing panic")
-
 	ta := SetupTestApp(t)
 	defer ta.Cleanup()
 
@@ -154,6 +146,7 @@ func TestUpdate_NotFound(t *testing.T) {
 		"Type":       []string{"Sms"},
 		"SentAt":     "2023-10-20T15:47:33.084Z",
 		"TemplateID": 1,
+		"BusinessID": setup.Business.ID,
 	}
 
 	resp := ta.MakeRequest(t, http.MethodPut, fmt.Sprintf("/v1/business/%d/reservations/99999", setup.Business.ID), updateReq, setup.Token)
@@ -218,8 +211,6 @@ func TestDelete_Forbidden_NoPermission(t *testing.T) {
 // =============================================================================
 
 func TestCRUD_Integration(t *testing.T) {
-	t.Skip("Skipped: Store and Update operations panic due to datetime validation on time.Time field")
-
 	ta := SetupTestApp(t)
 	defer ta.Cleanup()
 
@@ -232,6 +223,7 @@ func TestCRUD_Integration(t *testing.T) {
 		"Type":       []string{"Sms"},
 		"SentAt":     "2023-10-20T15:47:33.084Z",
 		"TemplateID": 1,
+		"BusinessID": setup.Business.ID,
 	}
 
 	createResp := ta.MakeRequest(t, http.MethodPost, fmt.Sprintf("/v1/business/%d/reservations", setup.Business.ID), createReq, setup.Token)
@@ -257,6 +249,7 @@ func TestCRUD_Integration(t *testing.T) {
 		"Type":       []string{"Sms", "Email"},
 		"SentAt":     "2023-10-22T15:47:33.084Z",
 		"TemplateID": 2,
+		"BusinessID": setup.Business.ID,
 	}
 
 	updateResp := ta.MakeRequest(t, http.MethodPut, fmt.Sprintf("/v1/business/%d/reservations/%d", setup.Business.ID, reservation.ID), updateReq, setup.Token)
@@ -333,8 +326,6 @@ func TestMultipleBusinesses_Isolation(t *testing.T) {
 // =============================================================================
 
 func TestEmptyBody_Requests(t *testing.T) {
-	t.Skip("Skipped: Reservation request struct has datetime validation on time.Time field causing panic")
-
 	ta := SetupTestApp(t)
 	defer ta.Cleanup()
 

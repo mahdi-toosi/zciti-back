@@ -43,9 +43,15 @@ func (_i *repo) GetAll(req request.Users) (users []*schema.User, paging paginato
 	query := _i.DB.Main.Model(&schema.User{})
 
 	if req.Keyword != "" {
-		query.Where("first_name Like ?", "%"+req.Keyword+"%")
-		query.Or("last_name Like ?", "%"+req.Keyword+"%")
-		query.Or("mobile", req.Keyword)
+		// Check if keyword is numeric for mobile search
+		_, isNumeric := strconv.ParseUint(req.Keyword, 10, 64)
+		if isNumeric == nil {
+			query.Where("first_name Like ? OR last_name Like ? OR mobile = ?",
+				"%"+req.Keyword+"%", "%"+req.Keyword+"%", req.Keyword)
+		} else {
+			query.Where("first_name Like ? OR last_name Like ?",
+				"%"+req.Keyword+"%", "%"+req.Keyword+"%")
+		}
 	}
 
 	if req.Pagination.Page > 0 {

@@ -25,8 +25,7 @@ import (
 	"go-fiber-starter/internal/bootstrap/database"
 	"go-fiber-starter/utils/config"
 
-	fxzerolog "github.com/efectn/fx-zerolog"
-	_ "go.uber.org/automaxprocs"
+	"go.uber.org/automaxprocs/maxprocs"
 	"go.uber.org/fx"
 )
 
@@ -46,6 +45,9 @@ import (
 // @description                 "Type 'Bearer {TOKEN}' to correctly set the API Key"
 // @BasePath                    /
 func main() {
+	// set GOMAXPROCS silently
+	_, _ = maxprocs.Set(maxprocs.Logger(func(string, ...interface{}) {}))
+
 	fx.New(
 		/* provide patterns */
 		// config
@@ -79,7 +81,6 @@ func main() {
 		auth.Module,
 		asset.Module,
 		order.Module,
-		//message.Module,
 		wallet.Module,
 		coupon.Module,
 		comment.Module,
@@ -90,7 +91,6 @@ func main() {
 		orderItem.Module,
 		transaction.Module,
 		reservation.Module,
-		//messageRoom.Module,
 		notification.Module,
 		notificationtemplate.Module,
 		// End provide modules
@@ -98,7 +98,7 @@ func main() {
 		// start application
 		fx.Invoke(bootstrap.Start),
 
-		// define logger
-		fx.WithLogger(fxzerolog.Init()),
+		// disable fx verbose logs
+		fx.NopLogger,
 	).Run()
 }
