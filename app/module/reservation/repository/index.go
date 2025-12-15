@@ -6,7 +6,6 @@ import (
 	"go-fiber-starter/app/module/reservation/request"
 	"go-fiber-starter/app/module/reservation/response"
 	"go-fiber-starter/internal/bootstrap/database"
-	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
 	"strings"
 	"time"
@@ -22,6 +21,8 @@ type IRepository interface {
 	Update(id uint64, reservation *schema.Reservation) (err error)
 	Delete(id uint64) (err error)
 	IsReservable(req oirequest.OrderItem, businessID uint64) error
+	MarkTurnOnReminderSent(id uint64) error
+	MarkTurnOffReminderSent(id uint64) error
 }
 
 func Repository(DB *database.Database) IRepository {
@@ -79,11 +80,11 @@ func (_i *repo) GetAll(req request.Reservations) (reservations []*schema.Reserva
 	}
 
 	if req.StartTime != nil && !req.StartTime.IsZero() {
-		query.Where("start_time >= ?", utils.StartOfDayString(*req.StartTime))
+		query.Where("start_time >= ?", req.StartTime)
 	}
 
 	if req.EndTime != nil && !req.EndTime.IsZero() {
-		query.Where("end_time <= ?", utils.EndOfDayString(*req.EndTime))
+		query.Where("end_time <= ?", req.EndTime)
 	}
 
 	if req.ProductID != 0 {
@@ -103,6 +104,22 @@ func (_i *repo) GetAll(req request.Reservations) (reservations []*schema.Reserva
 	// 	}
 	// 	query.Where("products.post_id IN (?)", req.Posts)
 	// }
+
+	if req.TurnOnReminderSent != nil {
+		if *req.TurnOnReminderSent {
+			query.Where("meta->>'TurnOnReminderSent' = 'true'")
+		} else {
+			query.Where("meta->>'TurnOnReminderSent' IS NULL OR meta->>'TurnOnReminderSent' != 'true'")
+		}
+	}
+
+	if req.TurnOffReminderSent != nil {
+		if *req.TurnOffReminderSent {
+			query.Where("meta->>'TurnOffReminderSent' = 'true'")
+		} else {
+			query.Where("meta->>'TurnOffReminderSent' IS NULL OR meta->>'TurnOffReminderSent' != 'true'")
+		}
+	}
 
 	if req.Pagination != nil && req.Pagination.Page > 0 {
 		var total int64
@@ -177,4 +194,16 @@ func (_i *repo) IsReservable(req oirequest.OrderItem, businessID uint64) error {
 	}
 
 	return nil
+}
+
+func (_i *repo) MarkTurnOnReminderSent(id uint64) error {
+	return _i.DB.Main.Model(&schema.Reservation{}).
+		Where("id = ?", id).
+		Update("meta", gorm.Expr("meta || ?", `{"TurnOnReminderSent": true}`)).Error
+}
+
+func (_i *repo) MarkTurnOffReminderSent(id uint64) error {
+	return _i.DB.Main.Model(&schema.Reservation{}).
+		Where("id = ?", id).
+		Update("meta", gorm.Expr("meta || ?", `{"TurnOffReminderSent": true}`)).Error
 }

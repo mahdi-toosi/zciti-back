@@ -14,11 +14,11 @@ import (
 )
 
 type TurnOnReminderService struct {
-	cronSpec   string
-	cfg        *config.Config
-	logger     zerolog.Logger
-	repo       repository.IRepository
-	smsService *internal.MessageWayService // Interface for SMS sending
+	CronSpec   string
+	Cfg        *config.Config
+	Logger     zerolog.Logger
+	Repo       repository.IRepository
+	SmsService *internal.MessageWayService // Interface for SMS sending
 }
 
 func RunTurnOnMsgReminders(
@@ -29,16 +29,16 @@ func RunTurnOnMsgReminders(
 	smsService *internal.MessageWayService,
 ) *TurnOnReminderService {
 	service := &TurnOnReminderService{
-		cfg:        cfg,
-		repo:       Repo,
-		logger:     logger,
-		smsService: smsService,
-		cronSpec:   "@every 1m",
+		Cfg:        cfg,
+		Repo:       Repo,
+		Logger:     logger,
+		SmsService: smsService,
+		CronSpec:   "@every 1m",
 	}
 
-	err := cronService.AddJob(service.cronSpec, service.SendTurnOnReminders)
+	err := cronService.AddJob(service.CronSpec, service.SendTurnOnReminders)
 	if err != nil {
-		service.logger.Fatal().Err(err).Msg("failed to add RunTurnOnMsgReminders job")
+		service.Logger.Fatal().Err(err).Msg("failed to add RunTurnOnMsgReminders job")
 	}
 
 	return service
@@ -46,56 +46,59 @@ func RunTurnOnMsgReminders(
 
 // SendTurnOnReminders checks and sends reminders for upcoming reservations
 func (_s *TurnOnReminderService) SendTurnOnReminders() {
-	//_s.logger.Info().Msg("SendTurnOnReminders")
+	//_s.Logger.Info().Msg("SendTurnOnReminders")
 
 	//Find reservations within the next 1 hour that haven't been reminded yet
-	reservations, err := _s.findReservationsDueForReminder()
+	reservations, err := _s.FindReservationsDueForReminder()
 	if err != nil {
-		_s.logger.Err(err).Msg("Failed to fetch reservations for reminders")
+		_s.Logger.Err(err).Msg("Failed to fetch reservations for reminders")
 		return
 	}
 
 	for _, reservation := range reservations {
-		//_s.logger.Info().Msgf("reservation id => %d", reservation.ID)
+		//_s.Logger.Info().Msgf("reservation id => %d", reservation.ID)
 		// Send reminder and mark as reminded
 		if reservation.Product.Post.Status == schema.PostStatusPublished &&
 			reservation.Product.Meta.UniWashMachineStatus == schema.UniWashMachineStatusON {
-			err := _s.processReservationReminder(*reservation)
+			err := _s.ProcessReservationReminder(*reservation)
 			if err != nil {
-				_s.logger.Err(err).Msg("Failed to process reservation reminder")
+				_s.Logger.Err(err).Msg("Failed to process reservation reminder")
 			}
 		}
 	}
 }
 
-// findReservationsDueForReminder finds reservations due for reminder
-func (_s *TurnOnReminderService) findReservationsDueForReminder() ([]*schema.Reservation, error) {
+// FindReservationsDueForReminder finds reservations due for reminder
+func (_s *TurnOnReminderService) FindReservationsDueForReminder() ([]*schema.Reservation, error) {
 	loc, _ := time.LoadLocation("Asia/Tehran")
 	t := time.Now().In(loc)
 	//t := time.Date(2025, 9, 8, 9, 26, 5, 0, loc)
 
 	startTime := t.Add(60 * time.Minute).Truncate(time.Minute)
 	endTime := startTime.Add(time.Hour)
+	reminderNotSent := false
 
-	reservations, _, err := _s.repo.GetAll(request.Reservations{
-		EndTime:   &endTime,
-		StartTime: &startTime,
-		Status:    schema.ReservationStatusReserved,
+	reservations, _, err := _s.Repo.GetAll(request.Reservations{
+		EndTime:            &endTime,
+		StartTime:          &startTime,
+		Status:             schema.ReservationStatusReserved,
+		TurnOnReminderSent: &reminderNotSent,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	//s.logger.Info().Msgf("turn on reservations len %d", len(reservations))
+	//_s.Logger.Info().Msgf("turn on reservations len %d", len(reservations))
 
 	return reservations, err
 }
 
-// processReservationReminder sends SMS and updates reminder status
-func (_s *TurnOnReminderService) processReservationReminder(reservation schema.Reservation) error {
-	_s.logger.Info().Msg("processReservationReminder")
-	// Prepare reminder message
-	_, err := _s.smsService.Send(MessageWay.Message{
+// ProcessReservationReminder sends SMS and updates reminder status
+func (_s *TurnOnReminderService) ProcessReservationReminder(reservation schema.Reservation) error {
+	_s.Logger.Info().Msg("ProcessReservationReminder")
+
+	// Send reminder message first
+	_, err := _s.SmsService.Send(MessageWay.Message{
 		Provider:   5, // با سرشماره 5000
 		TemplateID: 16620,
 		Method:     "sms",
@@ -103,6 +106,12 @@ func (_s *TurnOnReminderService) processReservationReminder(reservation schema.R
 	})
 	if err != nil {
 		return fmt.Errorf("failed to send SMS: %w", err)
+	}
+
+	// Mark as sent only AFTER successful SMS delivery
+	if err := _s.Repo.MarkTurnOnReminderSent(reservation.ID); err != nil {
+		_s.Logger.Err(err).Uint64("reservationID", reservation.ID).Msg("SMS sent but failed to mark reminder as sent")
+		return fmt.Errorf("failed to mark reminder as sent: %w", err)
 	}
 
 	return nil

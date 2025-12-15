@@ -16,21 +16,22 @@ type Reservation struct {
 }
 
 type Reservations struct {
-	BusinessID     uint64
-	UserID         uint64
-	Mobile         string
-	FullName       string
-	ProductID      uint64
-	CityID         uint64
-	WorkspaceID    uint64
-	DormitoryID    uint64
-	StartTime      *time.Time
-	EndTime        *time.Time
-	WithUsageCount uint64
-	Taxonomies     []uint64
-	Status         schema.ReservationStatus
-	Pagination     *paginator.Pagination
-	//UsageCount     uint64
+	BusinessID          uint64
+	UserID              uint64
+	Mobile              string
+	FullName            string
+	ProductID           uint64
+	CityID              uint64
+	WorkspaceID         uint64
+	DormitoryID         uint64
+	StartTime           *time.Time
+	EndTime             *time.Time
+	WithUsageCount      uint64
+	Taxonomies          []uint64
+	Status              schema.ReservationStatus
+	Pagination          *paginator.Pagination
+	TurnOnReminderSent  *bool // Filter for turn on reminder sent status
+	TurnOffReminderSent *bool // Filter for turn off reminder sent status
 }
 
 func (req *Reservation) ToDomain() *schema.Reservation {

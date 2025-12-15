@@ -73,7 +73,18 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	req.WithUsageCount, _ = utils.GetUintInQueries(c, "WithUsageCount")
 
 	req.StartTime = utils.GetDateInQueries(c, "StartTime")
+	if req.StartTime != nil && !req.StartTime.IsZero() {
+		// start of the start date
+		startOfStartTime := utils.StartOfDay(*req.StartTime)
+		req.StartTime = &startOfStartTime
+	}
+
 	req.EndTime = utils.GetDateInQueries(c, "EndTime")
+	if req.EndTime != nil && !req.EndTime.IsZero() {
+		// end of the end date
+		endOfEndTime := utils.EndOfDay(*req.EndTime)
+		req.EndTime = &endOfEndTime
+	}
 
 	if user.IsBusinessObserver(businessID) {
 		if user.Meta == nil {

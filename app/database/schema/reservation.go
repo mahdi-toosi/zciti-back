@@ -47,6 +47,8 @@ type ReservationMeta struct {
 	UniWashLastCommand            UniWashCommand `json:",omitempty"`
 	UniWashLastCommandTime        *time.Time     `json:",omitempty"`
 	UniWashLastCommandReferenceID string         `json:",omitempty"`
+	TurnOnReminderSent            bool           `json:",omitempty"`
+	TurnOffReminderSent           bool           `json:",omitempty"`
 }
 
 func (pm *ReservationMeta) Scan(value any) error {

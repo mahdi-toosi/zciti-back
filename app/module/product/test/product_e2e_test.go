@@ -1168,4 +1168,3 @@ func TestProductStockStatus_Variations(t *testing.T) {
 		t.Errorf("expected 3 products, got %d", len(products))
 	}
 }
-
