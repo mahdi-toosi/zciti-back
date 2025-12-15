@@ -399,7 +399,7 @@ func StartOfDayString(t time.Time) string {
 // EndOfDay returns a new time.Time set to 23:59:59.999999999 of the given day.
 // Preserves the original timezone.
 func EndOfDay(t time.Time) time.Time {
-	return time.Date(t.Year(), t.Month(), t.Day(), 23, 59, 59, 999999999, t.Location())
+	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location()).Add(time.Hour * 24)
 }
 
 // EndOfDayString returns the end of day as an RFC3339 formatted string.
