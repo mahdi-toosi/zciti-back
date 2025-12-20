@@ -26,7 +26,7 @@ import (
 )
 
 type IService interface {
-	Index(req request.Orders) (orders []*response.Order, paging paginator.Pagination, err error)
+	Index(req request.Orders) (orders []*response.Order, totalAmount uint64, paging paginator.Pagination, err error)
 	Show(userID uint64, id uint64) (order *response.Order, err error)
 	Store(req request.Order) (orderID uint64, paymentURL string, err error)
 	Status(userID uint64, orderID uint64, refNum string) (status string, err error)
@@ -79,8 +79,8 @@ type service struct {
 	TransactionRepo transactionRepo.IRepository
 }
 
-func (_i *service) Index(req request.Orders) (orders []*response.Order, paging paginator.Pagination, err error) {
-	results, paging, err := _i.Repo.GetAll(req)
+func (_i *service) Index(req request.Orders) (orders []*response.Order, totalAmount uint64, paging paginator.Pagination, err error) {
+	results, totalAmount, paging, err := _i.Repo.GetAll(req)
 	if err != nil {
 		return
 	}

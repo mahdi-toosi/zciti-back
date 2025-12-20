@@ -36,6 +36,16 @@ const (
 	OrderStatusProcessing OrderStatus = "processing" // Payment has been received, and the order is being processed.
 )
 
+var OrderStatusProxy = map[OrderStatus]string{
+	OrderStatusOnHold:     "در انتظار",
+	OrderStatusFailed:     "ناموفق",
+	OrderStatusPending:    "در حال پردازش",
+	OrderStatusRefunded:   "بازگشت وجه",
+	OrderStatusCompleted:  "تکمیل شده",
+	OrderStatusCancelled:  "لغو شده",
+	OrderStatusProcessing: "در حال انجام",
+}
+
 type OrderPaymentMethod string
 
 const (

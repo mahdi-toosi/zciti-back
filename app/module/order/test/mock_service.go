@@ -16,8 +16,8 @@ type MockOrderService struct {
 	db   *gorm.DB
 }
 
-func (m *MockOrderService) Index(req request.Orders) (orders []*response.Order, paging paginator.Pagination, err error) {
-	results, paging, err := m.repo.GetAll(req)
+func (m *MockOrderService) Index(req request.Orders) (orders []*response.Order, totalAmount uint64, paging paginator.Pagination, err error) {
+	results, totalAmount, paging, err := m.repo.GetAll(req)
 	if err != nil {
 		return
 	}

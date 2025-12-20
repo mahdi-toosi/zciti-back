@@ -4,6 +4,7 @@ import (
 	"go-fiber-starter/app/database/schema"
 	"go-fiber-starter/app/module/orderItem/request"
 	"go-fiber-starter/utils/paginator"
+	"time"
 )
 
 type Order struct {
@@ -19,10 +20,20 @@ type Order struct {
 }
 
 type Orders struct {
-	BusinessID uint64
-	CouponID   uint64
-	UserID     uint64
-	Pagination *paginator.Pagination
+	BusinessID     uint64
+	CouponID       uint64
+	UserID         uint64
+	ProductID      uint64
+	CityID         uint64
+	WorkspaceID    uint64
+	DormitoryID    uint64
+	Taxonomies     []uint64
+	Status         string     `example:"pending" validate:"omitempty,oneof=pending processing onHold completed cancelled refunded failed"`
+	StartTime      *time.Time // Filter by reservation start time
+	EndTime        *time.Time // Filter by reservation end time
+	OrderStartTime *time.Time // Filter by order creation start time
+	OrderEndTime   *time.Time // Filter by order creation end time
+	Pagination     *paginator.Pagination
 }
 
 func (req *Order) ToDomain(totalAmt *float64, authority *string) *schema.Order {

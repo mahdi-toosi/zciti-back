@@ -175,8 +175,8 @@ func (m *MockBusinessService) RoleMenuItems(businessID uint64, user schema.User)
 // MockOrderService mocks the order service for testing
 type MockOrderService struct{}
 
-func (m *MockOrderService) Index(req orequest.Orders) ([]*oresponse.Order, paginator.Pagination, error) {
-	return nil, paginator.Pagination{}, nil
+func (m *MockOrderService) Index(req orequest.Orders) ([]*oresponse.Order, uint64, paginator.Pagination, error) {
+	return nil, 0, paginator.Pagination{}, nil
 }
 
 func (m *MockOrderService) Show(userID uint64, id uint64) (*oresponse.Order, error) {
@@ -495,4 +495,3 @@ func (ta *TestApp) CleanupAll(t *testing.T) {
 func (ta *TestApp) WaitForDB() {
 	time.Sleep(10 * time.Millisecond)
 }
-

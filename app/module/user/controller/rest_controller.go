@@ -531,7 +531,7 @@ func (_i *controller) Orders(c *fiber.Ctx) error {
 	req.UserID = user.ID
 	req.Pagination = paginate
 
-	orders, paging, err := _i.oService.Index(req)
+	orders, _, paging, err := _i.oService.Index(req)
 	if err != nil {
 		return err
 	}

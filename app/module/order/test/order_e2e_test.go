@@ -55,6 +55,22 @@ func TestIndex_Success(t *testing.T) {
 	if len(data) != 2 {
 		t.Errorf("expected 2 orders, got %d", len(data))
 	}
+
+	// Verify Meta contains TotalAmount
+	meta, ok := result["Meta"].(map[string]interface{})
+	if !ok {
+		t.Errorf("expected Meta in response, got: %v", result)
+		return
+	}
+
+	if meta["TotalAmount"] == nil {
+		t.Errorf("expected TotalAmount in Meta, got: %v", meta)
+	}
+
+	// TotalAmount should be 3000 (1000 + 2000)
+	if meta["TotalAmount"] != float64(3000) {
+		t.Errorf("expected TotalAmount 3000, got: %v", meta["TotalAmount"])
+	}
 }
 
 func TestIndex_Unauthorized(t *testing.T) {
@@ -102,7 +118,7 @@ func TestIndex_WithPagination(t *testing.T) {
 	user.Permissions[business.ID] = []schema.UserRole{schema.URBusinessOwner}
 	ta.DB.Save(user)
 
-	// Create multiple orders
+	// Create multiple orders (100 + 200 + 300 + 400 + 500 = 1500)
 	for i := 1; i <= 5; i++ {
 		ta.CreateTestOrder(t, user.ID, business.ID, float64(i*100), schema.OrderStatusPending, schema.OrderPaymentMethodOnline)
 	}
@@ -133,8 +149,24 @@ func TestIndex_WithPagination(t *testing.T) {
 		return
 	}
 
-	if meta["total"] != float64(5) {
-		t.Errorf("expected total 5 orders, got: %v", meta["total"])
+	// Check nested Meta pagination
+	metaPagination, ok := meta["Meta"].(map[string]interface{})
+	if !ok {
+		t.Errorf("expected nested Meta in response, got: %v", meta)
+		return
+	}
+
+	if metaPagination["total"] != float64(5) {
+		t.Errorf("expected total 5 orders, got: %v", metaPagination["total"])
+	}
+
+	// Verify TotalAmount is present and correct (1500 total for all orders)
+	if meta["TotalAmount"] == nil {
+		t.Errorf("expected TotalAmount in Meta, got: %v", meta)
+	}
+
+	if meta["TotalAmount"] != float64(1500) {
+		t.Errorf("expected TotalAmount 1500, got: %v", meta["TotalAmount"])
 	}
 }
 
@@ -182,6 +214,109 @@ func TestIndex_FilterByCouponID(t *testing.T) {
 
 	if len(data) != 1 {
 		t.Errorf("expected 1 order with coupon, got %d", len(data))
+	}
+
+	// Verify TotalAmount reflects only the filtered order (900)
+	meta, ok := result["Meta"].(map[string]interface{})
+	if !ok {
+		t.Errorf("expected Meta in response, got: %v", result)
+		return
+	}
+
+	if meta["TotalAmount"] != float64(900) {
+		t.Errorf("expected TotalAmount 900 for filtered orders, got: %v", meta["TotalAmount"])
+	}
+}
+
+func TestIndex_TotalAmountByStatus(t *testing.T) {
+	ta := SetupTestApp(t)
+	defer ta.Cleanup()
+
+	// Create test user with business owner role
+	user := ta.CreateTestUser(t, 9123456789, "testPassword123", "Test", "User", 0, nil)
+	business := ta.CreateTestBusiness(t, "Test Business", schema.BTypeGymManager, user.ID)
+
+	// Update user with business permissions
+	user.Permissions[business.ID] = []schema.UserRole{schema.URBusinessOwner}
+	ta.DB.Save(user)
+
+	// Create orders with different statuses
+	ta.CreateTestOrder(t, user.ID, business.ID, 1000, schema.OrderStatusCompleted, schema.OrderPaymentMethodOnline)
+	ta.CreateTestOrder(t, user.ID, business.ID, 2000, schema.OrderStatusCompleted, schema.OrderPaymentMethodOnline)
+	ta.CreateTestOrder(t, user.ID, business.ID, 500, schema.OrderStatusPending, schema.OrderPaymentMethodOnline)
+	ta.CreateTestOrder(t, user.ID, business.ID, 750, schema.OrderStatusCancelled, schema.OrderPaymentMethodOnline)
+
+	// Generate token
+	token := ta.GenerateTestToken(t, user)
+
+	// Test 1: Filter by completed status - should return TotalAmount = 3000 (1000 + 2000)
+	resp := ta.MakeRequest(t, http.MethodGet, fmt.Sprintf("/v1/business/%d/orders?Status=completed", business.ID), nil, token)
+
+	if resp.StatusCode != http.StatusOK {
+		result := ParseResponse(t, resp)
+		t.Errorf("expected status 200, got %d, response: %v", resp.StatusCode, result)
+		return
+	}
+
+	result := ParseResponse(t, resp)
+	data, ok := result["Data"].([]interface{})
+	if !ok {
+		t.Errorf("expected Data array in response, got: %v", result)
+		return
+	}
+
+	if len(data) != 2 {
+		t.Errorf("expected 2 completed orders, got %d", len(data))
+	}
+
+	meta, ok := result["Meta"].(map[string]interface{})
+	if !ok {
+		t.Errorf("expected Meta in response, got: %v", result)
+		return
+	}
+
+	if meta["TotalAmount"] != float64(3000) {
+		t.Errorf("expected TotalAmount 3000 for completed orders, got: %v", meta["TotalAmount"])
+	}
+
+	// Test 2: Filter by pending status - should return TotalAmount = 500
+	resp2 := ta.MakeRequest(t, http.MethodGet, fmt.Sprintf("/v1/business/%d/orders?Status=pending", business.ID), nil, token)
+
+	if resp2.StatusCode != http.StatusOK {
+		result2 := ParseResponse(t, resp2)
+		t.Errorf("expected status 200, got %d, response: %v", resp2.StatusCode, result2)
+		return
+	}
+
+	result2 := ParseResponse(t, resp2)
+	meta2, ok := result2["Meta"].(map[string]interface{})
+	if !ok {
+		t.Errorf("expected Meta in response, got: %v", result2)
+		return
+	}
+
+	if meta2["TotalAmount"] != float64(500) {
+		t.Errorf("expected TotalAmount 500 for pending orders, got: %v", meta2["TotalAmount"])
+	}
+
+	// Test 3: No status filter - should return TotalAmount = 4250 (all orders)
+	resp3 := ta.MakeRequest(t, http.MethodGet, fmt.Sprintf("/v1/business/%d/orders", business.ID), nil, token)
+
+	if resp3.StatusCode != http.StatusOK {
+		result3 := ParseResponse(t, resp3)
+		t.Errorf("expected status 200, got %d, response: %v", resp3.StatusCode, result3)
+		return
+	}
+
+	result3 := ParseResponse(t, resp3)
+	meta3, ok := result3["Meta"].(map[string]interface{})
+	if !ok {
+		t.Errorf("expected Meta in response, got: %v", result3)
+		return
+	}
+
+	if meta3["TotalAmount"] != float64(4250) {
+		t.Errorf("expected TotalAmount 4250 for all orders, got: %v", meta3["TotalAmount"])
 	}
 }
 

@@ -5,6 +5,7 @@ import (
 	cresponse "go-fiber-starter/app/module/coupon/response"
 	oresponse "go-fiber-starter/app/module/orderItem/response"
 	"go-fiber-starter/app/module/user/response"
+	"go-fiber-starter/utils/paginator"
 	"time"
 )
 
@@ -21,6 +22,11 @@ type Order struct {
 	Status        schema.OrderStatus        `json:",omitempty"`
 	PaymentMethod schema.OrderPaymentMethod `json:",omitempty"`
 	OrderItems    []oresponse.OrderItem     `json:",omitempty"`
+}
+
+type Orders struct {
+	TotalAmount uint64
+	Meta        paginator.Pagination `json:",omitempty"`
 }
 
 func FromDomain(item *schema.Order) (res *Order) {
