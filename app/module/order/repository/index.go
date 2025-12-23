@@ -120,7 +120,9 @@ func (_i *repo) GetAll(req request.Orders) (orders []*schema.Order, totalAmount 
 	sumQuery := _i.DB.Main.
 		Model(&schema.Order{})
 
-	sumQuery = sumQuery.Where("orders.status = ?", schema.OrderStatusCompleted)
+	if req.Status != "" {
+		sumQuery = sumQuery.Where("orders.status = ?", req.Status)
+	}
 
 	if req.BusinessID > 0 {
 		sumQuery = sumQuery.Where(&schema.Order{BusinessID: req.BusinessID})
