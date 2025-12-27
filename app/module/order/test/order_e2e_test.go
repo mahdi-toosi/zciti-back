@@ -3,6 +3,7 @@ package test
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"testing"
 	"time"
 
@@ -317,6 +318,319 @@ func TestIndex_TotalAmountByStatus(t *testing.T) {
 
 	if meta3["TotalAmount"] != float64(4250) {
 		t.Errorf("expected TotalAmount 4250 for all orders, got: %v", meta3["TotalAmount"])
+	}
+}
+
+func TestIndex_FilterByFullName(t *testing.T) {
+	ta := SetupTestApp(t)
+	defer ta.Cleanup()
+
+	// Create test users with different names
+	user1 := ta.CreateTestUser(t, 9123456789, "testPassword123", "John", "Doe", 0, nil)
+	user2 := ta.CreateTestUser(t, 9123456790, "testPassword123", "Jane", "Smith", 0, nil)
+	business := ta.CreateTestBusiness(t, "Test Business", schema.BTypeGymManager, user1.ID)
+
+	// Update users with business permissions
+	user1.Permissions[business.ID] = []schema.UserRole{schema.URBusinessOwner}
+	ta.DB.Save(user1)
+	user2.Permissions[business.ID] = []schema.UserRole{schema.URBusinessOwner}
+	ta.DB.Save(user2)
+
+	// Create orders for different users
+	ta.CreateTestOrder(t, user1.ID, business.ID, 1000, schema.OrderStatusCompleted, schema.OrderPaymentMethodOnline)
+	ta.CreateTestOrder(t, user1.ID, business.ID, 2000, schema.OrderStatusCompleted, schema.OrderPaymentMethodOnline)
+	ta.CreateTestOrder(t, user2.ID, business.ID, 1500, schema.OrderStatusPending, schema.OrderPaymentMethodOnline)
+
+	// Generate token (using user1 as business owner)
+	token := ta.GenerateTestToken(t, user1)
+
+	// Test 1: Filter by "John Doe" - should return 2 orders (1000 + 2000 = 3000)
+	resp := ta.MakeRequest(t, http.MethodGet, fmt.Sprintf("/v1/business/%d/orders?FullName=%s", business.ID, url.QueryEscape("John Doe")), nil, token)
+
+	if resp.StatusCode != http.StatusOK {
+		result := ParseResponse(t, resp)
+		t.Errorf("expected status 200, got %d, response: %v", resp.StatusCode, result)
+		return
+	}
+
+	result := ParseResponse(t, resp)
+	data, ok := result["Data"].([]interface{})
+	if !ok {
+		t.Errorf("expected Data array in response, got: %v", result)
+		return
+	}
+
+	if len(data) != 2 {
+		t.Errorf("expected 2 orders for John Doe, got %d", len(data))
+	}
+
+	meta, ok := result["Meta"].(map[string]interface{})
+	if !ok {
+		t.Errorf("expected Meta in response, got: %v", result)
+		return
+	}
+
+	if meta["TotalAmount"] != float64(3000) {
+		t.Errorf("expected TotalAmount 3000 for John Doe orders, got: %v", meta["TotalAmount"])
+	}
+
+	// Test 2: Filter by "Jane" - should return 1 order (1500)
+	resp2 := ta.MakeRequest(t, http.MethodGet, fmt.Sprintf("/v1/business/%d/orders?FullName=Jane", business.ID), nil, token)
+
+	if resp2.StatusCode != http.StatusOK {
+		result2 := ParseResponse(t, resp2)
+		t.Errorf("expected status 200, got %d, response: %v", resp2.StatusCode, result2)
+		return
+	}
+
+	result2 := ParseResponse(t, resp2)
+	data2, ok := result2["Data"].([]interface{})
+	if !ok {
+		t.Errorf("expected Data array in response, got: %v", result2)
+		return
+	}
+
+	if len(data2) != 1 {
+		t.Errorf("expected 1 order for Jane, got %d", len(data2))
+	}
+
+	meta2, ok := result2["Meta"].(map[string]interface{})
+	if !ok {
+		t.Errorf("expected Meta in response, got: %v", result2)
+		return
+	}
+
+	if meta2["TotalAmount"] != float64(1500) {
+		t.Errorf("expected TotalAmount 1500 for Jane orders, got: %v", meta2["TotalAmount"])
+	}
+
+	// Test 3: Filter by partial name "Smith" - should return 1 order
+	resp3 := ta.MakeRequest(t, http.MethodGet, fmt.Sprintf("/v1/business/%d/orders?FullName=Smith", business.ID), nil, token)
+
+	if resp3.StatusCode != http.StatusOK {
+		result3 := ParseResponse(t, resp3)
+		t.Errorf("expected status 200, got %d, response: %v", resp3.StatusCode, result3)
+		return
+	}
+
+	result3 := ParseResponse(t, resp3)
+	data3, ok := result3["Data"].([]interface{})
+	if !ok {
+		t.Errorf("expected Data array in response, got: %v", result3)
+		return
+	}
+
+	if len(data3) != 1 {
+		t.Errorf("expected 1 order for Smith, got %d", len(data3))
+	}
+}
+
+func TestIndex_FilterByHasCoupon(t *testing.T) {
+	ta := SetupTestApp(t)
+	defer ta.Cleanup()
+
+	// Create test user with business owner role
+	user := ta.CreateTestUser(t, 9123456789, "testPassword123", "Test", "User", 0, nil)
+	business := ta.CreateTestBusiness(t, "Test Business", schema.BTypeGymManager, user.ID)
+
+	// Update user with business permissions
+	user.Permissions[business.ID] = []schema.UserRole{schema.URBusinessOwner}
+	ta.DB.Save(user)
+
+	// Create a coupon
+	now := time.Now()
+	coupon := ta.CreateTestCoupon(t, "TESTCODE", "Test Coupon", 10, schema.CouponTypePercentage, business.ID, now, now.AddDate(0, 1, 0))
+
+	// Create orders - two with coupon, two without
+	orderWithCoupon1 := ta.CreateTestOrder(t, user.ID, business.ID, 1000, schema.OrderStatusCompleted, schema.OrderPaymentMethodOnline)
+	orderWithCoupon1.CouponID = &coupon.ID
+	ta.DB.Save(orderWithCoupon1)
+
+	orderWithCoupon2 := ta.CreateTestOrder(t, user.ID, business.ID, 2000, schema.OrderStatusCompleted, schema.OrderPaymentMethodOnline)
+	orderWithCoupon2.CouponID = &coupon.ID
+	ta.DB.Save(orderWithCoupon2)
+
+	ta.CreateTestOrder(t, user.ID, business.ID, 500, schema.OrderStatusPending, schema.OrderPaymentMethodOnline)
+	ta.CreateTestOrder(t, user.ID, business.ID, 750, schema.OrderStatusPending, schema.OrderPaymentMethodOnline)
+
+	// Generate token
+	token := ta.GenerateTestToken(t, user)
+
+	// Test 1: Filter by HasCoupon=true - should return 2 orders (1000 + 2000 = 3000)
+	resp := ta.MakeRequest(t, http.MethodGet, fmt.Sprintf("/v1/business/%d/orders?HasCoupon=true", business.ID), nil, token)
+
+	if resp.StatusCode != http.StatusOK {
+		result := ParseResponse(t, resp)
+		t.Errorf("expected status 200, got %d, response: %v", resp.StatusCode, result)
+		return
+	}
+
+	result := ParseResponse(t, resp)
+	data, ok := result["Data"].([]interface{})
+	if !ok {
+		t.Errorf("expected Data array in response, got: %v", result)
+		return
+	}
+
+	if len(data) != 2 {
+		t.Errorf("expected 2 orders with coupon, got %d", len(data))
+	}
+
+	meta, ok := result["Meta"].(map[string]interface{})
+	if !ok {
+		t.Errorf("expected Meta in response, got: %v", result)
+		return
+	}
+
+	if meta["TotalAmount"] != float64(3000) {
+		t.Errorf("expected TotalAmount 3000 for orders with coupon, got: %v", meta["TotalAmount"])
+	}
+
+	// Verify all returned orders have coupons
+	for _, orderData := range data {
+		order := orderData.(map[string]interface{})
+		couponData, ok := order["Coupon"].(map[string]interface{})
+		if !ok || couponData["ID"] == nil {
+			t.Errorf("expected all orders to have coupon, got: %v", order)
+		}
+	}
+
+	// Test 2: Filter by HasCoupon=false - should return 2 orders (500 + 750 = 1250)
+	resp2 := ta.MakeRequest(t, http.MethodGet, fmt.Sprintf("/v1/business/%d/orders?HasCoupon=false", business.ID), nil, token)
+
+	if resp2.StatusCode != http.StatusOK {
+		result2 := ParseResponse(t, resp2)
+		t.Errorf("expected status 200, got %d, response: %v", resp2.StatusCode, result2)
+		return
+	}
+
+	result2 := ParseResponse(t, resp2)
+	data2, ok := result2["Data"].([]interface{})
+	if !ok {
+		t.Errorf("expected Data array in response, got: %v", result2)
+		return
+	}
+
+	if len(data2) != 2 {
+		t.Errorf("expected 2 orders without coupon, got %d", len(data2))
+	}
+
+	meta2, ok := result2["Meta"].(map[string]interface{})
+	if !ok {
+		t.Errorf("expected Meta in response, got: %v", result2)
+		return
+	}
+
+	if meta2["TotalAmount"] != float64(1250) {
+		t.Errorf("expected TotalAmount 1250 for orders without coupon, got: %v", meta2["TotalAmount"])
+	}
+
+	// Verify all returned orders don't have coupons (or have empty coupon)
+	for _, orderData := range data2 {
+		order := orderData.(map[string]interface{})
+		couponData, ok := order["Coupon"].(map[string]interface{})
+		// Coupon might be present but with ID 0 or nil
+		if ok && couponData["ID"] != nil && couponData["ID"] != float64(0) {
+			t.Errorf("expected orders without coupon, but found coupon ID: %v", couponData["ID"])
+		}
+	}
+}
+
+func TestIndex_FilterByFullNameAndHasCoupon(t *testing.T) {
+	ta := SetupTestApp(t)
+	defer ta.Cleanup()
+
+	// Create test users with different names
+	user1 := ta.CreateTestUser(t, 9123456789, "testPassword123", "John", "Doe", 0, nil)
+	user2 := ta.CreateTestUser(t, 9123456790, "testPassword123", "Jane", "Smith", 0, nil)
+	business := ta.CreateTestBusiness(t, "Test Business", schema.BTypeGymManager, user1.ID)
+
+	// Update users with business permissions
+	user1.Permissions[business.ID] = []schema.UserRole{schema.URBusinessOwner}
+	ta.DB.Save(user1)
+	user2.Permissions[business.ID] = []schema.UserRole{schema.URBusinessOwner}
+	ta.DB.Save(user2)
+
+	// Create a coupon
+	now := time.Now()
+	coupon := ta.CreateTestCoupon(t, "TESTCODE", "Test Coupon", 10, schema.CouponTypePercentage, business.ID, now, now.AddDate(0, 1, 0))
+
+	// Create orders:
+	// - John Doe: 1 with coupon (1000), 1 without (500)
+	// - Jane Smith: 1 with coupon (2000), 1 without (750)
+	order1 := ta.CreateTestOrder(t, user1.ID, business.ID, 1000, schema.OrderStatusCompleted, schema.OrderPaymentMethodOnline)
+	order1.CouponID = &coupon.ID
+	ta.DB.Save(order1)
+
+	ta.CreateTestOrder(t, user1.ID, business.ID, 500, schema.OrderStatusPending, schema.OrderPaymentMethodOnline)
+
+	order3 := ta.CreateTestOrder(t, user2.ID, business.ID, 2000, schema.OrderStatusCompleted, schema.OrderPaymentMethodOnline)
+	order3.CouponID = &coupon.ID
+	ta.DB.Save(order3)
+
+	ta.CreateTestOrder(t, user2.ID, business.ID, 750, schema.OrderStatusPending, schema.OrderPaymentMethodOnline)
+
+	// Generate token (using user1 as business owner)
+	token := ta.GenerateTestToken(t, user1)
+
+	// Test: Filter by FullName="John Doe" AND HasCoupon=true - should return 1 order (1000)
+	resp := ta.MakeRequest(t, http.MethodGet, fmt.Sprintf("/v1/business/%d/orders?FullName=%s&HasCoupon=true", business.ID, url.QueryEscape("John Doe")), nil, token)
+
+	if resp.StatusCode != http.StatusOK {
+		result := ParseResponse(t, resp)
+		t.Errorf("expected status 200, got %d, response: %v", resp.StatusCode, result)
+		return
+	}
+
+	result := ParseResponse(t, resp)
+	data, ok := result["Data"].([]interface{})
+	if !ok {
+		t.Errorf("expected Data array in response, got: %v", result)
+		return
+	}
+
+	if len(data) != 1 {
+		t.Errorf("expected 1 order for John Doe with coupon, got %d", len(data))
+	}
+
+	meta, ok := result["Meta"].(map[string]interface{})
+	if !ok {
+		t.Errorf("expected Meta in response, got: %v", result)
+		return
+	}
+
+	if meta["TotalAmount"] != float64(1000) {
+		t.Errorf("expected TotalAmount 1000 for John Doe orders with coupon, got: %v", meta["TotalAmount"])
+	}
+
+	// Test: Filter by FullName="Jane" AND HasCoupon=false - should return 1 order (750)
+	resp2 := ta.MakeRequest(t, http.MethodGet, fmt.Sprintf("/v1/business/%d/orders?FullName=Jane&HasCoupon=false", business.ID), nil, token)
+
+	if resp2.StatusCode != http.StatusOK {
+		result2 := ParseResponse(t, resp2)
+		t.Errorf("expected status 200, got %d, response: %v", resp2.StatusCode, result2)
+		return
+	}
+
+	result2 := ParseResponse(t, resp2)
+	data2, ok := result2["Data"].([]interface{})
+	if !ok {
+		t.Errorf("expected Data array in response, got: %v", result2)
+		return
+	}
+
+	if len(data2) != 1 {
+		t.Errorf("expected 1 order for Jane without coupon, got %d", len(data2))
+	}
+
+	meta2, ok := result2["Meta"].(map[string]interface{})
+	if !ok {
+		t.Errorf("expected Meta in response, got: %v", result2)
+		return
+	}
+
+	if meta2["TotalAmount"] != float64(750) {
+		t.Errorf("expected TotalAmount 750 for Jane orders without coupon, got: %v", meta2["TotalAmount"])
 	}
 }
 
