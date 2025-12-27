@@ -49,6 +49,8 @@ type controller struct {
 // @Param        WorkspaceID query int false "Workspace ID"
 // @Param        DormitoryID query int false "Dormitory ID"
 // @Param        CouponID query int false "Coupon ID"
+// @Param        FullName query string false "User Full Name"
+// @Param        HasCoupon query bool false "Filter by coupon presence (true = has coupon, false = no coupon)"
 // @Param        Export query string false "Export format (excel)"
 // @Router       /business/:businessID/orders [get]
 // @Router       /user/business/:businessID/orders [get]
@@ -67,8 +69,15 @@ func (_i *controller) Index(c *fiber.Ctx) error {
 	req.BusinessID = businessID
 	req.CouponID, _ = utils.GetUintInQueries(c, "CouponID")
 	req.Status = c.Query("Status")
+	req.FullName = c.Query("FullName")
 	req.ProductID, _ = utils.GetUintInQueries(c, "ProductID")
 	export := c.Query("Export")
+
+	// Parse HasCoupon filter (optional boolean)
+	if hasCouponStr := c.Query("HasCoupon"); hasCouponStr != "" {
+		hasCoupon := c.QueryBool("HasCoupon")
+		req.HasCoupon = &hasCoupon
+	}
 
 	req.CityID, _ = utils.GetUintInQueries(c, "CityID")
 	req.WorkspaceID, _ = utils.GetUintInQueries(c, "WorkspaceID")

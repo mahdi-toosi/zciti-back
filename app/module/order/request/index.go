@@ -29,6 +29,8 @@ type Orders struct {
 	DormitoryID    uint64
 	Taxonomies     []uint64
 	Status         string     `example:"pending" validate:"omitempty,oneof=pending processing onHold completed cancelled refunded failed"`
+	FullName       string     // Filter by user full name
+	HasCoupon      *bool      // Filter by whether order has coupon (true = has coupon, false = no coupon)
 	StartTime      *time.Time // Filter by reservation start time
 	EndTime        *time.Time // Filter by reservation end time
 	OrderStartTime *time.Time // Filter by order creation start time

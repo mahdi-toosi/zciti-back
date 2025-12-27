@@ -6,6 +6,7 @@ import (
 	"go-fiber-starter/internal/bootstrap/database"
 	"go-fiber-starter/utils"
 	"go-fiber-starter/utils/paginator"
+	"strings"
 
 	"gorm.io/gorm"
 )
@@ -43,6 +44,15 @@ func (_i *repo) GetAll(req request.Orders) (orders []*schema.Order, totalAmount 
 		query = query.Where(&schema.Order{CouponID: &req.CouponID})
 	}
 
+	// Apply HasCoupon filter
+	if req.HasCoupon != nil {
+		if *req.HasCoupon {
+			query = query.Where("orders.coupon_id IS NOT NULL")
+		} else {
+			query = query.Where("orders.coupon_id IS NULL")
+		}
+	}
+
 	if req.Status != "" {
 		query = query.Where("orders.status = ?", req.Status)
 	}
@@ -60,6 +70,12 @@ func (_i *repo) GetAll(req request.Orders) (orders []*schema.Order, totalAmount 
 	needsOrderItemsJoin := false
 	needsReservationsJoin := false
 	needsTaxonomiesJoin := false
+	needsUsersJoin := false
+
+	// Check if FullName filter is needed
+	if req.FullName != "" {
+		needsUsersJoin = true
+	}
 
 	// Check if time filters are needed (filter by reservation start/end time)
 	if (req.StartTime != nil && !req.StartTime.IsZero()) || (req.EndTime != nil && !req.EndTime.IsZero()) {
@@ -79,6 +95,10 @@ func (_i *repo) GetAll(req request.Orders) (orders []*schema.Order, totalAmount 
 	}
 
 	// Apply joins
+	if needsUsersJoin {
+		query = query.Joins("JOIN users ON orders.user_id = users.id")
+	}
+
 	if needsOrderItemsJoin {
 		query = query.Joins("JOIN order_items ON orders.id = order_items.order_id")
 	}
@@ -110,6 +130,14 @@ func (_i *repo) GetAll(req request.Orders) (orders []*schema.Order, totalAmount 
 		query = query.Where("posts_taxonomies.taxonomy_id IN (?)", req.Taxonomies)
 	}
 
+	// Apply FullName filter
+	if req.FullName != "" {
+		query = query.Where(
+			"CONCAT(users.first_name, ' ', users.last_name) LIKE ?",
+			"%"+strings.TrimSpace(req.FullName)+"%",
+		)
+	}
+
 	// Group by order ID to avoid duplicates from joins
 	if needsOrderItemsJoin {
 		query = query.Group("orders.id")
@@ -136,6 +164,15 @@ func (_i *repo) GetAll(req request.Orders) (orders []*schema.Order, totalAmount 
 		sumQuery = sumQuery.Where(&schema.Order{CouponID: &req.CouponID})
 	}
 
+	// Apply HasCoupon filter
+	if req.HasCoupon != nil {
+		if *req.HasCoupon {
+			sumQuery = sumQuery.Where("orders.coupon_id IS NOT NULL")
+		} else {
+			sumQuery = sumQuery.Where("orders.coupon_id IS NULL")
+		}
+	}
+
 	// Apply order creation time filters
 	if req.OrderStartTime != nil && !req.OrderStartTime.IsZero() {
 		sumQuery = sumQuery.Where("orders.created_at >= ?", utils.StartOfDayString(*req.OrderStartTime))
@@ -143,6 +180,18 @@ func (_i *repo) GetAll(req request.Orders) (orders []*schema.Order, totalAmount 
 
 	if req.OrderEndTime != nil && !req.OrderEndTime.IsZero() {
 		sumQuery = sumQuery.Where("orders.created_at <= ?", utils.EndOfDayString(*req.OrderEndTime))
+	}
+
+	// Apply FullName filter using EXISTS subquery
+	if req.FullName != "" {
+		sumQuery = sumQuery.Where(
+			`EXISTS (
+				SELECT 1 FROM users 
+				WHERE users.id = orders.user_id 
+				AND CONCAT(users.first_name, ' ', users.last_name) LIKE ?
+			)`,
+			"%"+strings.TrimSpace(req.FullName)+"%",
+		)
 	}
 
 	// Apply time filters using EXISTS subquery
@@ -210,7 +259,7 @@ func (_i *repo) GetAll(req request.Orders) (orders []*schema.Order, totalAmount 
 		query = query.Preload("User")
 	}
 
-	err = query.Preload("Coupon").Preload("OrderItems.Reservation").Order("orders.created_at desc").Find(&orders).Error
+	err = query.Debug().Preload("Coupon").Preload("OrderItems.Reservation").Order("orders.created_at desc").Find(&orders).Error
 	if err != nil {
 		return
 	}
