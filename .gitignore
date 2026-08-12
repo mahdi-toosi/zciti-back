@@ -20,8 +20,10 @@
 # Directories for AIR
 tmp
 
-# docs 
-docs/
+# docs
+docs/*
+!docs/agents/
+!docs/adr/
 
 # goland
 .idea
