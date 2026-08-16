@@ -37,3 +37,6 @@ storage/public/*
 !storage/public/example.txt
 storage/private/*
 !storage/private/example.html
+
+#graphify
+graphify-out
