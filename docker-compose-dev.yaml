@@ -6,7 +6,7 @@ networks:
 
 services:
   mainDb:
-    image: bitnami/postgresql:latest
+    image: soldevelo/postgresql:latest
     environment:
       POSTGRESQL_DATABASE: zciti_main_dev
       POSTGRESQL_USERNAME: postgres
@@ -18,7 +18,7 @@ services:
     volumes:
       - postgres-db:/var/lib/postgresql/data
   chatDb:
-    image: bitnami/postgresql:latest
+    image: soldevelo/postgresql:latest
     environment:
       POSTGRESQL_DATABASE: zciti_chat_dev
       POSTGRESQL_USERNAME: postgres
@@ -28,7 +28,7 @@ services:
     ports:
       - "5433:5432"
   redis:
-    image: bitnami/redis:latest
+    image: soldevelo/redis:latest
     environment:
       REDIS_PASSWORD: redis
       REDIS_DATABASE: 1
